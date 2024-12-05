@@ -8,6 +8,7 @@ worker_path = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "..", "..", "worker"
 )
 sys.path.append(worker_path)
+
 from worker.aggregation_worker import LLMAggregationWorker
 
 
