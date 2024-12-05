@@ -36,5 +36,6 @@ model_kwargs:
 dataset_kwargs:
   train_files: ./data/NER_main_train_new.json
   validation_files: ./data/NER_main_train_new.json
+  prompt_file: medical.txt
 algorithm_kwargs:
   distribute_init_parameters: false

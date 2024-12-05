@@ -29,7 +29,7 @@ dependencies = {file = ["requirements.txt"]}
 Repository = "https://github.com/cyyever/distributed_learning_simulator"
 
 [tool.pyright]
-include = ["method","algorithm"]
+include = ["method","algorithm","worker"]
 defineConstant = { DEBUG = true }
 
 reportMissingImports = true
@@ -37,7 +37,7 @@ reportMissingTypeStubs = false
 
 [tool.ruff]
 target-version = "py312"
-src = ["method", "algorithm"]
+src = ["method", "algorithm","worker"]
 
 [tool.ruff.lint]
 select = [
