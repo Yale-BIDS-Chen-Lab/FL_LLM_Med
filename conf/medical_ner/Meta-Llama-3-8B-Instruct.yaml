@@ -1,6 +1,8 @@
 ---
+dataset_sampling: random_split
 dataset_name: hugging_face_yale_ner
 model_name: hugging_face_causal_lm_meta-llama/Llama-3.2-1B-Instruct
+distributed_algorithm: adaptor_avg
 optimizer_name: AdamW
 batch_size: 8
 epoch: 1
@@ -34,8 +36,9 @@ model_kwargs:
     - up_proj
     - down_proj
 dataset_kwargs:
-  train_files: ./data/NER_main_train_new.json
-  validation_files: ./data/NER_main_train_new.json
+  train_files: /home/cyy/lianrancode/cyy/data/NER_main_train_new.json
+  test_files: /home/cyy/lianrancode/cyy/data/NER_main_train_new.json
   prompt_file: medical.txt
+  no_validation: true
 algorithm_kwargs:
   distribute_init_parameters: false
