@@ -2,7 +2,7 @@ import os
 import sys
 
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
-from cyy_torch_toolbox import TensorDict, TransformType
+from cyy_torch_toolbox import TensorDict, Transform
 
 worker_path = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "..", "..", "worker"
@@ -15,9 +15,7 @@ from worker.aggregation_worker import LLMAggregationWorker
 class FinetuneAdaptorWorker(LLMAggregationWorker):
     def _before_training(self) -> None:
         super()._before_training()
-        self.trainer.dataset_collection.append_transform(
-            self.format_input, key=TransformType.InputText
-        )
+        self.dataset_collection.append_text_transform(Transform(fun=self.format_input))
 
     def _get_sent_parameters(self) -> TensorDict:
         if self._model_loading_fun is None:
@@ -30,8 +28,7 @@ class FinetuneAdaptorWorker(LLMAggregationWorker):
         )
 
     @classmethod
-    def format_input(cls, example) -> str:
-        sample = example["data"]
+    def format_input(cls, sample) -> str:
         return "\n".join(
             ["### Input", sample["input"], "### Output", str(sample["output"])]
         )
