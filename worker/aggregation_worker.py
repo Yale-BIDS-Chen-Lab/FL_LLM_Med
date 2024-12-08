@@ -1,5 +1,6 @@
 import os
 
+from cyy_torch_toolbox import TextDatasetCollection
 from distributed_learning_simulation import (
     AggregationWorker,
 )
@@ -13,4 +14,9 @@ class LLMAggregationWorker(AggregationWorker):
             os.path.dirname(os.path.realpath(__file__)), "..", "prompt", prompt_file
         )
         with open(prompt_file, encoding="utf8") as f:
-            self.trainer.dataset_collection.set_prompt(f.read())
+            self.dataset_collection.set_prompt(f.read())
+
+    @property
+    def dataset_collection(self) -> TextDatasetCollection:
+        assert isinstance(self.trainer.dataset_collection, TextDatasetCollection)
+        return self.trainer.dataset_collection
