@@ -19,7 +19,9 @@ global_config: DistributedTrainingConfig = DistributedTrainingConfig()
 def load_config(conf) -> None:
     global global_config
     global_config = __load_config(
-        conf, os.path.join(os.path.dirname(__file__), "conf", "global.yaml")
+        conf,
+        os.path.join(os.path.dirname(__file__), "conf", "global.yaml"),
+        import_libs=False,
     )
 
 

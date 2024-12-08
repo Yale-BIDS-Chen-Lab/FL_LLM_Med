@@ -1,9 +1,8 @@
 from cyy_torch_toolbox import TextDatasetCollection
+from datapipeline_mixin import DatapipelineMixin
 from distributed_learning_simulation import (
     AggregationWorker,
 )
-
-from datapipeline_mixin import DatapipelineMixin
 
 
 class LLMTextWorker(AggregationWorker, DatapipelineMixin):
