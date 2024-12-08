@@ -4,12 +4,7 @@ import sys
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
 from cyy_torch_toolbox import TensorDict
 
-worker_path = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "..", "..", "worker"
-)
-sys.path.append(worker_path)
-
-from worker import LLMTextWorker
+from ..method_forward import LLMTextWorker
 
 from .data_pipeline import get_pipeline
 

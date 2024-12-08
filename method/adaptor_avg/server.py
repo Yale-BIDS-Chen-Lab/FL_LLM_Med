@@ -1,13 +1,9 @@
 import os
+from cyy_torch_toolbox import Inferencer, TextDatasetCollection
 import sys
 
-from cyy_torch_toolbox import Inferencer, TextDatasetCollection
 
-server_path = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "..", "..", "server"
-)
-sys.path.append(server_path)
-from server import LLMTextServer
+from ..method_forward import LLMTextServer
 
 from .data_pipeline import get_pipeline
 
