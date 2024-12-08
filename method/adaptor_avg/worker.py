@@ -16,15 +16,16 @@ class FinetuneAdaptorWorker(LLMAggregationWorker):
     def _before_training(self) -> None:
         super()._before_training()
         self.dataset_collection.append_text_transform(Transform(fun=self.format_input))
+        self._model_loading_fun = self._load_adaptor
 
-    def _get_sent_parameters(self) -> TensorDict:
-        if self._model_loading_fun is None:
-            self._model_loading_fun = self._load_adaptor
+    def _get_sent_parameter_names(self) -> set[str] | None:
         assert isinstance(
             self.trainer.model_evaluator, HuggingFaceModelEvaluatorForFinetune
         )
-        return self.trainer.model_evaluator.get_perf_model_state_dict(
-            self.trainer.model
+        return set(
+            self.trainer.model_evaluator.get_perf_model_state_dict(
+                self.trainer.model
+            ).keys()
         )
 
     @classmethod
