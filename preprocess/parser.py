@@ -1,4 +1,6 @@
 from typing import Any
+from cyy_naive_lib.fs.path import list_files
+import os
 
 
 class Parser:
@@ -30,10 +32,18 @@ class I2B2(Parser):
         return phrase
 
 
-def parse_file(file: str) -> list:
+def parse_file(file: str) -> Any:
     parsers = {".i2b2": I2B2()}
     for suffix, parser in parsers.items():
         if file.endswith(suffix):
             with open(file, encoding="utf8") as f:
                 return parser.parse(f.readlines())
     raise NotImplementedError()
+
+
+def parse_local_data(data_dir: str) -> dict:
+    assert os.path.isdir(data_dir)
+    res = {}
+    for file in list_files(data_dir):
+        res[file] = parse_file(file)
+    return res
