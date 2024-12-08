@@ -27,4 +27,6 @@ def load_config(conf) -> None:
 
 if __name__ == "__main__":
     load_config()
+    # To avoid OOM
+    global_config.worker_number_per_process = global_config.worker_number
     train(config=global_config)
