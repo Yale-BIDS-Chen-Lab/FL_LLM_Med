@@ -1,5 +1,5 @@
 from typing import Any
-from cyy_naive_lib.fs.path import list_files
+from cyy_naive_lib.fs.path import list_files, list_files_by_suffixes
 import os
 
 
@@ -8,32 +8,37 @@ class Parser:
         raise NotImplementedError()
 
 
-class I2B2(Parser):
-    def parse(self, lines: list[str]) -> list[tuple[list[str], str]]:
-        phrase: list[tuple[list[str], str]] = []
+class IOB(Parser):
+    def parse(self, lines: list[str]) -> list[tuple[list[str], str | None]]:
+        phrase: list[tuple[list[str], str | None]] = []
         last_type = ""
         for line in lines:
             line = line.strip()
             if not line:
                 continue
-            token, token_type = line.split("\t")
+            idx = line.rfind("\t")
+            token_type = line[idx + 1 :]
+            token = line[:idx]
             if token_type == "O":
-                phrase.append(([token], token_type))
+                phrase.append(([token], None))
                 last_type = ""
-
-            if token_type.startswith("B-"):
+            elif token_type.startswith("B-"):
                 last_type = token_type[2:]
-                phrase.append(([token], token_type))
-
-            if token_type.startswith("I-"):
-                assert last_type == token_type[2:]
-                last_type = token_type[2:]
-                phrase[-1][0].append(token)
+                phrase.append(([token], last_type))
+            elif token_type.startswith("I-"):
+                this_type = token_type[2:]
+                if last_type == this_type:
+                    phrase[-1][0].append(token)
+                    last_type = ""
+                else:
+                    phrase.append(([token], this_type))
+            else:
+                raise RuntimeError(f"invalid line:{line}")
         return phrase
 
 
 def parse_file(file: str) -> Any:
-    parsers = {".i2b2": I2B2()}
+    parsers = {".bio": IOB(), ".iob": IOB()}
     for suffix, parser in parsers.items():
         if file.endswith(suffix):
             with open(file, encoding="utf8") as f:
@@ -41,9 +46,14 @@ def parse_file(file: str) -> Any:
     raise NotImplementedError()
 
 
-def parse_dir(data_dir: str) -> dict:
+def parse_dir(data_dir: str, suffix: str | None = None) -> dict:
     assert os.path.isdir(data_dir)
     res = {}
-    for file in list_files(data_dir):
+    files = (
+        list_files(data_dir)
+        if suffix is None
+        else list_files_by_suffixes(data_dir, suffixes=[suffix])
+    )
+    for file in files:
         res[file] = parse_file(file)
     return res
