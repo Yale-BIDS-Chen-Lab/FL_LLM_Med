@@ -1,11 +1,6 @@
-import os
-import sys
-
-from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
 from cyy_torch_toolbox import TensorDict
 
 from ..method_forward import LLMTextWorker
-
 from .data_pipeline import get_pipeline
 
 
@@ -16,18 +11,10 @@ class FinetuneAdaptorWorker(LLMTextWorker):
             self.dataset_collection.append_text_transform(transform)
         self._model_loading_fun = self._load_adaptor
 
-    def _get_sent_parameter_names(self) -> set[str] | None:
-        assert isinstance(
-            self.trainer.model_evaluator, HuggingFaceModelEvaluatorForFinetune
-        )
-        return set(
-            self.trainer.model_evaluator.get_perf_model_state_dict(
-                self.trainer.model
-            ).keys()
+    def _get_parameters(self) -> TensorDict:
+        return self.trainer.model_evaluator.get_perf_model_state_dict(
+            self.trainer.model
         )
 
     def _load_adaptor(self, adaptor_parameter: TensorDict) -> None:
-        assert isinstance(
-            self.trainer.model_evaluator, HuggingFaceModelEvaluatorForFinetune
-        )
         self.trainer.model_evaluator.load_perf_model_state_dict(adaptor_parameter)
