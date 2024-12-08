@@ -11,5 +11,6 @@ if __name__ == "__main__":
         "--output_file", help="output json file", type=str, required=True
     )
     args = parser.parse_args()
-    parse_dir(args.data_dir)
-    print(args.data_dir)
+    result = parse_dir(args.data_dir, "bio")
+    result |= parse_dir(args.data_dir, "iob")
+    print(result)
