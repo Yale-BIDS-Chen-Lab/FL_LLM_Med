@@ -41,7 +41,7 @@ def parse_file(file: str) -> Any:
     raise NotImplementedError()
 
 
-def parse_local_data(data_dir: str) -> dict:
+def parse_dir(data_dir: str) -> dict:
     assert os.path.isdir(data_dir)
     res = {}
     for file in list_files(data_dir):
