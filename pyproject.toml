@@ -16,7 +16,7 @@ classifiers = [
 ]
 
 dependencies = [
-"cyy_distributed_learning_simulation_lib@git+https://github.com/cyyever/distributed_learning_simulation_lib.git@main",
+"distributed_learning_simulation_lib@git+https://github.com/cyyever/distributed_learning_simulation_lib.git@main",
 "cyy_huggingface_toolbox@git+https://github.com/cyyever/huggingface_toolbox.git@main",
 ]
 
