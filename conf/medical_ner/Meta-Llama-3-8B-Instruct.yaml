@@ -14,20 +14,6 @@ model_kwargs:
   need_finetune: true
   pretrained: true
   finetune_modules:
-    # - layers.15.self_attn.q_proj
-    # - layers.15.self_attn.k_proj
-    # - layers.15.self_attn.v_proj
-    # - layers.15.self_attn.o_proj
-    # - layers.15.mlp.gate_proj
-    # - layers.15.mlp.up_proj
-    # - layers.15.mlp.down_proj
-    # - layers.15.self_attn.q_proj
-    # - layers.15.self_attn.k_proj
-    # - layers.15.self_attn.v_proj
-    # - layers.15.self_attn.o_proj
-    # - layers.15.mlp.gate_proj
-    # - layers.15.mlp.up_proj
-    # - layers.15.mlp.down_proj
     - q_proj
     - o_proj
     - k_proj
