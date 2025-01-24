@@ -1,2 +1,0 @@
-git+https://github.com/cyyever/distributed_learning_simulation_lib.git@main
-git+https://github.com/cyyever/huggingface_toolbox.git@main
