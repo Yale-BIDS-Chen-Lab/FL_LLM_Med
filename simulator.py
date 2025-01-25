@@ -31,14 +31,12 @@ if __name__ == "__main__":
     # To avoid OOM
     global_config.worker_number_per_process = global_config.worker_number
     print(global_config.dc_config.dataset_kwargs)
-    for k,v in global_config.dc_config.dataset_kwargs.items():
+    for k, v in global_config.dc_config.dataset_kwargs.items():
         if "files" in k:
-            if isinstance(v,str) and v.startswith("data/"):
-                global_config.dc_config.dataset_kwargs[k]=str(Path(v.replace("data",os.path.abspath("data"))))
+            if isinstance(v, str) and v.startswith("data/"):
+                global_config.dc_config.dataset_kwargs[k] = str(
+                    os.path.join(os.path.abspath("data"), v[len("data/") :])
+                )
                 print(global_config.dc_config.dataset_kwargs[k])
 
-
-
-
-            
     train(config=global_config)
