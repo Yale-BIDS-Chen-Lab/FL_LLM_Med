@@ -1,6 +1,7 @@
-from typing import Any
-from cyy_naive_lib.fs.path import list_files, list_files_by_suffixes
 import os
+from typing import Any
+
+from cyy_naive_lib.fs.path import list_files, list_files_by_suffixes
 
 
 class Parser:

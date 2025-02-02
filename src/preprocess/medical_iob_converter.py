@@ -1,5 +1,6 @@
 import argparse
 import json
+
 from parser import parse_dir
 
 if __name__ == "__main__":
