@@ -13,4 +13,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     result = parse_dir(args.data_dir, "bio")
     result |= parse_dir(args.data_dir, "iob")
-    print(result)
+    with open(args.output_file, encoding="utf8") as f:
+        json.dump(result, f)
