@@ -1,11 +1,16 @@
 import argparse
 import json
 
-from parser import parse_dir
+import os
+import sys
+
+lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
+sys.path.append(lib_path)
+from preprocess import parse_dir
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog="Convert Data",
+        prog="Convert IBO Data",
     )
     parser.add_argument("--data_dir", help="raw data dir", type=str, required=True)
     parser.add_argument(
