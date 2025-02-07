@@ -39,3 +39,11 @@ class IOBRecord:
     @property
     def text(self) -> str:
         return " ".join(" ".join(t[0]) for t in self.__data)
+
+    @property
+    def annotated_phrases(self) -> list[tuple[str, str]]:
+        res: list[tuple[str, str]] = []
+        for item in self.__data:
+            if item[1] is not None:
+                res.append((" ".join(item[0]), item[1]))
+        return res
