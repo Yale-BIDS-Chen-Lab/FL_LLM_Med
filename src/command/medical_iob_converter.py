@@ -23,4 +23,4 @@ if __name__ == "__main__":
         all_records += records
     assert all_records
     with open(args.output_file, "w", encoding="utf8") as f:
-        json.dump({"data": [r.to_json() for r in all_records]}, f)
+        json.dump([r.to_json() for r in all_records], f)

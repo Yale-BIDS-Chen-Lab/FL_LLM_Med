@@ -1,3 +1,4 @@
+import cyy_huggingface_toolbox  # noqa: F401
 import importlib
 import os
 

@@ -8,11 +8,15 @@ class IOBRecord:
         self.__data = data
 
     def to_json(self) -> dict:
-        return {"text": self.text, "annotated_phrases": self.annotated_phrases}
+        return {"tokens": self.tokens, "annotated_phrases": self.annotated_phrases}
+
+    @property
+    def tokens(self) -> list[str]:
+        return sum((t[0] for t in self.__data), start=[])
 
     @property
     def text(self) -> str:
-        return " ".join(" ".join(t[0]) for t in self.__data)
+        return " ".join(self.tokens)
 
     @property
     def annotated_phrases(self) -> list[tuple[str, str]]:

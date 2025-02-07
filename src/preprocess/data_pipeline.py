@@ -5,7 +5,12 @@ from cyy_torch_toolbox.data_pipeline import DataPipeline, Transform
 
 def format_input(sample: Any) -> str:
     return "\n".join(
-        ["### Input", sample["text"], "### Output", str(sample["annotated_phrases"])]
+        [
+            "### Input",
+            " ".join(sample["tokens"]),
+            "### Output",
+            str(sample["annotated_phrases"]),
+        ]
     )
 
 

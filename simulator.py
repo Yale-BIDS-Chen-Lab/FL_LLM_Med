@@ -1,8 +1,6 @@
 import os
 import sys
 
-from pathlib import Path
-import cyy_huggingface_toolbox  # noqa: F401
 import hydra
 from distributed_learning_simulation.config import (
     DistributedTrainingConfig,
@@ -29,7 +27,7 @@ def load_config(conf) -> None:
 if __name__ == "__main__":
     load_config()
     # To avoid OOM
-    global_config.worker_number_per_process = global_config.worker_number
+    global_config.worker_number_per_process = int(global_config.worker_number / 2)
     print(global_config.dc_config.dataset_kwargs)
     for k, v in global_config.dc_config.dataset_kwargs.items():
         if "files" in k:
