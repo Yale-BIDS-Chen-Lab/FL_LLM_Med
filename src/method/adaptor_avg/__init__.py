@@ -3,12 +3,12 @@ from distributed_learning_simulation import (
     FedAVGAlgorithm,
 )
 
-from .server import FinetuneAdaptorServer
-from .worker import FinetuneAdaptorWorker
+from .server import NERServer
+from .worker import NERWorker
 
 CentralizedAlgorithmFactory.register_algorithm(
     algorithm_name="adaptor_avg",
-    client_cls=FinetuneAdaptorWorker,
-    server_cls=FinetuneAdaptorServer,
+    client_cls=NERWorker,
+    server_cls=NERServer,
     algorithm_cls=FedAVGAlgorithm,
 )
