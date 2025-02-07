@@ -1,4 +1,6 @@
 import os
+
+os.environ["WANDB_DISABLED"] = "true"
 import sys
 
 import hydra
@@ -27,8 +29,7 @@ def load_config(conf) -> None:
 if __name__ == "__main__":
     load_config()
     # To avoid OOM
-    global_config.worker_number_per_process = int(global_config.worker_number / 2)
-    print(global_config.dc_config.dataset_kwargs)
+    # global_config.worker_number_per_process = 1
     for k, v in global_config.dc_config.dataset_kwargs.items():
         if "files" in k:
             if isinstance(v, str) and v.startswith("data/"):
