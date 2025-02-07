@@ -1,8 +1,7 @@
 from cyy_torch_toolbox import Inferencer, TextDatasetCollection
+from distributed_learning_simulation import AggregationServer
+
 from datapipeline_mixin import DatapipelineMixin
-from distributed_learning_simulation import (
-    AggregationServer,
-)
 
 
 class LLMTextServer(AggregationServer, DatapipelineMixin):
