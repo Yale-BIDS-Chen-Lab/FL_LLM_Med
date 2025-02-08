@@ -29,4 +29,4 @@ def parse_dir(data_dir: str, suffix: str | None = None) -> dict:
     return res
 
 
-__all__ = ["parse_dir", "IOBRecord", "get_iob_pipeline"]
+__all__ = ["IOBRecord", "get_iob_pipeline", "parse_dir"]

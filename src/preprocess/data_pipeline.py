@@ -3,8 +3,8 @@ from typing import Any
 from cyy_torch_toolbox.data_pipeline import DataPipeline, Transform
 
 
-def format_input(sample: Any) -> str:
-    return "\n".join(
+def format_input(sample: dict) -> dict:
+    sample["input"] = "\n".join(
         [
             "### Input",
             " ".join(sample["tokens"]),
@@ -12,6 +12,7 @@ def format_input(sample: Any) -> str:
             str(sample["annotated_phrases"]),
         ]
     )
+    return sample
 
 
 def get_iob_pipeline() -> DataPipeline:
