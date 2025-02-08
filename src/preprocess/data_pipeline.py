@@ -1,5 +1,3 @@
-from typing import Any
-
 from cyy_torch_toolbox.data_pipeline import DataPipeline, Transform
 
 
@@ -9,7 +7,7 @@ def format_input(sample: dict) -> dict:
             "### Input",
             " ".join(sample["tokens"]),
             "### Output",
-            str(sample["annotated_phrases"]),
+            " ".join([str(a) for a in sample["annotated_phrases"]]),
         ]
     )
     return sample

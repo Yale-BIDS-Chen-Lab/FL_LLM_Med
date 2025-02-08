@@ -1,61 +1,69 @@
 from .parser import Parser
 
-type IOBData = list[tuple[list[str], str | None]]
-
 
 class IOBRecord:
-    def __init__(self, data: IOBData) -> None:
-        self.__data = data
+    def __init__(self) -> None:
+        self.__tokens: list[str] = []
+        self.__token_tags: list[str] = []
+        self.last_tag: str | None = None
+        self.phrase: list[tuple[list[str], str, int]] = []
+
+    def add_line(self, token: str, token_tag: str) -> None:
+        self.__tokens.append(token)
+        self.__token_tags.append(token_tag)
+        if token_tag == "O":
+            self.last_tag = None
+        elif token_tag.startswith("B-"):
+            self.last_tag = token_tag[2:]
+            self.phrase.append(([token], self.last_tag, len(self.__tokens) - 1))
+        elif token_tag.startswith("I-"):
+            this_tag = token_tag[2:]
+            if self.last_tag == this_tag:
+                self.phrase[-1][0].append(token)
+            else:
+                self.last_tag = this_tag
+                self.phrase.append(([token], self.last_tag, len(self.__token_tags) - 1))
+        else:
+            raise RuntimeError(f"invalid line:{token} {token_tag}")
 
     def to_json(self) -> dict:
-        return {"tokens": self.tokens, "annotated_phrases": self.annotated_phrases}
+        return {
+            "tokens": self.tokens,
+            "annotated_phrases": self.annotated_phrases,
+            "annotated_phrase_locations": self.annotated_phrase_locations,
+            "tags": self.__token_tags,
+        }
 
     @property
     def tokens(self) -> list[str]:
-        return sum((t[0] for t in self.__data), start=[])
+        return self.__tokens
 
     @property
     def text(self) -> str:
         return " ".join(self.tokens)
 
     @property
+    def annotated_phrase_locations(self) -> list[int]:
+        return [p[2] for p in self.phrase]
+
+    @property
     def annotated_phrases(self) -> list[tuple[str, str]]:
-        res: list[tuple[str, str]] = []
-        for item in self.__data:
-            if item[1]:
-                res.append((" ".join(item[0]), item[1]))
-        return res
+        return [(" ".join(p[0]), p[1]) for p in self.phrase]
 
 
 class IOB(Parser):
     def parse(self, lines: list[str]) -> list[IOBRecord]:
         results: list[IOBRecord] = []
-        phrase: IOBData = []
-        last_type: str | None = None
-        for line in lines:
-            line = line.strip()
+        record = IOBRecord()
+        for _line in lines:
+            line = _line.strip()
             if not line:
-                if phrase:
-                    results.append(IOBRecord(phrase))
-                    phrase = []
-                last_type = None
+                if record.tokens:
+                    results.append(record)
+                    record = IOBRecord()
                 continue
             idx = line.rfind("\t")
-            token_type = line[idx + 1 :]
+            token_tag = line[idx + 1 :]
             token = line[:idx]
-            if token_type == "O":
-                last_type = None
-                phrase.append(([token], last_type))
-            elif token_type.startswith("B-"):
-                last_type = token_type[2:]
-                phrase.append(([token], last_type))
-            elif token_type.startswith("I-"):
-                this_type = token_type[2:]
-                if last_type == this_type:
-                    phrase[-1][0].append(token)
-                else:
-                    last_type = this_type
-                    phrase.append(([token], last_type))
-            else:
-                raise RuntimeError(f"invalid line:{line}")
+            record.add_line(token, token_tag)
         return results

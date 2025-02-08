@@ -1,18 +1,20 @@
-from typing import Any
-from ner_metrics import classification_report
 import json
+from typing import Any
 
+from cyy_naive_lib.log import log_info
 from cyy_torch_toolbox import Inferencer, TextDatasetCollection
+from nervaluate import Evaluator
 
 from ..method_forward import FinetuneAdaptorServer, get_iob_pipeline
 
 
-def parse_prediction(prediction: str) -> list[tuple[str, str, int]]:
-    res: list[tuple[str, str, int]] = []
+def parse_prediction(prediction: str) -> list[tuple[str, str]]:
+    res: list[tuple[str, str]] = []
     prediction = (
         prediction.replace("['", '["')
         .replace("']", '"]')
         .replace("', '", '", "')
+        .replace("','", '","')
         .replace("\", '", '", "')
         .replace("[[", "[")
         .replace("]]", "]")
@@ -26,60 +28,67 @@ def parse_prediction(prediction: str) -> list[tuple[str, str, int]]:
         if not end_idx >= 0:
             break
         item = prediction[: end_idx + 2]
-        # print("item is", item)
+        prediction = prediction[end_idx + 2 :]
         try:
             predicated_pair = json.loads(item)
-            if len(predicated_pair) != 3:
-                # print("invalid item", predicated_pair)
+            if len(predicated_pair) != 2:
                 continue
             res.append(predicated_pair)
         except Exception:
             break
-        prediction = prediction[end_idx + 2 :]
 
     new_res = []
-    for a, b, c in res:
-        if not isinstance(a, str) or not isinstance(b, str) or not isinstance(c, int):
+    for a, b in res:
+        if not isinstance(a, str) or not isinstance(b, str):
             continue
-        new_res.append((a, b, c))
+        new_res.append((a, b))
     return new_res
 
 
 def get_NER_metric(tester: Inferencer):
     generated_texts = tester.get_sample_output(generated_kwargs={})
-    print(generated_texts)
     prediction = []
     ground_tags = []
+    tag_set = set()
     for sample_index, generated_text in generated_texts.items():
         sample = tester.dataset_util.get_sample(sample_index)
-        for pair in parse_prediction(generated_text):
-            prediction.append(f"{pair[0]} B-{pair[1]}")
-        for pair in sample["annotated_phrases"]:
-            ground_tags.append(f"{pair[0]} B-{pair[1]}")
-    print(ground_tags)
-    print(prediction)
-    lenient = classification_report(
-        tags_true=ground_tags, tags_pred=prediction, mode="lenient"
-    )
-    strict = classification_report(
-        tags_true=ground_tags, tags_pred=prediction, mode="strict"
-    )
-    scores = []
-    for entity in strict:
-        strict_scores = strict[entity]
-        lenient_scores = lenient[entity]
-        scores.append(
-            {
-                "entity": entity,
-                "strict_precision": f"{strict_scores['precision']}",
-                "strict_recall": f"{strict_scores['recall']}",
-                "strict_f1-score": f"{strict_scores['f1-score']}",
-                "lenient_precision": f"{lenient_scores['precision']}",
-                "lenient_recall": f"{lenient_scores['recall']}",
-                "lenient_f1-score": f"{lenient_scores['f1-score']}",
-            }
-        )
-    print(scores)
+        tags = sample["tags"]
+        for tag in tags:
+            if tag != "O":
+                tag_set.add(tag[2:])
+        tokens = sample["tokens"]
+        prediction_tags = ["O"] * len(tags)
+        for phrase, tag in parse_prediction(generated_text):
+            if not phrase:
+                continue
+            sub_tokens = phrase.split(" ")
+            for i in range(len(tokens)):
+                if (
+                    tokens[i] == sub_tokens[0]
+                    and tokens[i : i + len(sub_tokens)] == sub_tokens
+                ):
+                    prediction_tags[i] = f"B-{tag}"
+                    for j in range(i + 1, len(sub_tokens)):
+                        prediction_tags[j] = f"I-{tag}"
+
+            # print(phrase, tag)
+            # print(sample["annotated_phrases"])
+            # idx = sample["annotated_phrases"].index([phrase, tag])
+            # if idx >= 0:
+            #     token_location = sample["annotated_phrase_locations"][idx]
+            #     token_num = len(phrase.split(" "))
+            #     for i in range(token_num):
+            #         assert tags[token_location + i] != "O"
+            #         prediction_tags[token_location + i] = (
+            #             tags[token_location + i][:2] + tag
+            #         )
+
+        prediction.append(prediction_tags)
+        ground_tags.append(tags)
+    results, results_per_tag, result_indices, result_indices_by_tag = Evaluator(
+        ground_tags, prediction, tags=list(tag_set), loader="list"
+    ).evaluate()
+    return results
 
 
 class NERServer(FinetuneAdaptorServer):
@@ -93,5 +102,6 @@ class NERServer(FinetuneAdaptorServer):
     def _get_metric(self, tester: Inferencer) -> Any:
         metric = super()._get_metric(tester=tester)
         assert isinstance(metric, dict)
-        get_NER_metric(tester)
+        results = get_NER_metric(tester)
+        log_info("round: %s, NER test result %s", self.round_index, results)
         return metric
