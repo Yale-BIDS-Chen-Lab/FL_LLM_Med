@@ -10,7 +10,8 @@ class LLMTextServer(AggregationServer, DatapipelineMixin):
     def get_tester(self, *args, **kwargs) -> Inferencer:
         inferencer = super().get_tester(*args, **kwargs)
         assert isinstance(inferencer.dataset_collection, TextDatasetCollection)
-        inferencer.dataset_collection.set_prompt(self.read_prompt())
+        if inferencer.dataset_collection.prompt is None:
+            inferencer.dataset_collection.set_prompt(self.read_prompt())
         return inferencer
 
 
