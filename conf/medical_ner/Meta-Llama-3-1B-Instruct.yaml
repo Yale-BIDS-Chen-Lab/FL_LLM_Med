@@ -11,7 +11,6 @@ use_amp: true
 weight_decay: 0
 learning_rate: 2e-4
 model_kwargs:
-  # load_in_8bit: true
   pretrained: true
   finetune_modules:
     - q_proj
@@ -21,6 +20,7 @@ model_kwargs:
     - gate_proj
     - up_proj
     - down_proj
+  # load_in_8bit: true
 dataset_kwargs:
   train_files: [data/a.json]
   test_files: [data/a.json]
