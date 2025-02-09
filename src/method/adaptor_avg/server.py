@@ -102,6 +102,9 @@ class NERServer(FinetuneAdaptorServer):
     def _get_metric(self, tester: Inferencer) -> Any:
         metric = super()._get_metric(tester=tester)
         assert isinstance(metric, dict)
-        results = get_NER_metric(tester)
-        log_info("round: %s, NER test result %s", self.round_index, results)
+        self._round_index += 1
+        if self._stopped():
+            results = get_NER_metric(tester)
+            log_info("round: %s, NER test result %s", self.round_index, results)
+        self._round_index -= 1
         return metric
