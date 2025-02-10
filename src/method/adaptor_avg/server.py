@@ -46,6 +46,9 @@ def parse_prediction(prediction: str) -> list[tuple[str, str]]:
 
 
 def get_NER_metric(tester: Inferencer):
+    # merge Rola layers
+    tester.replace_model(lambda old_model: old_model.merge_and_unload())
+
     max_new_tokens = 0
     for _, sample in tester.dataset_util.get_raw_samples():
         sample_token = 0
@@ -53,7 +56,9 @@ def get_NER_metric(tester: Inferencer):
             sample_token += len(phrase[0].split(" ")) * 2 + 10
         max_new_tokens = max(max_new_tokens, sample_token)
 
-    generated_texts = tester.get_sample_output(max_new_tokens=max_new_tokens)
+    generated_texts = tester.get_sample_output(
+        max_new_tokens=max_new_tokens, do_sample=False
+    )
     prediction = []
     ground_tags = []
     tag_set = set()
