@@ -1,0 +1,28 @@
+---
+dataset_sampling: random_split
+dataset_name: hugging_face_yale_ner
+model_name: hugging_face_causal_lm_deepseek-ai/DeepSeek-R1-Distill-Llama-8B
+distributed_algorithm: adaptor_avg
+optimizer_name: AdamW
+cache_transforms: cpu
+batch_size: 16
+epoch: 1
+use_amp: true
+weight_decay: 0
+learning_rate: 2e-4
+model_kwargs:
+  pretrained: true
+  finetune_modules:
+    # - 31.attention.q_proj
+    - 31.mlp.gate_proj
+    - 31.mlp.up_proj
+    - 31.mlp.down_proj
+  load_in_4bit: true
+dataset_kwargs:
+  train_files: [data/a.json]
+  test_files: [data/a.json]
+  prompt_file: medical.txt
+  no_validation: true
+  server_batch_size: 32
+algorithm_kwargs:
+  distribute_init_parameters: false
