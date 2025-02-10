@@ -50,7 +50,7 @@ def get_NER_metric(tester: Inferencer):
     for _, sample in tester.dataset_util.get_raw_samples():
         sample_token = 0
         for phrase in sample["data"]["annotated_phrases"]:
-            sample_token += len(phrase[0].split(" ")) * 2 + 5
+            sample_token += len(phrase[0].split(" ")) * 2 + 10
         max_new_tokens = max(max_new_tokens, sample_token)
 
     generated_texts = tester.get_sample_output(max_new_tokens=max_new_tokens)

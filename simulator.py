@@ -28,8 +28,6 @@ def load_config(conf) -> None:
 
 if __name__ == "__main__":
     load_config()
-    # To avoid OOM
-    # global_config.worker_number_per_process = 1
     for k, v in global_config.dc_config.dataset_kwargs.items():
         if "files" in k:
             if isinstance(v, str) and v.startswith("data/"):
@@ -38,4 +36,4 @@ if __name__ == "__main__":
                 )
                 print(global_config.dc_config.dataset_kwargs[k])
 
-    train(config=global_config)
+    train(config=global_config, single_task=True)
