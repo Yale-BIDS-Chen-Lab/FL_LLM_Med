@@ -21,6 +21,20 @@ class FinetuneAdaptorWorker(LLMTextWorker):
     def _before_training(self) -> None:
         super()._before_training()
         self._model_loading_fun = self._load_adaptor
+        with self.context.global_store.default_lock:
+            if self.context.thread_local_store.has("tokenizer"):
+                self.trainer.model_evaluator.set_tokenizer(
+                    self.context.thread_local_store.get("tokenizer")
+                )
+            else:
+                self.context.thread_local_store.store(
+                    "tokenizer", self.trainer.model_evaluator.tokenizer
+                )
+
+    def pause(self, in_round: bool = False) -> None:
+        if not in_round:
+            self.trainer.model_evaluator.set_tokenizer(None)
+        super().pause(in_round=in_round)
 
     def _get_parameters(self) -> TensorDict:
         return self.trainer.model_evaluator.get_perf_model_state_dict(
