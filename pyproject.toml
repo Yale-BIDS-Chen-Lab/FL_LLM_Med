@@ -25,7 +25,6 @@ dependencies = [
 [tool.setuptools.package-dir]
 "distributed_LLM_learning_simulator.conf"= "./conf"
 "distributed_LLM_learning_simulator.method"= "./src/method"
-"distributed_LLM_learning_simulator.data"= "./data"
 
 [project.urls]
 Repository = "https://github.com/cyyever/distributed_LLM_learning_simulator"
