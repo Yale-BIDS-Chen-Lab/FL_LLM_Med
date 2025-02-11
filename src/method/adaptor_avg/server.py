@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Any
 
 from cyy_naive_lib.log import log_info
@@ -110,6 +111,15 @@ class NERServer(FinetuneAdaptorServer):
         for transform in get_iob_pipeline().transforms:
             inferencer.dataset_collection.append_text_transform(transform)
         return inferencer
+
+    def _server_exit(self) -> None:
+        # merge Rola layers
+        tester = self.get_tester()
+        tester.replace_model(lambda old_model: old_model.merge_and_unload())
+        tester.model_evaluator.tokenizer.tokenizer.save_pretrained(
+            os.path.join(self.save_dir, "finetuned_model")
+        )
+        tester.model.save_pretrained(os.path.join(self.save_dir, "finetuned_model"))
 
     # def _get_metric(self, tester: Inferencer) -> Any:
     #     metric = super()._get_metric(tester=tester)
