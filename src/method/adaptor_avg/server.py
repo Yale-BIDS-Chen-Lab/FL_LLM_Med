@@ -2,7 +2,6 @@ import json
 import os
 from typing import Any
 
-from cyy_naive_lib.log import log_info
 from cyy_torch_toolbox import Inferencer, TextDatasetCollection
 from nervaluate import Evaluator
 
