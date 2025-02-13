@@ -22,8 +22,15 @@ model_kwargs:
     - down_proj
   # load_in_8bit: true
 dataset_kwargs:
-  train_files: [data/a.json]
-  test_files: [data/a.json]
+  train_files:
+    - /home/cyy/NER_data/train/MIMIC3.json
+    - /home/cyy/NER_data/train/MTSamples.json
+    - /home/cyy/NER_data/train/UTP.json
+  test_files:
+    - /home/cyy/NER_data/test/MIMIC3.json
+    - /home/cyy/NER_data/test/MTSamples.json
+    - /home/cyy/NER_data/test/UTP.json
+    - /home/cyy/NER_data/test/i2b2.json
   prompt_file: medical.txt
   no_validation: true
 algorithm_kwargs:
