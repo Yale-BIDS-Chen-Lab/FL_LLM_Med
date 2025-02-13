@@ -7,11 +7,15 @@ from ..method_forward import FinetuneAdaptorServer, get_iob_pipeline
 
 
 class NERServer(FinetuneAdaptorServer):
+    added_transform = False
+
     def get_tester(self, *args: Any, **kwargs: Any) -> Inferencer:
         inferencer = super().get_tester(*args, **kwargs)
         assert isinstance(inferencer.dataset_collection, TextDatasetCollection)
-        for transform in get_iob_pipeline().transforms:
-            inferencer.dataset_collection.append_text_transform(transform)
+        if not self.added_transform:
+            for transform in get_iob_pipeline().transforms:
+                inferencer.dataset_collection.append_text_transform(transform)
+            self.added_transform = True
         return inferencer
 
     def _server_exit(self) -> None:

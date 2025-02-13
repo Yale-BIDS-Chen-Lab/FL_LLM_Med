@@ -1,4 +1,4 @@
-from cyy_torch_toolbox import Inferencer, TensorDict, TextDatasetCollection
+from cyy_torch_toolbox import Inferencer, TensorDict, TextDatasetCollection, tensor_to
 from distributed_learning_simulation import AggregationServer
 
 from datapipeline_mixin import DatapipelineMixin
@@ -17,4 +17,5 @@ class LLMTextServer(AggregationServer, DatapipelineMixin):
 
 class FinetuneAdaptorServer(LLMTextServer):
     def load_parameter(self, tester: Inferencer, parameter: TensorDict) -> None:
+        parameter = tensor_to(parameter, device=tester.device)
         tester.model_evaluator.load_perf_model_state_dict(parameter)
