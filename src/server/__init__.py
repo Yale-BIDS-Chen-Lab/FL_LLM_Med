@@ -7,8 +7,8 @@ __all__ = ["FinetuneAdaptorServer"]
 
 
 class LLMTextServer(AggregationServer, DatapipelineMixin):
-    def get_tester(self, *args, **kwargs) -> Inferencer:
-        inferencer = super().get_tester(*args, **kwargs)
+    def get_tester(self) -> Inferencer:
+        inferencer = super().get_tester()
         assert isinstance(inferencer.dataset_collection, TextDatasetCollection)
         if inferencer.dataset_collection.prompt is None:
             inferencer.dataset_collection.set_prompt(self.read_prompt())
