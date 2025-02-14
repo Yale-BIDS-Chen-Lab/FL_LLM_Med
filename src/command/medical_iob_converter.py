@@ -19,10 +19,7 @@ if __name__ == "__main__":
         "--skip_empty", help="skip empty lines", type=bool, required=True
     )
     args = parser.parse_args()
-    if args.skip_empty:
-        os.putenv("SKIP_EMPTY_LINE", "1")
-    else:
-        os.putenv("SKIP_EMPTY_LINE", "0")
+    os.environ["SKIP_EMPTY_LINE"] = str(int(args.skip_empty))
 
     result = parse_dir(args.data_dir, "bio")
     result |= parse_dir(args.data_dir, "iob")
