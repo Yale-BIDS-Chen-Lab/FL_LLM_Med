@@ -32,7 +32,7 @@ dataset_kwargs:
     - test/MTSamples.json
     - test/UTP.json
     - test/i2b2.json
-  prompt_file: medical.txt
   no_validation: true
+  prompt_file: medical.txt
 algorithm_kwargs:
   distribute_init_parameters: false
