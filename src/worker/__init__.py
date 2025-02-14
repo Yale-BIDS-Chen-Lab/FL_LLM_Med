@@ -42,4 +42,6 @@ class FinetuneAdaptorWorker(LLMTextWorker):
         )
 
     def _load_adaptor(self, adaptor_parameter: TensorDict) -> None:
-        self.trainer.model_evaluator.load_perf_model_state_dict(adaptor_parameter)
+        self.trainer.model_evaluator.load_perf_model_state_dict(
+            adaptor_parameter, device=self.trainer.device
+        )

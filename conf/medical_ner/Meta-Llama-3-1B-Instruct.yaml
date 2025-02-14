@@ -1,4 +1,5 @@
 ---
+heavy_server: true
 dataset_sampling: random_split
 dataset_name: hugging_face_yale_ner
 model_name: hugging_face_causal_lm_meta-llama/Llama-3.2-1B-Instruct
@@ -22,15 +23,14 @@ model_kwargs:
     - down_proj
   # load_in_8bit: true
 dataset_kwargs:
-  train_files:
-    - /home/cyy/NER_data/train/MIMIC3.json
-    - /home/cyy/NER_data/train/MTSamples.json
-    - /home/cyy/NER_data/train/UTP.json
+  input_max_len: 800
+  data_dir: /home/cyy/NER_data_new
+  train_files: [train/MIMIC3.json, train/MTSamples.json, train/UTP.json]
   test_files:
-    - /home/cyy/NER_data/test/MIMIC3.json
-    - /home/cyy/NER_data/test/MTSamples.json
-    - /home/cyy/NER_data/test/UTP.json
-    - /home/cyy/NER_data/test/i2b2.json
+    - test/MIMIC3.json
+    - test/MTSamples.json
+    - test/UTP.json
+    - test/i2b2.json
   prompt_file: medical.txt
   no_validation: true
 algorithm_kwargs:
