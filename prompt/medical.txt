@@ -6,4 +6,10 @@ Your task is to generate a list of (phrase, entity type) pairs from medical inpu
 "treatment": Denote the procedures, interventions, and substances given to a patient for treating a problem.
 "test": Denote a medical procedure performed (i) to detect or diagnose a problem, (ii) to monitor diseases, disease processes, and susceptibility, or (iii) to determine a course of treatment.
 "drug": Denote the generic or brand name of a single medication or a collective name of a group of medication.
-{input}
+### Input
+
+{space_join_tokens}
+
+### Output
+
+{space_join_annotated_phrases}
