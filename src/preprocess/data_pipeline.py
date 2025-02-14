@@ -1,4 +1,4 @@
-from cyy_torch_toolbox.data_pipeline import DataPipeline, Transform
+from cyy_torch_toolbox.data_pipeline import DataPipeline
 
 
 def get_iob_pipeline() -> DataPipeline:

@@ -1,6 +1,6 @@
 import os
-from cyy_torch_toolbox import DataPipeline
 
+from cyy_torch_toolbox import DataPipeline
 from distributed_learning_simulation import ExecutorProtocol
 
 
