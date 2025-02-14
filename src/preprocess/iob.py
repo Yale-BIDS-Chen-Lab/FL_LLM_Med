@@ -1,3 +1,5 @@
+import os
+
 from .parser import Parser
 
 
@@ -57,7 +59,9 @@ class IOB(Parser):
         record = IOBRecord()
         for _line in lines:
             line = _line.strip()
-            if not line:
+            skip_empty_line = os.getenv("SKIP_EMPTY_LINE")
+            assert skip_empty_line is not None
+            if not line and int(skip_empty_line):
                 if record.tokens:
                     results.append(record)
                     record = IOBRecord()
@@ -66,4 +70,6 @@ class IOB(Parser):
             token_tag = line[idx + 1 :]
             token = line[:idx]
             record.add_line(token, token_tag)
+        if record.tokens:
+            results.append(record)
         return results
