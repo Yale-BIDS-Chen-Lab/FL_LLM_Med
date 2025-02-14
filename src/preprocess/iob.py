@@ -59,10 +59,10 @@ class IOB(Parser):
         record = IOBRecord()
         for _line in lines:
             line = _line.strip()
-            skip_empty_line = os.getenv("SKIP_EMPTY_LINE")
-            assert skip_empty_line is not None
-            if not line and int(skip_empty_line):
-                if record.tokens:
+            if not line:
+                skip_empty_line = os.getenv("SKIP_EMPTY_LINE")
+                assert skip_empty_line is not None
+                if int(skip_empty_line) and record.tokens:
                     results.append(record)
                     record = IOBRecord()
                 continue
