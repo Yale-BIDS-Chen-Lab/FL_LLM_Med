@@ -46,10 +46,12 @@ def get_vllm_output() -> list[tuple[dict, RequestOutput]]:
     for batch in tester.dataloader:
         # Generate texts from the prompts. The output is a list of RequestOutput objects
         # that contain the prompt, generated text, and other information.
-        print("batch keys", batch.keys())
-        batch_list: list[dict] = [{} for _ in range(batch["batch_size"])]
+        batch_size = batch["batch_size"]
+        batch_list: list[dict] = [{} for _ in range(batch_size)]
         for k, v in batch.items():
             if isinstance(v, list):
+                if len(v) != batch_size:
+                    continue
                 for idx, a in enumerate(v):
                     batch_list[idx][k] = a
 
