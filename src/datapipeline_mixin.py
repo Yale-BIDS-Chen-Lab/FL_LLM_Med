@@ -1,9 +1,13 @@
 import os
+from cyy_torch_toolbox import DataPipeline
 
 from distributed_learning_simulation import ExecutorProtocol
 
 
 class DatapipelineMixin(ExecutorProtocol):
+    def get_text_pipeline(self) -> DataPipeline:
+        return DataPipeline()
+
     def read_prompt(self) -> str:
         prompt_file = self.config.dc_config.dataset_kwargs["prompt_file"]
         prompt_file = os.path.join(

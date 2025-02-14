@@ -1,5 +1,6 @@
 from cyy_torch_toolbox import TensorDict, TextDatasetCollection
 from distributed_learning_simulation import AggregationWorker
+from cyy_naive_lib.log import log_info
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
 
 from datapipeline_mixin import DatapipelineMixin
@@ -11,6 +12,8 @@ class LLMTextWorker(AggregationWorker, DatapipelineMixin):
     def _before_training(self) -> None:
         self._send_parameter_diff: bool = False
         super()._before_training()
+        for transform in self.get_text_pipeline().transforms:
+            self.dataset_collection.append_text_transform(transform)
         self.dataset_collection.set_prompt(self.read_prompt())
 
     @property
@@ -32,6 +35,8 @@ class FinetuneAdaptorWorker(LLMTextWorker):
                 self.context.thread_local_store.store(
                     "tokenizer", self.model_evaluator.tokenizer
                 )
+        if self.hold_log_lock:
+            log_info("model is %s", self.trainer.model)
 
     @property
     def model_evaluator(self) -> HuggingFaceModelEvaluatorForFinetune:
