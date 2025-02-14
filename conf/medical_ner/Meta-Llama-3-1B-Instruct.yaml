@@ -5,6 +5,7 @@ dataset_name: hugging_face_yale_ner
 model_name: hugging_face_causal_lm_meta-llama/Llama-3.2-1B-Instruct
 distributed_algorithm: adaptor_avg
 optimizer_name: AdamW
+learning_rate_scheduler_name: OneCycleLR
 cache_transforms: cpu
 batch_size: 8
 epoch: 1

@@ -1,9 +1,9 @@
-from cyy_torch_toolbox import Inferencer, TensorDict, TextDatasetCollection, tensor_to
+from cyy_torch_toolbox import Inferencer, TensorDict, TextDatasetCollection
+from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
 from distributed_learning_simulation import AggregationServer
-
 from datapipeline_mixin import DatapipelineMixin
 
-__all__ = ["FinetuneAdaptorServer"]
+__all__ = ["FinetuneAdaptorServer", "LLMTextServer"]
 
 
 class LLMTextServer(AggregationServer, DatapipelineMixin):
@@ -15,8 +15,8 @@ class LLMTextServer(AggregationServer, DatapipelineMixin):
         return inferencer
 
 
-class FinetuneAdaptorServer(LLMTextServer):
+class FinetuneAdaptorServer(AggregationServer):
     def load_parameter(self, tester: Inferencer, parameter: TensorDict) -> None:
-        tester.model_evaluator.load_perf_model_state_dict(
-            parameter, device=tester.device
-        )
+        model_evaluator = tester.model_evaluator
+        assert isinstance(model_evaluator, HuggingFaceModelEvaluatorForFinetune)
+        model_evaluator.load_perf_model_state_dict(parameter, device=tester.device)
