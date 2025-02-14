@@ -18,8 +18,8 @@ class NERServer(FinetuneAdaptorServer, LLMTextServer):
         return inferencer
 
     def _server_exit(self) -> None:
-        assert self.__model_cache.has_data
-        self.__model_cache.save()
+        assert self.current_aggregated_model.has_data
+        self.current_aggregated_model.save()
         # tester = self.get_tester()
         # # merge Rola layers
         # tester.replace_model(lambda old_model: old_model.merge_and_unload())
