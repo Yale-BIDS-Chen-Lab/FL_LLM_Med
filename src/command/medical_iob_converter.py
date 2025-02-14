@@ -21,6 +21,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.skip_empty:
         os.putenv("SKIP_EMPTY_LINE", "1")
+    else:
+        os.putenv("SKIP_EMPTY_LINE", "0")
 
     result = parse_dir(args.data_dir, "bio")
     result |= parse_dir(args.data_dir, "iob")
