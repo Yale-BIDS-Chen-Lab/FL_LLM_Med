@@ -50,8 +50,6 @@ def get_vllm_output() -> list[tuple[dict, RequestOutput]]:
         batch_list: list[dict] = [{} for _ in range(batch_size)]
         for k, v in batch.items():
             if isinstance(v, list):
-                if len(v) != batch_size:
-                    continue
                 for idx, a in enumerate(v):
                     batch_list[idx][k] = a
 

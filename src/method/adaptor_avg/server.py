@@ -1,5 +1,4 @@
 import os
-from typing import Any
 
 from cyy_torch_toolbox import Inferencer, TextDatasetCollection
 
