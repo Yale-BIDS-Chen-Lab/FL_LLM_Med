@@ -1,8 +1,8 @@
 import os
-
-os.environ["WANDB_DISABLED"] = "true"
 import sys
 
+os.environ["WANDB_DISABLED"] = "true"
+from cyy_naive_lib.log import log_warning
 from distributed_learning_simulation import (
     load_config,
     train,
@@ -18,4 +18,6 @@ if __name__ == "__main__":
         config_path=config_path,
         global_conf_path=os.path.join(config_path, "global.yaml"),
     )
+    if config.use_amp:
+        log_warning("AMP may slowdown training and increase GPU memory")
     train(config=config, single_task=True)
