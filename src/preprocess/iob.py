@@ -32,7 +32,6 @@ class IOBRecord:
         return {
             "tokens": self.tokens,
             "annotated_phrases": self.annotated_phrases,
-            "annotated_phrase_locations": self.annotated_phrase_locations,
             "tags": self.__token_tags,
         }
 
@@ -62,6 +61,7 @@ class IOB(Parser):
             if not line:
                 skip_empty_line = os.getenv("SKIP_EMPTY_LINE")
                 assert skip_empty_line is not None
+                assert int(skip_empty_line)
                 if int(skip_empty_line) and record.tokens:
                     results.append(record)
                     record = IOBRecord()

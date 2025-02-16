@@ -16,7 +16,7 @@ if __name__ == "__main__":
         "--output_file", help="output json file", type=str, required=True
     )
     parser.add_argument(
-        "--skip_empty", help="skip empty lines", type=bool, required=True
+        "--skip_empty", help="skip empty lines", type=bool, default=True
     )
     args = parser.parse_args()
     os.environ["SKIP_EMPTY_LINE"] = str(int(args.skip_empty))

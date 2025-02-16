@@ -3,7 +3,6 @@ from typing import Any
 
 from cyy_naive_lib.fs.path import list_files, list_files_by_suffixes
 
-from .data_pipeline import get_iob_pipeline
 from .iob import IOB, IOBRecord
 
 
@@ -29,4 +28,4 @@ def parse_dir(data_dir: str, suffix: str | None = None) -> dict:
     return res
 
 
-__all__ = ["IOBRecord", "get_iob_pipeline", "parse_dir"]
+__all__ = ["IOBRecord", "parse_dir"]
