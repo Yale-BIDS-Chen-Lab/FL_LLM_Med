@@ -18,6 +18,6 @@ if __name__ == "__main__":
         config_path=config_path,
         global_conf_path=os.path.join(config_path, "global.yaml"),
     )
-    if config.use_amp:
+    if config.trainer_config.hook_config.use_amp:
         log_warning("AMP may slowdown training and increase GPU memory")
     train(config=config, single_task=True)
