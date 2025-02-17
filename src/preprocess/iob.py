@@ -5,10 +5,9 @@ from .parser import Parser
 
 class IOBRecord:
     def __init__(self) -> None:
-        self.__tokens: list[str] = []
+        self.__tokens: list[str | tuple[list[str], str]] = []
         self.__token_tags: list[str] = []
         self.last_tag: str | None = None
-        self.phrase: list[tuple[list[str], str, int]] = []
 
     def add_line(self, token: str, token_tag: str) -> None:
         self.__tokens.append(token)
@@ -17,39 +16,48 @@ class IOBRecord:
             self.last_tag = None
         elif token_tag.startswith("B-"):
             self.last_tag = token_tag[2:]
-            self.phrase.append(([token], self.last_tag, len(self.__tokens) - 1))
+            self.__tokens.pop()
+            self.__tokens.append(([token], self.last_tag))
         elif token_tag.startswith("I-"):
             this_tag = token_tag[2:]
             if self.last_tag == this_tag:
-                self.phrase[-1][0].append(token)
+                self.__tokens.pop()
+                assert isinstance(self.__tokens[-1], tuple)
+                self.__tokens[-1][0].append(token)
             else:
                 self.last_tag = this_tag
-                self.phrase.append(([token], self.last_tag, len(self.__token_tags) - 1))
+                self.__tokens.pop()
+                self.__tokens.append(([token], self.last_tag))
         else:
             raise RuntimeError(f"invalid line:{token} {token_tag}")
 
     def to_json(self) -> dict:
+        tokens = self.__tokens
+        assert len(tokens) == len(self.__token_tags)
+
         return {
-            "tokens": self.tokens,
+            "tokens": tokens,
             "annotated_phrases": self.annotated_phrases,
             "tags": self.__token_tags,
         }
 
     @property
     def tokens(self) -> list[str]:
-        return self.__tokens
+        result: list[str] = []
+        for t in self.__tokens:
+            if isinstance(t, str):
+                result.append(t)
+            else:
+                result += t[0]
+        return result
 
     @property
     def text(self) -> str:
         return " ".join(self.tokens)
 
     @property
-    def annotated_phrase_locations(self) -> list[int]:
-        return [p[2] for p in self.phrase]
-
-    @property
     def annotated_phrases(self) -> list[tuple[str, str]]:
-        return [(" ".join(p[0]), p[1]) for p in self.phrase]
+        return [(" ".join(p[0]), p[1]) for p in self.tokens if not isinstance(p, str)]
 
 
 class IOB(Parser):
