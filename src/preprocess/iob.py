@@ -32,13 +32,14 @@ class IOBRecord:
             raise RuntimeError(f"invalid line:{token} {token_tag}")
 
     def to_json(self) -> dict:
-        tokens = self.__tokens
+        tokens = self.tokens
         assert len(tokens) == len(self.__token_tags)
 
         return {
             "tokens": tokens,
             "annotated_phrases": self.annotated_phrases,
             "tags": self.__token_tags,
+            "html": self.html,
         }
 
     @property
@@ -67,7 +68,7 @@ class IOBRecord:
                 result.append(t)
             else:
                 phrase = " ".join(t[0])
-                result += f"<span class='t[1]'>{phrase}</span>"
+                result.append(f"<span class='t[1]'>{phrase}</span>")
         return " ".join(result)
 
 
