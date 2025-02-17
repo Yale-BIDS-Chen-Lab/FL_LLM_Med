@@ -77,9 +77,12 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
 
         model = executor.model
         self.context.release_device_lock()
+        training_dataset = Dataset.from_list([])
+        if isinstance(executor, Trainer):
+            training_dataset = Dataset.from_list(executor.dataloader.dataset)
         self._sft_trainer = SFTTrainer(
             model,
-            train_dataset=self.get_training_dataset(),
+            train_dataset=training_dataset,
             formatting_func=self._formatting_func,
             args=training_args,
         )
