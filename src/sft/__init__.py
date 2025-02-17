@@ -84,7 +84,6 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
         self.__sft_trainer = SFTTrainer(
             model,
             train_dataset=self.get_training_dataset(),
-            eval_dataset=self.get_evaluation_dataset(),
             formatting_func=self.__formatting_func,
             args=training_args,
         )

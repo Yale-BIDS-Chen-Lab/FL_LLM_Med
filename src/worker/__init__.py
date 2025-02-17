@@ -1,9 +1,4 @@
 from .common import FinetuneAdaptorWorker
+from .sft import SFTTrainerWorker
 
-__all__ = ["FinetuneAdaptorWorker"]
-try:
-    from .sft import SFTTrainerWorker
-
-    __all__ += ["SFTTrainerWorker"]
-except BaseException:
-    pass
+__all__ = ["FinetuneAdaptorWorker", "SFTTrainerWorker"]
