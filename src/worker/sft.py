@@ -34,9 +34,6 @@ class SFTTrainerWorker(FinetuneAdaptorWorker, SFTTrainerMinxin):
             self._sft_trainer = None
             gc.collect()
 
-    def get_training_dataset(self):
-        return Dataset.from_list(self.trainer.dataloader.dataset)
-
     def _load_adaptor(self, adaptor_parameter: TensorDict) -> None:
         load_perf_model_state_dict(
             model=self.get_sft_trainer().model_wrapped,

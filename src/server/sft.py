@@ -39,6 +39,7 @@ class SFTServer(FinetuneAdaptorServer, SFTTrainerMinxin):
     def _get_metric(self, tester: Inferencer) -> Any:
         self.cached_tester = tester
         sft_trainer = self.get_sft_trainer()
+        print(sft_trainer.model.hf_device_map)
         sft_trainer.predict(test_dataset=self.get_evaluation_dataset(tester))
         sft_trainer.save_model()
         return {}
@@ -52,7 +53,3 @@ class SFTServer(FinetuneAdaptorServer, SFTTrainerMinxin):
             return tokenizer(examples["input"], truncation=True)
 
         return dataset.map(preprocess_function, batched=True)
-
-    def get_training_dataset(self) -> Dataset:
-        assert self.cached_tester is not None
-        return Dataset.from_list(self.cached_tester.dataloader.dataset)
