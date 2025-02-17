@@ -44,47 +44,43 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
 
 
 class SFTTrainerMinxin(ExecutorProtocol, Protocol):
-    __sft_trainer: None | SFTTrainer = None
-
-    @property
-    def trainer(self) -> Trainer: ...
+    _sft_trainer: None | SFTTrainer = None
 
     def get_training_dataset(self):
-        return Dataset.from_list([])
+        return None
 
     def get_evaluation_dataset(self):
-        return Dataset.from_list([])
+        return None
 
-    def __formatting_func(self, sample) -> str:
+    def _formatting_func(self, sample) -> str:
         return sample["input"]
 
-    def get_sft_trainer(self) -> SFTTrainer:
+    def get_sft_trainer(self, executor: Executor | None = None) -> SFTTrainer:
         os.environ["NO_TOKENIZER_TRANSFORMS"] = "1"
-        if self.__sft_trainer is not None:
-            return self.__sft_trainer
+        if self._sft_trainer is not None:
+            return self._sft_trainer
+        assert executor is not None
         log_info("perform create_sft_trainer")
-        learning_rate = self.trainer.hyper_parameter.learning_rate
-        assert isinstance(learning_rate, float)
-        device = torch.device("cuda:0")
-        # self.trainer.set_device_fun(self.context.get_device)
-        # device = self.trainer.device
+        # device = torch.device("cuda:0")
+        device = self.context.get_device(set_visible_device=True)
         log_info("use device %s", device)
         if device.type.lower() == "cuda":
-            os.environ["CUDA_VISIBLE_DEVICES"] = str(device.index)
             device = torch.device("cuda:0")
+        executor.set_device(device)
 
-        self.trainer.mutable_model_config.model_kwargs["device_map"] = {"": device}
         output_dir = os.path.join(self.save_dir, "SFTTrainer")
         training_args = get_SFTConfig(
-            config=self.config, executor=self.trainer, output_dir=output_dir
+            config=self.config, executor=executor, output_dir=output_dir
         )
 
-        # self.model_evaluator.to_device(device=device)
-        model = self.trainer.model
-        self.__sft_trainer = SFTTrainer(
+        executor.mutable_model_config.model_kwargs["device_map"] = {"": device}
+
+        model = executor.model
+        self.context.release_device_lock()
+        self._sft_trainer = SFTTrainer(
             model,
             train_dataset=self.get_training_dataset(),
-            formatting_func=self.__formatting_func,
+            formatting_func=self._formatting_func,
             args=training_args,
         )
-        return self.__sft_trainer
+        return self._sft_trainer
