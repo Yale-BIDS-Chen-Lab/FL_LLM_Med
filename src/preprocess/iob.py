@@ -59,6 +59,17 @@ class IOBRecord:
     def annotated_phrases(self) -> list[tuple[str, str]]:
         return [(" ".join(p[0]), p[1]) for p in self.tokens if not isinstance(p, str)]
 
+    @property
+    def html(self) -> str:
+        result: list[str] = []
+        for t in self.__tokens:
+            if isinstance(t, str):
+                result.append(t)
+            else:
+                phrase = " ".join(t[0])
+                result += f"<span class='t[1]'>{phrase}</span>"
+        return " ".join(result)
+
 
 class IOB(Parser):
     def parse(self, lines: list[str]) -> list[IOBRecord]:
