@@ -31,25 +31,16 @@ class FinetuneAdaptorWorker(LLMTextWorker):
     def _before_training(self) -> None:
         super()._before_training()
         self._model_loading_fun = self._load_adaptor
-        with self.context.global_store.default_lock:
-            if self.context.thread_local_store.has("tokenizer"):
-                self.model_evaluator.set_tokenizer(
-                    self.context.thread_local_store.get("tokenizer")
-                )
-            else:
-                self.context.thread_local_store.store(
-                    "tokenizer", self.model_evaluator.tokenizer
-                )
         if self.hold_log_lock:
             log_info("model is %s", self.trainer.model)
 
     @property
     def model_evaluator(self) -> HuggingFaceModelEvaluatorForFinetune:
-        return self.trainer.model_evaluator
+        model_evaluator = self.trainer.model_evaluator
+        assert isinstance(model_evaluator, HuggingFaceModelEvaluatorForFinetune)
+        return model_evaluator
 
     def pause(self, in_round: bool = False) -> None:
-        if not in_round:
-            self.model_evaluator.set_tokenizer(None)
         super().pause(in_round=in_round)
 
     def _get_parameters(self) -> TensorDict:
@@ -83,7 +74,7 @@ class SFTTrainerWorker(FinetuneAdaptorWorker):
             gradient_checkpointing=False,
             bf16=True,
             save_total_limit=0,
-            output_dir=self.save_dir,
+            output_dir=os.path.join(self.save_dir, "SFTTrainer"),
             optim="paged_adamw_32bit",
             lr_scheduler_type="cosine",
             warmup_ratio=0.05,
@@ -92,6 +83,7 @@ class SFTTrainerWorker(FinetuneAdaptorWorker):
 
         self.trainer.model_evaluator.to_device(device=self.trainer.device)
         model = self.trainer.model
+        assert hasattr(model, "hf_device_map")
         model.hf_device_map = {"": self.trainer.device}
         self.sft_trainer = SFTTrainer(
             model,
@@ -105,6 +97,7 @@ class SFTTrainerWorker(FinetuneAdaptorWorker):
         self.create_sft_trainer()
         assert self.sft_trainer is not None
         self.sft_trainer.train()
+        self.sft_trainer.save_model(os.path.join(self.save_dir, "SFTTrainer"))
         self._aggregation(sent_data=self._get_sent_data())
 
     def _get_parameters(self) -> TensorDict:
