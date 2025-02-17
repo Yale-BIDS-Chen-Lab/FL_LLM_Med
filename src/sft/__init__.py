@@ -3,12 +3,25 @@ from typing import Protocol
 
 import torch
 from cyy_naive_lib.log import log_info
-from cyy_torch_toolbox import Config, Executor, Trainer
+from cyy_torch_toolbox import Config, Executor, TensorDict, Trainer, tensor_to
 from datasets import Dataset
 from distributed_learning_simulation import ExecutorProtocol
+from peft.utils.save_and_load import set_peft_model_state_dict
 from trl import SFTConfig, SFTTrainer
 
-__all__ = ["SFTTrainerMinxin", "get_SFTConfig"]
+__all__ = ["SFTTrainerMinxin", "get_SFTConfig", "load_perf_model_state_dict"]
+
+
+def load_perf_model_state_dict(
+    model, state_dict: TensorDict, device: torch.device
+) -> None:
+    state_dict = tensor_to(state_dict, device=device)
+    _, unexpected_keys = set_peft_model_state_dict(
+        model=model,
+        peft_model_state_dict=state_dict,
+        ignore_mismatched_sizes=False,
+    )
+    assert not unexpected_keys
 
 
 def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTConfig:

@@ -1,5 +1,4 @@
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
-from cyy_naive_lib.log import log_info
 from cyy_torch_toolbox import TensorDict, TextDatasetCollection
 from distributed_learning_simulation import AggregationWorker
 
@@ -26,8 +25,6 @@ class FinetuneAdaptorWorker(LLMTextWorker):
     def _before_training(self) -> None:
         super()._before_training()
         self._model_loading_fun = self._load_adaptor
-        if self.hold_log_lock:
-            log_info("model is %s", self.trainer.model)
 
     @property
     def model_evaluator(self) -> HuggingFaceModelEvaluatorForFinetune:

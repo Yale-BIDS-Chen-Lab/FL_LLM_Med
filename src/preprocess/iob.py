@@ -68,7 +68,7 @@ class IOBRecord:
                 result.append(t)
             else:
                 phrase = " ".join(t[0])
-                result.append(f"<span class='t[1]'>{phrase}</span>")
+                result.append(f"<span class='{t[1]}'>{phrase}</span>")
         return " ".join(result)
 
 
