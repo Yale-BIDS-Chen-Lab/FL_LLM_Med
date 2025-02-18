@@ -1,5 +1,6 @@
 import os
 
+from cyy_naive_lib.log import log_info
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
 from cyy_torch_toolbox import Inferencer, TensorDict, TextDatasetCollection
 from distributed_learning_simulation import AggregationServer
@@ -11,6 +12,8 @@ class LLMTextServer(AggregationServer, DatapipelineMixin):
     added_transform = False
 
     def get_tester(self, for_evaluation: bool = False) -> Inferencer:
+        self.config.model_config.model_kwargs.pop("load_in_4bit", None)
+        self.config.model_config.model_kwargs.pop("load_in_8bit", None)
         inferencer = super().get_tester()
         assert isinstance(inferencer.dataset_collection, TextDatasetCollection)
         if not self.added_transform:
