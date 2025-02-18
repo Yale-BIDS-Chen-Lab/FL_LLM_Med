@@ -1,12 +1,13 @@
 import os
-from cyy_naive_lib.log import log_warning
 import sys
 from typing import Any
+from cyy_naive_lib.log import log_warning
+
 
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 
-from cyy_torch_toolbox import Inferencer, TensorDict
+from cyy_torch_toolbox import Inferencer, TensorDict, tensor_to
 from datasets import Dataset
 
 from sft import SFTTrainerMinxin, load_perf_model_state_dict
@@ -18,16 +19,23 @@ __all__ = ["SFTServer"]
 
 class SFTServer(LLMTextServer, SFTTrainerMinxin):
     cached_tester: None | Inferencer = None
+    param_list = []
 
     def load_parameter(self, tester: Inferencer, parameter: TensorDict) -> None:
         self.cached_tester = tester
         sft_trainer = self.get_sft_trainer(tester)
+        log_warning("load parameter to device %s", self.cached_tester.device)
+        self.param_list = list(parameter.keys())
         load_perf_model_state_dict(
             sft_trainer.model_wrapped, parameter, device=tester.device
         )
 
     def _get_metric(self, tester: Inferencer) -> Any:
+        assert self.cached_tester is not None
         sft_trainer = self.get_sft_trainer()
+        sft_trainer.model_wrapped.to(device=self.cached_tester.device)
+        # for name, p in sft_trainer.model_wrapped.named_parameters():
+        #     log_warning("%s checking %s", name, p)
         metrics = sft_trainer.evaluate(eval_dataset=self.get_evaluation_dataset())
         log_warning("metric is %s", metrics)
         return metrics
@@ -38,7 +46,10 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
         tokenizer = self.cached_tester.model_evaluator.tokenizer
 
         def preprocess_function(examples):
-            return tokenizer(examples["input"], truncation=True)
+            return tensor_to(
+                tokenizer(examples["input"], truncation=True),
+                device=self.cached_tester.device,
+            )
 
         return dataset.map(preprocess_function, batched=True)
 

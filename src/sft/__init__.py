@@ -40,6 +40,7 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
         optim="paged_adamw_32bit",
         lr_scheduler_type="cosine",
         gradient_checkpointing=False,
+        report_to="none",
         warmup_ratio=0.05,
         max_seq_length=config.dc_config.dataset_kwargs.get("input_max_len", 1024),
     )
