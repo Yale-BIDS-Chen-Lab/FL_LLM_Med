@@ -32,9 +32,6 @@ class FinetuneAdaptorWorker(LLMTextWorker):
         assert isinstance(model_evaluator, HuggingFaceModelEvaluatorForFinetune)
         return model_evaluator
 
-    def pause(self, in_round: bool = False) -> None:
-        super().pause(in_round=in_round)
-
     def _get_parameters(self) -> TensorDict:
         return self.model_evaluator.get_perf_model_state_dict(self.trainer.model)
 

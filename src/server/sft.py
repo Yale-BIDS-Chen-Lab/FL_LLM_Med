@@ -1,4 +1,5 @@
 import os
+import torch
 import sys
 from typing import Any
 
@@ -31,23 +32,22 @@ class SFTServer(FinetuneAdaptorServer, SFTTrainerMinxin):
     cached_tester: None | Inferencer = None
 
     def load_parameter(self, tester: Inferencer, parameter: TensorDict) -> None:
+        self.cached_tester = tester
         sft_trainer = self.get_sft_trainer(tester)
         load_perf_model_state_dict(
             sft_trainer.model_wrapped, parameter, device=tester.device
         )
 
     def _get_metric(self, tester: Inferencer) -> Any:
-        self.cached_tester = tester
         sft_trainer = self.get_sft_trainer()
-        print(sft_trainer.model.hf_device_map)
-        sft_trainer.predict(test_dataset=self.get_evaluation_dataset(tester))
+        sft_trainer.predict(test_dataset=self.get_evaluation_dataset())
         sft_trainer.save_model()
         return {}
 
     def get_evaluation_dataset(self, tester: Inferencer) -> Dataset:
         assert self.cached_tester is not None
         dataset = Dataset.from_list(self.cached_tester.dataloader.dataset)
-        tokenizer = tester.model_evaluator.tokenizer
+        tokenizer = self.cached_tester.model_evaluator.tokenizer
 
         def preprocess_function(examples):
             return tokenizer(examples["input"], truncation=True)
