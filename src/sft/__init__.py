@@ -1,8 +1,8 @@
 import os
+import torch
 from typing import Protocol
 
-import torch
-from cyy_naive_lib.log import log_info
+from cyy_naive_lib.log import log_info, log_debug
 from cyy_torch_toolbox import Config, Executor, TensorDict, Trainer, tensor_to
 from datasets import Dataset
 from distributed_learning_simulation import ExecutorProtocol
@@ -33,11 +33,13 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
         per_device_train_batch_size=executor.hyper_parameter.batch_size,
         num_train_epochs=executor.hyper_parameter.epoch,
         learning_rate=learning_rate,
+        logging_steps=0.2,
         bf16=True,
         save_total_limit=0,
         output_dir=output_dir,
         optim="paged_adamw_32bit",
         lr_scheduler_type="cosine",
+        gradient_checkpointing=False,
         warmup_ratio=0.05,
         max_seq_length=config.dc_config.dataset_kwargs.get("input_max_len", 1024),
     )
@@ -60,12 +62,9 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
         if self._sft_trainer is not None:
             return self._sft_trainer
         assert executor is not None
-        log_info("perform create_sft_trainer")
-        # device = torch.device("cuda:0")
         device = self.context.get_device(set_visible_device=True)
-        log_info("use device %s", device)
-        if device.type.lower() == "cuda":
-            device = torch.device("cuda:0")
+        self.context.release_device_lock()
+        log_debug("use device %s", device)
         executor.set_device(device)
 
         output_dir = os.path.join(self.save_dir, "SFTTrainer")
@@ -76,7 +75,6 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
         executor.mutable_model_config.model_kwargs["device_map"] = {"": device}
 
         model = executor.model
-        self.context.release_device_lock()
         training_dataset = Dataset.from_list(executor.dataloader.dataset)
         self._sft_trainer = SFTTrainer(
             model,
