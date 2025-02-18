@@ -6,6 +6,7 @@ lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
 from cyy_torch_toolbox import TensorDict
+from cyy_naive_lib.log import log_info
 
 from sft import SFTTrainerMinxin, load_perf_model_state_dict
 
@@ -15,6 +16,8 @@ __all__ = ["SFTTrainerWorker"]
 
 
 class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
+    _sample_size: None | int = None
+
     def _before_training(self) -> None:
         super()._before_training()
         self._model_loading_fun = self._load_adaptor
@@ -44,3 +47,13 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
             state_dict=adaptor_parameter,
             device=self.trainer.device,
         )
+
+    def get_aggregation_weight(self) -> float:
+        if self._sample_size is not None:
+            return self._sample_size
+        self._sample_size = 0
+        for batch in self.get_sft_trainer().get_train_dataloader():
+            self._sample_size += (batch["labels"][..., 1:] != -100).sum().item()
+        assert self._sample_size is not None and self._sample_size > 0
+        log_info("sample_size is %s", self._sample_size)
+        return self._sample_size
