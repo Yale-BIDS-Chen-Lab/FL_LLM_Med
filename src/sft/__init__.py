@@ -16,6 +16,8 @@ def load_perf_model_state_dict(
     model, state_dict: TensorDict, device: torch.device
 ) -> None:
     state_dict = tensor_to(state_dict, device=device)
+    # for n in sorted(state_dict.keys()):
+    #     log_info("%s is %s", n, state_dict[n])
     _, unexpected_keys = set_peft_model_state_dict(
         model=model,
         peft_model_state_dict=state_dict,
