@@ -1,4 +1,5 @@
 import os
+from cyy_naive_lib.log import log_warning
 import sys
 from typing import Any
 
@@ -28,6 +29,7 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
     def _get_metric(self, tester: Inferencer) -> Any:
         sft_trainer = self.get_sft_trainer()
         metrics = sft_trainer.evaluate(eval_dataset=self.get_evaluation_dataset())
+        log_warning("metric is %s", metrics)
         return metrics
 
     def get_evaluation_dataset(self) -> Dataset:
