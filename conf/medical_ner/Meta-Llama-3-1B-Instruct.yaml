@@ -4,13 +4,11 @@ dataset_sampling: random_split
 dataset_name: hugging_face_yale_ner
 model_name: hugging_face_causal_lm_meta-llama/Llama-3.2-1B-Instruct
 distributed_algorithm: adaptor_avg
-optimizer_name: AdamW
-learning_rate_scheduler_name: OneCycleLR
 cache_transforms: cpu
 batch_size: 4
 epoch: 1
 weight_decay: 0
-learning_rate: 2e-4
+learning_rate: 2e-3
 model_kwargs:
   pretrained: true
   finetune_modules:
@@ -25,14 +23,14 @@ model_kwargs:
 dataset_kwargs:
   input_max_len: 800
   data_dir: /home/cyy/NER_data
-  # train_files: [train/MIMIC3.json, train/MTSamples.json, train/UTP.json]
-  train_files: [train/MIMIC3.json]
+  train_files: [train/MIMIC3.json, train/MTSamples.json, train/UTP.json]
   test_files:
     - test/MIMIC3.json
     - test/MTSamples.json
     - test/UTP.json
     - test/i2b2.json
   no_validation: true
-  prompt_file: medical.txt
+  prompt_file: medical_html.txt
+  evaluation_prompt_file: medical_html_evaluation.txt
 algorithm_kwargs:
   distribute_init_parameters: false
