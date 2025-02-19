@@ -3,3 +3,5 @@ log_level: INFO
 save_performance_metric: false
 use_amp: false
 use_slow_performance_metrics: false
+algorithm_kwargs:
+  distribute_init_parameters: false
