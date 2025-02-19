@@ -6,7 +6,7 @@ from cyy_naive_lib.log import (
     replace_logger,
 )
 
-os.environ["WANDB_DISABLED"] = "true"
+# os.environ["WANDB_DISABLED"] = "true"
 os.environ["TQDM_DISABLE"] = "1"
 from cyy_naive_lib.log import log_warning
 from distributed_learning_simulation import (
