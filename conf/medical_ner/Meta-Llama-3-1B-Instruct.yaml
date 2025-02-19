@@ -4,7 +4,6 @@ batch_size: 4
 epoch: 1
 learning_rate: 2e-3
 model_kwargs:
-  pretrained: true
   finetune_modules:
     - q_proj
     - o_proj

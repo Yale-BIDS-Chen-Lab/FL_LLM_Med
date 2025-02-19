@@ -6,7 +6,6 @@ cache_transforms: cpu
 dataset_kwargs:
   input_max_len: 800
   data_dir: /home/cyy/NER_data
-  pretrained: true
   train_files: [train/MIMIC3.json, train/MTSamples.json, train/UTP.json]
   test_files:
     - test/MIMIC3.json

@@ -10,8 +10,5 @@ model_kwargs:
     - o_proj
     - k_proj
     - v_proj
-    - gate_proj
-    - up_proj
-    - down_proj
   load_in_4bit: true
 defaults: [common, _self_]
