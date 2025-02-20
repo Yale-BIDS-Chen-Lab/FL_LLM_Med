@@ -2,7 +2,7 @@
 model_name: hugging_face_causal_lm_meta-llama/Meta-Llama-3-8B-Instruct
 batch_size: 4
 epoch: 1
-learning_rate: 2e-3
+learning_rate: 2e-4
 model_kwargs:
   finetune_modules:
     - q_proj
