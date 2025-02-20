@@ -19,8 +19,12 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
     _sample_size: None | int = None
 
     def _before_training(self) -> None:
-        super()._before_training()
+        device = self.context.get_device()
+        self.context.release_device_lock()
+        self.trainer.set_device(device)
+        self.trainer.mutable_model_config.model_kwargs["device_map"] = {"": device}
         self._model_loading_fun = self._load_adaptor
+        super()._before_training()
 
     def _train(self, first_training: bool, training_kwargs: dict) -> None:
         assert not training_kwargs
@@ -44,7 +48,9 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
 
     def _load_adaptor(self, adaptor_parameter: TensorDict) -> None:
         load_perf_model_state_dict(
-            model=self.get_sft_trainer(self.trainer).model_wrapped,
+            model=self._sft_trainer.model_wrapped
+            if self._sft_trainer is not None
+            else self.trainer.running_model_evaluator.model,
             state_dict=adaptor_parameter,
             device=self.trainer.device,
         )

@@ -80,7 +80,6 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
         if self.hold_log_lock:
             log_info("SFTConfig is %s", training_args)
 
-        executor.mutable_model_config.model_kwargs["device_map"] = {"": device}
 
         model = executor.model
         training_dataset = Dataset.from_list(executor.dataloader.dataset)

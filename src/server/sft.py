@@ -32,9 +32,9 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
         return HuggingFaceModelEvaluatorForFinetune.get_perf_model_state_dict(model)
 
     def load_parameter(self, tester: Inferencer, parameter: TensorDict) -> None:
-        self.cached_tester = tester
+        assert tester is self.cached_tester
         sft_trainer = self.get_sft_trainer(tester)
-        log_warning("load parameter to device %s", self.cached_tester.device)
+        log_warning("load parameter to device %s", tester.device)
         self.param_list = list(parameter.keys())
         load_perf_model_state_dict(
             sft_trainer.model_wrapped, parameter, device=tester.device
