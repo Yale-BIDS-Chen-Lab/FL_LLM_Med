@@ -5,8 +5,8 @@ import sys
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
-from cyy_torch_toolbox import TensorDict
 from cyy_naive_lib.log import log_info
+from cyy_torch_toolbox import TensorDict
 
 from sft import SFTTrainerMinxin, load_perf_model_state_dict
 
