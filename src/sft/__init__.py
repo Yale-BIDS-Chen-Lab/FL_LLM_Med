@@ -2,6 +2,7 @@ import os
 import torch
 from typing import Protocol
 
+from transformers.training_args import AcceleratorConfig
 from cyy_naive_lib.log import log_info, log_debug
 from cyy_torch_toolbox import Config, Executor, TensorDict, Trainer, tensor_to
 from datasets import Dataset
@@ -31,21 +32,27 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
     if isinstance(executor, Trainer):
         learning_rate = executor.hyper_parameter.learning_rate
     assert isinstance(learning_rate, float)
+    accelerate_config = AcceleratorConfig()
+    accelerate_config.non_blocking = True
     return SFTConfig(
+        accelerator_config=accelerate_config,
         per_device_train_batch_size=executor.hyper_parameter.batch_size,
         num_train_epochs=executor.hyper_parameter.epoch,
         learning_rate=learning_rate,
         logging_steps=0.2,
         bf16=True,
-        save_total_limit=0,
         output_dir=output_dir,
-        optim="paged_adamw_32bit",
+        # optim="paged_adamw_32bit",
         lr_scheduler_type="cosine",
         gradient_checkpointing=False,
+        save_steps=0.3,
+        save_total_limit=1,
+        save_safetensors=False,
         report_to="none",
         warmup_ratio=0.05,
         logging_nan_inf_filter=False,
         max_seq_length=config.dc_config.dataset_kwargs.get("input_max_len", 1024),
+        max_length=config.dc_config.dataset_kwargs.get("input_max_len", 1024),
     )
 
 
@@ -75,6 +82,8 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
         training_args = get_SFTConfig(
             config=self.config, executor=executor, output_dir=output_dir
         )
+        if self.hold_log_lock:
+            log_info("SFTConfig is %s", training_args)
 
         executor.mutable_model_config.model_kwargs["device_map"] = {"": device}
 
