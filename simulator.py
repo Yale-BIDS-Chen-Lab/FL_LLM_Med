@@ -1,5 +1,8 @@
 import os
 import sys
+import logging
+from contextlib import redirect_stdout
+
 from cyy_naive_lib.log import (
     replace_default_logger,
     initialize_proxy_logger,
@@ -12,6 +15,23 @@ from distributed_learning_simulation import (
     load_config,
     train,
 )
+
+
+class StreamToLogger:
+    """
+    Fake file-like stream object that redirects writes to a logger instance.
+    """
+
+    def __init__(self, logger) -> None:
+        self.logger = logger
+
+    def write(self, buf) -> None:
+        for line in buf.rstrip().splitlines():
+            self.logger.info(line.rstrip())
+
+    def flush(self) -> None:
+        pass
+
 
 config_path = os.path.join(os.path.dirname(__file__), "conf")
 src_path = os.path.join(config_path, "..", "src")
@@ -30,4 +50,6 @@ if __name__ == "__main__":
     if config.trainer_config.hook_config.use_amp:
         log_warning("AMP may slowdown training and increase GPU memory")
     config.preallocate_device = True
-    train(config=config, single_task=True)
+
+    with redirect_stdout(StreamToLogger(logging.getLogger())):
+        train(config=config, single_task=True)
