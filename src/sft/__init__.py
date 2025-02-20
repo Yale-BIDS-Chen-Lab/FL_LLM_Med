@@ -1,6 +1,7 @@
 import os
 import torch
 from typing import Protocol
+import gc
 
 from transformers.training_args import AcceleratorConfig
 from cyy_naive_lib.log import log_info, log_debug
@@ -48,9 +49,8 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
         gradient_checkpointing=config.model_config.model_kwargs.get(
             "use_gradient_checkpointing", False
         ),
-        save_steps=0.3,
-        save_total_limit=1,
-        save_safetensors=False,
+        save_strategy="no",
+        eval_strategy="no",
         report_to="none",
         warmup_ratio=0.05,
         logging_nan_inf_filter=False,
@@ -61,12 +61,6 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
 
 class SFTTrainerMinxin(ExecutorProtocol, Protocol):
     _sft_trainer: None | SFTTrainer = None
-
-    def get_training_dataset(self):
-        return None
-
-    def get_evaluation_dataset(self):
-        return None
 
     def _formatting_func(self, sample) -> str:
         return sample["input"]
@@ -99,3 +93,7 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
             args=training_args,
         )
         return self._sft_trainer
+
+    def clear_sft_trainer(self) -> None:
+        self._sft_trainer = None
+        gc.collect()

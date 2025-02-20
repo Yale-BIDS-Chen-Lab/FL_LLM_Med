@@ -28,11 +28,12 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
         sft_trainer.train()
         # TODO disable
         sft_trainer.save_model()
+        self.clear_sft_trainer()
         self._aggregation(sent_data=self._get_sent_data())
 
     def _get_parameters(self) -> TensorDict:
         return HuggingFaceModelEvaluatorForFinetune.get_perf_model_state_dict(
-            self.get_sft_trainer().model_wrapped
+            self.get_sft_trainer(self.trainer).model_wrapped
         )
 
     def pause(self, in_round: bool = False) -> None:
