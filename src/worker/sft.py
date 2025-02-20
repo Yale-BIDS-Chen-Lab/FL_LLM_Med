@@ -27,7 +27,7 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
         sft_trainer = self.get_sft_trainer(self.trainer)
         sft_trainer.train()
         # TODO disable
-        sft_trainer.save_model()
+        # sft_trainer.save_model()
         self.clear_sft_trainer()
         self._aggregation(sent_data=self._get_sent_data())
 
