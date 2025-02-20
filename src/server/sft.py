@@ -1,8 +1,10 @@
 import os
 import sys
 from typing import Any
-from cyy_naive_lib.log import log_warning, log_debug
+
+import torch
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
+from cyy_naive_lib.log import log_debug, log_warning
 from distributed_learning_simulation import ModelParameter
 
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
@@ -46,9 +48,10 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
         sft_trainer.model_wrapped.to(device=self.cached_tester.device)
         # for name, p in sft_trainer.model_wrapped.named_parameters():
         #     log_warning("%s checking %s", name, p)
-        metrics = sft_trainer.evaluate(eval_dataset=self.get_evaluation_dataset())
-        log_warning("metric is %s", metrics)
-        return metrics
+        with torch.inference_mode():
+            metrics = sft_trainer.evaluate(eval_dataset=self.get_evaluation_dataset())
+            log_warning("metric is %s", metrics)
+            return metrics
 
     def get_evaluation_dataset(self) -> Dataset:
         assert self.cached_tester is not None
