@@ -52,6 +52,7 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
         report_to="none",
         warmup_ratio=0.05,
         logging_nan_inf_filter=False,
+        prediction_loss_only=True,
         max_seq_length=config.dc_config.dataset_kwargs.get("input_max_len", 1024),
         # max_length=config.dc_config.dataset_kwargs.get("input_max_len", 1024),
     )
@@ -79,7 +80,6 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
         )
         if self.hold_log_lock:
             log_info("SFTConfig is %s", training_args)
-
 
         model = executor.model
         training_dataset = Dataset.from_list(executor.dataloader.dataset)
