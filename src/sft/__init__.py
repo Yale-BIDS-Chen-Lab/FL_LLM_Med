@@ -28,6 +28,7 @@ def load_perf_model_state_dict(
 
 
 def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTConfig:
+    torch.backends.cudnn.benchmark = True
     learning_rate = 2.0e-5
     if isinstance(executor, Trainer):
         learning_rate = executor.hyper_parameter.learning_rate
@@ -39,12 +40,14 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
         per_device_train_batch_size=executor.hyper_parameter.batch_size,
         num_train_epochs=executor.hyper_parameter.epoch,
         learning_rate=learning_rate,
-        logging_steps=0.2,
+        logging_steps=0.1,
         bf16=True,
+        # tf32=True,
         output_dir=output_dir,
-        # optim="paged_adamw_32bit",
         lr_scheduler_type="cosine",
-        gradient_checkpointing=False,
+        gradient_checkpointing=config.model_config.model_kwargs.get(
+            "use_gradient_checkpointing", False
+        ),
         save_steps=0.3,
         save_total_limit=1,
         save_safetensors=False,
