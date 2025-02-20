@@ -2,7 +2,8 @@ import os
 import sys
 from typing import Any
 from cyy_naive_lib.log import log_warning
-
+from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
+from distributed_learning_simulation import ModelParameter
 
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
@@ -20,6 +21,15 @@ __all__ = ["SFTServer"]
 class SFTServer(LLMTextServer, SFTTrainerMinxin):
     cached_tester: None | Inferencer = None
     param_list = []
+
+    def get_tester(self, for_evaluation: bool = False) -> Inferencer:
+        if self.cached_tester is None:
+            self.cached_tester = super().get_tester()
+        return self.cached_tester
+
+    def _get_init_model(self) -> ModelParameter:
+        model = self.get_tester().model_evaluator.model
+        return HuggingFaceModelEvaluatorForFinetune.get_perf_model_state_dict(model)
 
     def load_parameter(self, tester: Inferencer, parameter: TensorDict) -> None:
         self.cached_tester = tester
