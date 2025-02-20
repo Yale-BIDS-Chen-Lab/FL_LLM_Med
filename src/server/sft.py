@@ -1,7 +1,7 @@
 import os
 import sys
 from typing import Any
-from cyy_naive_lib.log import log_warning
+from cyy_naive_lib.log import log_warning, log_debug
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
 from distributed_learning_simulation import ModelParameter
 
@@ -34,7 +34,7 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
     def load_parameter(self, tester: Inferencer, parameter: TensorDict) -> None:
         assert tester is self.cached_tester
         sft_trainer = self.get_sft_trainer(tester)
-        log_warning("load parameter to device %s", tester.device)
+        log_debug("load parameter to device %s", tester.device)
         self.param_list = list(parameter.keys())
         load_perf_model_state_dict(
             sft_trainer.model_wrapped, parameter, device=tester.device
