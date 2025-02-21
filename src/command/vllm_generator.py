@@ -33,11 +33,10 @@ def get_vllm_output() -> Generator[tuple[dict, RequestOutput]]:
 
     with TempDir():
         save_dir = os.path.join(session.server_dir, "SFTTrainer")
-        model = AutoModelForCausalLM.from_pretrained(
-            session.config.model_config.model_name.removeprefix(
-                "hugging_face_causal_lm_"
-            )
+        model_name = session.config.model_config.model_name.removeprefix(
+            "hugging_face_causal_lm_"
         )
+        model = AutoModelForCausalLM.from_pretrained(model_name)
         finetuned_model = PeftModel.from_pretrained(model=model, model_id=save_dir)
         merge_model = finetuned_model.merge_and_unload()
         merge_model.save_pretrained("./finetuned_model")
@@ -49,8 +48,7 @@ def get_vllm_output() -> Generator[tuple[dict, RequestOutput]]:
         # you should set the generation_config to "auto".
 
         llm = LLM(
-            model="./finetuned_model",
-            generation_config="auto",
+            model="./finetuned_model", generation_config="auto", tokenizer=model_name
         )
 
         # Load the default sampling parameters from the model.
