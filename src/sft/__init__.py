@@ -1,5 +1,6 @@
 import gc
 import os
+import uuid
 from typing import Any, Protocol
 
 import torch
@@ -104,7 +105,9 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
                 device=executor.device,
             )
 
-        return dataset.map(preprocess_function, batched=True)
+        return dataset.map(
+            preprocess_function, batched=True, new_fingerprint=str(uuid.uuid4())
+        )
 
     def clear_sft_trainer(self) -> None:
         self._sft_trainer = None

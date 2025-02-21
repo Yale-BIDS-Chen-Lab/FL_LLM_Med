@@ -35,7 +35,7 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
 
     def load_parameter(self, tester: Inferencer, parameter: TensorDict) -> None:
         assert tester is self.cached_tester
-        sft_trainer = self.get_sft_trainer(tester, Dataset.from_list([]))
+        sft_trainer = self.get_sft_trainer(tester)
         log_debug("load parameter to device %s", tester.device)
         self.param_list = list(parameter.keys())
         load_perf_model_state_dict(
