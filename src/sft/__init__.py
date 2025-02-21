@@ -91,6 +91,7 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
             train_dataset=train_dataset,
             args=training_args,
         )
+        assert self._sft_trainer.model is self._sft_trainer.model_wrapped
         return self._sft_trainer
 
     def get_sft_trainer_dataset(self, executor: Executor) -> Dataset:
