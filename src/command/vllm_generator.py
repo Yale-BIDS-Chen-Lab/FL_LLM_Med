@@ -19,7 +19,7 @@ os.environ["NO_TOKENIZER_TRANSFORMS"] = "true"
 src_path = os.path.join(os.path.dirname(__file__), "..", "..", "src")
 sys.path.insert(0, src_path)
 import method  # noqa: F401
-from server import FinetuneAdaptorServer
+from server import FinetuneAdaptorServer, LLMTextServer
 
 
 def get_vllm_output() -> Generator[tuple[dict, RequestOutput]]:
@@ -28,14 +28,14 @@ def get_vllm_output() -> Generator[tuple[dict, RequestOutput]]:
     session.config.model_config.model_kwargs.pop("load_in_8bit", None)
     session.config.model_config.model_kwargs.pop("finetune_config", None)
     server = get_server(config=session.config)
-    assert isinstance(server, FinetuneAdaptorServer)
+    assert isinstance(server, LLMTextServer)
     tester: Inferencer = server.get_tester(for_evaluation=True)
     model_evaluator = tester.model_evaluator
     assert isinstance(model_evaluator, HuggingFaceModelEvaluatorForFinetune)
 
     with TempDir():
         model = AutoModelForCausalLM.from_pretrained(
-            os.path.join(session.session_dir, "SFTTrainer")
+            os.path.join(session.server_dir, "SFTTrainer")
         )
         finetuned_model = PeftModel.from_pretrained(
             model=model,
