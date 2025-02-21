@@ -24,7 +24,7 @@ class RecordCount:
 
 
 def allocate(
-    all_records: list[IOBRecord], tag: str, allocation: dict, split_number: int
+    all_records: list[IOBRecord], checked_tag: str, allocation: dict, split_number: int
 ) -> list[IOBRecord]:
     heap: list = []
     for idx in range(split_number):
@@ -37,16 +37,17 @@ def allocate(
         counter = collections.Counter(
             tag.removeprefix("B-").removeprefix("I-") for tag in r.token_tags
         )
-        if tag not in counter:
+        if counter[checked_tag] == 0:
             remain_records.append(r)
         else:
-            used_records.append(RecordCount(count=counter[r], record=r))
+            used_records.append(RecordCount(count=counter[checked_tag], record=r))
     assert used_records
     for used_record in sorted(used_records, reverse=True):
         worker_count: WorkerCount = heapq.heappop(heap)
         worker_count.count += used_record.count
         allocation[worker_count.index].append(used_record.record)
         heapq.heappush(heap, worker_count)
+        assert len(heap) == split_number
     assert allocation
     return remain_records
 
@@ -79,6 +80,7 @@ if __name__ == "__main__":
             tag.removeprefix("B-").removeprefix("I-") for tag in r.token_tags
         )
         total_counter += counter
+    total_record_cnt = len(all_records)
     counts = sorted(total_counter.values())
     allocation = {i: [] for i in range(split_number)}
     for sorted_count in counts:
@@ -88,8 +90,11 @@ if __name__ == "__main__":
             if count == sorted_count:
                 print("allocate ", tag)
                 all_records = allocate(all_records, tag, allocation, split_number)
-    for idx, records in allocation.items():
+    allocated_cnt = 0
+    for records in allocation.values():
         total_counter = collections.Counter()
+        allocated_cnt += len(records)
+
         for r in records:
             assert isinstance(r, IOBRecord)
             counter = collections.Counter(
