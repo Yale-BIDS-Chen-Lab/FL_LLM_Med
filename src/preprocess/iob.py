@@ -31,14 +31,18 @@ class IOBRecord:
         else:
             raise RuntimeError(f"invalid line:{token} {token_tag}")
 
+    @property
+    def token_tags(self) -> list[str]:
+        return self.__token_tags
+
     def to_json(self) -> dict:
         tokens = self.tokens
-        assert len(tokens) == len(self.__token_tags)
+        assert len(tokens) == len(self.token_tags)
 
         return {
             "tokens": tokens,
             "annotated_phrases": self.annotated_phrases,
-            "tags": self.__token_tags,
+            "tags": self.token_tags,
             "html": self.html,
         }
 
