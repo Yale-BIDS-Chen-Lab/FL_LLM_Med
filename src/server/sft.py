@@ -1,6 +1,6 @@
-from typing import Any
-import sys
 import os
+import sys
+from typing import Any
 
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
