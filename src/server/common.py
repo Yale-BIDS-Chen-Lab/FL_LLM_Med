@@ -13,6 +13,11 @@ class LLMTextServer(AggregationServer, DatapipelineMixin):
     def get_tester(self, for_evaluation: bool = False) -> Inferencer:
         self.config.model_config.model_kwargs.pop("load_in_4bit", None)
         self.config.model_config.model_kwargs.pop("load_in_8bit", None)
+        if "finetune_config" not in self.config.model_config.model_kwargs:
+            self.config.model_config.model_kwargs["finetune_config"] = {}
+        self.config.model_config.model_kwargs["finetune_config"]["inference_mode"] = (
+            True
+        )
         inferencer = super().get_tester()
         assert isinstance(inferencer.dataset_collection, TextDatasetCollection)
         if not self.added_transform:
