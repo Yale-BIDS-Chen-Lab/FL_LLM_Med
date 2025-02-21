@@ -1,8 +1,9 @@
 import gc
 import os
-from typing import Protocol
+from typing import Any, Protocol
 
 import torch
+from cyy_huggingface_toolbox import HuggingFaceModelEvaluator
 from cyy_naive_lib.log import log_debug, log_info
 from cyy_torch_toolbox import Config, Executor, TensorDict, Trainer, tensor_to
 from datasets import Dataset
@@ -35,13 +36,12 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
     accelerate_config = AcceleratorConfig()
     accelerate_config.non_blocking = True
     return SFTConfig(
-        accelerator_config=accelerate_config,
+        accelerator_config=accelerate_config.to_dict(),
         per_device_train_batch_size=executor.hyper_parameter.batch_size,
         num_train_epochs=executor.hyper_parameter.epoch,
         learning_rate=learning_rate,
         logging_steps=0.1,
         bf16=True,
-        # tf32=True,
         output_dir=output_dir,
         lr_scheduler_type="cosine",
         gradient_checkpointing=config.model_config.model_kwargs.get(
@@ -63,10 +63,9 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
 class SFTTrainerMinxin(ExecutorProtocol, Protocol):
     _sft_trainer: None | SFTTrainer = None
 
-    def _formatting_func(self, sample) -> str:
-        return sample["input"]
-
-    def get_sft_trainer(self, executor: Executor | None = None) -> SFTTrainer:
+    def get_sft_trainer(
+        self, executor: Executor | None = None, train_dataset: Any | None = None
+    ) -> SFTTrainer:
         os.environ["NO_TOKENIZER_TRANSFORMS"] = "1"
         if self._sft_trainer is not None:
             return self._sft_trainer
@@ -84,14 +83,28 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
             log_info("SFTConfig is %s", training_args)
 
         model = executor.model
-        training_dataset = Dataset.from_list(executor.dataloader.dataset)
+        if train_dataset is None:
+            train_dataset = self.get_sft_trainer_dataset(executor)
         self._sft_trainer = SFTTrainer(
             model,
-            train_dataset=training_dataset,
-            formatting_func=self._formatting_func,
+            train_dataset=train_dataset,
             args=training_args,
         )
         return self._sft_trainer
+
+    def get_sft_trainer_dataset(self, executor: Executor) -> Dataset:
+        log_info("dataset size is %s", len(executor.dataloader.dataset))
+        dataset = Dataset.from_list(executor.dataloader.dataset)
+        assert isinstance(executor.model_evaluator, HuggingFaceModelEvaluator)
+        tokenizer = executor.model_evaluator.tokenizer.tokenizer
+
+        def preprocess_function(examples):
+            return tensor_to(
+                tokenizer(examples["input"], truncation=True),
+                device=executor.device,
+            )
+
+        return dataset.map(preprocess_function, batched=True)
 
     def clear_sft_trainer(self) -> None:
         self._sft_trainer = None

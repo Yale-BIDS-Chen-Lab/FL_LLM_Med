@@ -10,7 +10,7 @@ from distributed_learning_simulation import ModelParameter
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 
-from cyy_torch_toolbox import Inferencer, TensorDict, tensor_to
+from cyy_torch_toolbox import Inferencer, TensorDict
 from datasets import Dataset
 
 from sft import SFTTrainerMinxin, load_perf_model_state_dict
@@ -35,7 +35,7 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
 
     def load_parameter(self, tester: Inferencer, parameter: TensorDict) -> None:
         assert tester is self.cached_tester
-        sft_trainer = self.get_sft_trainer(tester)
+        sft_trainer = self.get_sft_trainer(tester, Dataset.from_list([]))
         log_debug("load parameter to device %s", tester.device)
         self.param_list = list(parameter.keys())
         load_perf_model_state_dict(
@@ -49,22 +49,9 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
         # for name, p in sft_trainer.model_wrapped.named_parameters():
         #     log_warning("%s checking %s", name, p)
         with torch.inference_mode():
-            metrics = sft_trainer.evaluate(eval_dataset=self.get_evaluation_dataset())
+            metrics = sft_trainer.evaluate(eval_dataset=self.get_sft_trainer_dataset())
             log_warning("metric is %s", metrics)
             return metrics
-
-    def get_evaluation_dataset(self) -> Dataset:
-        assert self.cached_tester is not None
-        dataset = Dataset.from_list(self.cached_tester.dataloader.dataset)
-        tokenizer = self.cached_tester.model_evaluator.tokenizer
-
-        def preprocess_function(examples):
-            return tensor_to(
-                tokenizer(examples["input"], truncation=True),
-                device=self.cached_tester.device,
-            )
-
-        return dataset.map(preprocess_function, batched=True)
 
     def _server_exit(self) -> None:
         sft_trainer = self.get_sft_trainer()
