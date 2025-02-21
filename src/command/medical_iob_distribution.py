@@ -1,4 +1,5 @@
 import argparse
+import json
 from dataclasses import dataclass, field
 import collections
 import os
@@ -63,6 +64,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--split_number", help="number to split", type=int, required=True
     )
+    parser.add_argument(
+        "--output_dir", help="output dir for json files", type=str, required=True
+    )
     args = parser.parse_args()
     os.environ["SKIP_EMPTY_LINE"] = str(int(args.skip_empty))
     split_number = int(args.split_number)
@@ -102,3 +106,12 @@ if __name__ == "__main__":
             )
             total_counter += counter
         print([(k, total_counter[k]) for k in sorted(total_counter.keys())])
+    output_dir = os.path.join(args.output_dir, f"split_{split_number}")
+    os.makedirs(output_dir, exist_ok=True)
+    for worker_idx, records in allocation.items():
+        with open(
+            os.path.join(output_dir, f"worker_{worker_idx}.json"),
+            "w",
+            encoding="utf8",
+        ) as f:
+            json.dump([r.to_json() for r in records], f)
