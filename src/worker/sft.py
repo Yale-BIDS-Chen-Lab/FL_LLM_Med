@@ -27,8 +27,7 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
         self._model_loading_fun = self._load_adaptor
         super()._before_training()
 
-    def _train(self, first_training: bool, training_kwargs: dict) -> None:
-        assert not training_kwargs
+    def _train(self, first_training: bool) -> None:
         sft_trainer = self.get_sft_trainer(self.trainer)
         sft_trainer.train()
         self.clear_sft_trainer()
