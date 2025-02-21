@@ -41,13 +41,13 @@ def allocate(
             remain_records.append(r)
         else:
             used_records.append(RecordCount(count=counter[r], record=r))
+    assert used_records
     for used_record in sorted(used_records, reverse=True):
         worker_count: WorkerCount = heapq.heappop(heap)
         worker_count.count += used_record.count
-        if worker_count.index not in allocation:
-            allocation[worker_count.index] = []
         allocation[worker_count.index].append(used_record.record)
         heapq.heappush(heap, worker_count)
+    assert allocation
     return remain_records
 
 
@@ -73,20 +73,27 @@ if __name__ == "__main__":
         all_records += records
     assert all_records
     total_counter = collections.Counter()
-    cnt = 0
     for r in all_records:
         assert isinstance(r, IOBRecord)
         counter = collections.Counter(
             tag.removeprefix("B-").removeprefix("I-") for tag in r.token_tags
         )
-        elemelts = list(counter.elements())
-        if len(elemelts) == 1 and elemelts[0] == "O":
-            continue
-        cnt += 1
         total_counter += counter
     counts = sorted(total_counter.values())
     allocation = {i: [] for i in range(split_number)}
-    for tag, count in total_counter.items():
-        if count == counts:
-            all_records = allocate(all_records, tag, allocation, split_number)
-    assert not all_records
+    for sorted_count in counts:
+        for tag, count in total_counter.items():
+            if tag == "O":
+                continue
+            if count == sorted_count:
+                print("allocate ", tag)
+                all_records = allocate(all_records, tag, allocation, split_number)
+    for idx, records in allocation.items():
+        total_counter = collections.Counter()
+        for r in records:
+            assert isinstance(r, IOBRecord)
+            counter = collections.Counter(
+                tag.removeprefix("B-").removeprefix("I-") for tag in r.token_tags
+            )
+            total_counter += counter
+        print([(k, total_counter[k]) for k in sorted(total_counter.keys())])
