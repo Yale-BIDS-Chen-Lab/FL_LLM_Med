@@ -1,5 +1,4 @@
 import os
-import pickle
 import sys
 from collections.abc import Generator
 
@@ -10,7 +9,9 @@ from distributed_learning_simulation import (
     Session,
     get_server,
 )
-from vllm import LLM, RequestOutput
+from peft import PeftModel
+from transformers import AutoModelForCausalLM
+from vllm import LLM, RequestOutput, SamplingParams
 
 os.environ["WANDB_DISABLED"] = "true"
 os.environ["NO_TOKENIZER_TRANSFORMS"] = "true"
@@ -25,26 +26,25 @@ def get_vllm_output() -> Generator[tuple[dict, RequestOutput]]:
     session = Session()
     session.config.model_config.model_kwargs.pop("load_in_4bit", None)
     session.config.model_config.model_kwargs.pop("load_in_8bit", None)
+    session.config.model_config.model_kwargs.pop("finetune_config", None)
     server = get_server(config=session.config)
     assert isinstance(server, FinetuneAdaptorServer)
     tester: Inferencer = server.get_tester(for_evaluation=True)
     model_evaluator = tester.model_evaluator
     assert isinstance(model_evaluator, HuggingFaceModelEvaluatorForFinetune)
 
-    with open(session.last_model_path, "rb") as f:
-        parameter = pickle.load(f)
-        print(
-            "perf parameter number is",
-            sum((p.numel() for p in parameter.values()), start=0),
-        )
-        model_evaluator.load_perf_model_state_dict(parameter, device=tester.device)
-
-    # # merge Rola layers
-    tester.replace_model(lambda old_model: old_model.merge_and_unload())
-
     with TempDir():
-        model_evaluator.save_pretrained("./finetuned_model")
-        model_evaluator.tokenizer.tokenizer.save_pretrained("./finetuned_model")
+        model = AutoModelForCausalLM.from_pretrained(
+            os.path.join(session.session_dir, "SFTTrainer")
+        )
+        finetuned_model = PeftModel.from_pretrained(
+            model=model,
+            model_id=session.config.model_config.model_name.removeprefix(
+                "hugging_face_causal_lm_"
+            ),
+        )
+        merge_model = finetuned_model.merge_and_unload()
+        merge_model.save_pretrained("./finetuned_model")
 
         # Create an LLM with built-in default generation config.
         # The generation config is set to None by default to keep
@@ -58,13 +58,10 @@ def get_vllm_output() -> Generator[tuple[dict, RequestOutput]]:
         )
 
         # Load the default sampling parameters from the model.
-        sampling_params = llm.get_default_sampling_params()
-        # # Modify the sampling parameters if needed.
-        # sampling_params.temperature = 0.5
+        sampling_params = SamplingParams(
+            n=1, max_tokens=512, stop="<EOS>", temperature=0
+        )
 
-        # assert isinstance(tester.dataset_collection, TextDatasetCollection)
-        # print(tester.dataset_collection.get_text_pipeline())
-        # tester.dataset_collection.get_text_pipeline
         for batch in tester.dataloader:
             # Generate texts from the prompts. The output is a list of RequestOutput objects
             # that contain the prompt, generated text, and other information.
