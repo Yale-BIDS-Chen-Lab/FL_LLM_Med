@@ -1,4 +1,9 @@
 from typing import Any
+import sys
+import os
+
+lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
+sys.path.append(lib_path)
 
 import torch
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
@@ -6,7 +11,7 @@ from cyy_naive_lib.log import log_debug, log_warning
 from cyy_torch_toolbox import Inferencer, TensorDict
 from distributed_learning_simulation import ModelParameter
 
-from src.sft import SFTTrainerMinxin, load_perf_model_state_dict
+from sft import SFTTrainerMinxin, load_perf_model_state_dict
 
 from .common import LLMTextServer
 

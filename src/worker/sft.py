@@ -1,10 +1,15 @@
 import gc
+import sys
+import os
+
+lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
+sys.path.append(lib_path)
 
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
 from cyy_naive_lib.log import log_info
 from cyy_torch_toolbox import TensorDict
 
-from src.sft import SFTTrainerMinxin, load_perf_model_state_dict
+from sft import SFTTrainerMinxin, load_perf_model_state_dict
 
 from .common import LLMTextWorker
 
@@ -26,8 +31,6 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
         assert not training_kwargs
         sft_trainer = self.get_sft_trainer(self.trainer)
         sft_trainer.train()
-        # TODO disable
-        # sft_trainer.save_model()
         self.clear_sft_trainer()
         self._aggregation(sent_data=self._get_sent_data())
 

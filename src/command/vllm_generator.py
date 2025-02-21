@@ -2,24 +2,24 @@ import os
 import sys
 from collections.abc import Generator
 
-from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
+src_path = os.path.join(os.path.dirname(__file__), "..", "..", "src")
+sys.path.insert(0, src_path)
+
 from cyy_naive_lib.fs.tempdir import TempDir
 from cyy_torch_toolbox import Inferencer
 from distributed_learning_simulation import (
     Session,
     get_server,
 )
-from peft import PeftModel
+from peft.peft_model import PeftModel
 from transformers import AutoModelForCausalLM
 from vllm import LLM, RequestOutput, SamplingParams
 
 os.environ["WANDB_DISABLED"] = "true"
 os.environ["NO_TOKENIZER_TRANSFORMS"] = "true"
 
-src_path = os.path.join(os.path.dirname(__file__), "..", "..", "src")
-sys.path.insert(0, src_path)
 import method  # noqa: F401
-from server import FinetuneAdaptorServer, LLMTextServer
+from server import LLMTextServer
 
 
 def get_vllm_output() -> Generator[tuple[dict, RequestOutput]]:
@@ -30,19 +30,15 @@ def get_vllm_output() -> Generator[tuple[dict, RequestOutput]]:
     server = get_server(config=session.config)
     assert isinstance(server, LLMTextServer)
     tester: Inferencer = server.get_tester(for_evaluation=True)
-    model_evaluator = tester.model_evaluator
-    assert isinstance(model_evaluator, HuggingFaceModelEvaluatorForFinetune)
 
     with TempDir():
+        save_dir = os.path.join(session.server_dir, "SFTTrainer")
         model = AutoModelForCausalLM.from_pretrained(
-            os.path.join(session.server_dir, "SFTTrainer")
-        )
-        finetuned_model = PeftModel.from_pretrained(
-            model=model,
-            model_id=session.config.model_config.model_name.removeprefix(
+            session.config.model_config.model_name.removeprefix(
                 "hugging_face_causal_lm_"
-            ),
+            )
         )
+        finetuned_model = PeftModel.from_pretrained(model=model, model_id=save_dir)
         merge_model = finetuned_model.merge_and_unload()
         merge_model.save_pretrained("./finetuned_model")
 
