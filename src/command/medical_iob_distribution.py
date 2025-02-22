@@ -3,79 +3,12 @@ import collections
 import json
 import os
 import sys
-from dataclasses import dataclass, field
 
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
-import heapq
 
 from preprocess import IOBRecord, parse_dir
-
-
-@dataclass(order=True)
-class WorkerCount:
-    count: int
-    index: int = field(compare=False)
-
-
-@dataclass(order=True)
-class RecordCount:
-    count: int
-    record: IOBRecord = field(compare=False)
-
-
-def get_min_tag(all_records: list[IOBRecord]) -> str | None:
-    assert all_records
-    total_counter: collections.Counter[str] = collections.Counter()
-    for r in all_records:
-        assert isinstance(r, IOBRecord)
-        counter = collections.Counter(
-            tag.removeprefix("B-").removeprefix("I-") for tag in r.token_tags
-        )
-        total_counter += counter
-    total_counter.pop("O")
-    if not total_counter:
-        return None
-    counts = sorted(list(total_counter.items()), key=lambda a: a[1])
-    return counts[0][0]
-
-
-def allocate_impl(
-    all_records: list[IOBRecord], checked_tag: str, allocation: dict, split_number: int
-) -> list[IOBRecord]:
-    heap: list = []
-    for idx in range(split_number):
-        heapq.heappush(heap, WorkerCount(count=0, index=idx))
-    assert all_records
-    used_records: list[RecordCount] = []
-    remain_records = []
-    for r in all_records:
-        assert isinstance(r, IOBRecord)
-        counter = collections.Counter(
-            tag.removeprefix("B-").removeprefix("I-") for tag in r.token_tags
-        )
-        if counter[checked_tag] == 0:
-            remain_records.append(r)
-        else:
-            used_records.append(RecordCount(count=counter[checked_tag], record=r))
-    assert used_records
-    for used_record in sorted(used_records, reverse=True):
-        worker_count: WorkerCount = heapq.heappop(heap)
-        worker_count.count += used_record.count
-        allocation[worker_count.index].append(used_record.record)
-        heapq.heappush(heap, worker_count)
-        assert len(heap) == split_number
-    assert allocation
-    return remain_records
-
-
-def allocate(all_records: list[IOBRecord], allocation: dict, split_number: int) -> None:
-    while True:
-        tag = get_min_tag(all_records=all_records)
-        if tag is None:
-            return
-        all_records = allocate_impl(all_records, tag, allocation, split_number)
-
+from preprocess.allocation import allocate
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -107,7 +40,7 @@ if __name__ == "__main__":
 
     for data_dir in data_dirs:
         assert os.path.isdir(data_dir)
-        print("check ",data_dir)
+        print("check ", data_dir)
         result = parse_dir(data_dir, "bio")
         result |= parse_dir(args.data_dir, "iob")
         all_records = []
