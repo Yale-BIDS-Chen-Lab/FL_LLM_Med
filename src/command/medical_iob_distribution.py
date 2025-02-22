@@ -24,7 +24,23 @@ class RecordCount:
     record: IOBRecord = field(compare=False)
 
 
-def allocate(
+def get_min_tag(all_records: list[IOBRecord]) -> str | None:
+    assert all_records
+    total_counter = collections.Counter()
+    for r in all_records:
+        assert isinstance(r, IOBRecord)
+        counter = collections.Counter(
+            tag.removeprefix("B-").removeprefix("I-") for tag in r.token_tags
+        )
+        total_counter += counter
+    total_counter.pop("O")
+    if not total_counter:
+        return None
+    counts = sorted(list(total_counter.items()), key=lambda a: a[1])
+    return counts[0][0]
+
+
+def allocate_impl(
     all_records: list[IOBRecord], checked_tag: str, allocation: dict, split_number: int
 ) -> list[IOBRecord]:
     heap: list = []
@@ -53,6 +69,14 @@ def allocate(
     return remain_records
 
 
+def allocate(all_records: list[IOBRecord], allocation: dict, split_number: int) -> None:
+    while True:
+        tag = get_min_tag(all_records=all_records)
+        if tag is None:
+            return
+        all_records = allocate_impl(all_records, tag, allocation, split_number)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="Analyze IBO Distribution",
@@ -77,23 +101,8 @@ if __name__ == "__main__":
     for records in result.values():
         all_records += records
     assert all_records
-    total_counter = collections.Counter()
-    for r in all_records:
-        assert isinstance(r, IOBRecord)
-        counter = collections.Counter(
-            tag.removeprefix("B-").removeprefix("I-") for tag in r.token_tags
-        )
-        total_counter += counter
-    total_record_cnt = len(all_records)
-    counts = sorted(total_counter.values())
     allocation = {i: [] for i in range(split_number)}
-    for sorted_count in counts:
-        for tag, count in total_counter.items():
-            if tag == "O":
-                continue
-            if count == sorted_count:
-                print("allocate ", tag)
-                all_records = allocate(all_records, tag, allocation, split_number)
+    allocate(all_records=all_records, allocation=allocation, split_number=split_number)
     allocated_cnt = 0
     for records in allocation.values():
         total_counter = collections.Counter()
