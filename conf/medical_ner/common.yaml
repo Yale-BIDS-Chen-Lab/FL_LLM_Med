@@ -1,12 +1,13 @@
 ---
 dataset_name: hugging_face_yale_ner
-dataset_sampling: random_split
+dataset_sampling: iid
 distributed_algorithm: adaptor_avg
 cache_transforms: cpu
 dataset_kwargs:
   input_max_len: 800
-  data_dir: /home/cyy/NER_data
-  train_files: [train/MIMIC3.json, train/MTSamples.json]
+  train_data_dir: /home/cyy/NER_data_train_iid/split_2
+  train_files: [worker_0.json, worker_1.json]
+  test_data_dir: /home/cyy/NER_data
   test_files:
     - test/MIMIC3.json
     - test/MTSamples.json
