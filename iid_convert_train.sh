@@ -1,0 +1,5 @@
+NER_bio_dir=/home/cyy/NER_bio/train
+NER_json_dir=/home/cyy/NER_data_train_iid
+iid_number=4
+
+python3 src/command/medical_iob_distribution.py --data_dir="${NER_bio_dir}" --sub_dirs='MIMIC3:UTP:MTSamples' --skip_empty=1 --split_number=${iid_number} --output_dir="${NER_json_dir}"
