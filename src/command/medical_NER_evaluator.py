@@ -1,10 +1,10 @@
 import argparse
-
-from ner_metrics import classification_report
-from vllm_generator import get_vllm_output
+import json
 
 from medical_NER_evaluation.common import find_tag
 from medical_NER_evaluation.html_form import html2bio
+from ner_metrics import classification_report
+from vllm_generator import get_vllm_output
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -49,17 +49,18 @@ if __name__ == "__main__":
         #     print(out_text)
         #     fdsfds
 
-        prediction.append(predicated_tags)
-        ground_tags.append(tags)
+        prediction += predicated_tags
+        ground_tags += tags
 
     lenient = classification_report(
         tags_true=ground_tags, tags_pred=prediction, mode="lenient"
     )  # for lenient match
-    print(lenient)
+    print(json.dumps(lenient))
+
     strict = classification_report(
         tags_true=ground_tags, tags_pred=prediction, mode="strict"
     )
-    print(strict)
+    print(json.dumps(strict))
 
     # print(tag_set)
     # return Evaluator(

@@ -1,3 +1,4 @@
+import copy
 import os
 import sys
 from collections.abc import Generator
@@ -27,7 +28,9 @@ def get_vllm_output(
     data_file: str | None = None,
 ) -> Generator[tuple[dict, RequestOutput]]:
     session = Session(session_dir=session_dir)
-    server = get_server(config=session.config)
+    config = copy.deepcopy(session.config)
+    config.hyper_parameter_config.batch_size = 1024
+    server = get_server(config=config)
     assert isinstance(server, LLMTextServer)
     tester: Inferencer = server.get_tester(for_evaluation=True)
     if data_file is not None:
