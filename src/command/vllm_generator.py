@@ -6,7 +6,7 @@ src_path = os.path.join(os.path.dirname(__file__), "..", "..", "src")
 sys.path.insert(0, src_path)
 
 from cyy_naive_lib.fs.tempdir import TempDir
-from cyy_torch_toolbox import Inferencer
+from cyy_torch_toolbox import Inferencer, load_local_files
 from distributed_learning_simulation import (
     Session,
     get_server,
@@ -22,14 +22,17 @@ import method  # noqa: F401
 from server import LLMTextServer
 
 
-def get_vllm_output() -> Generator[tuple[dict, RequestOutput]]:
+def get_vllm_output(
+    data_file: str | None = None,
+) -> Generator[tuple[dict, RequestOutput]]:
     session = Session()
-    session.config.model_config.model_kwargs.pop("load_in_4bit", None)
-    session.config.model_config.model_kwargs.pop("load_in_8bit", None)
-    session.config.model_config.model_kwargs.pop("finetune_config", None)
     server = get_server(config=session.config)
     assert isinstance(server, LLMTextServer)
     tester: Inferencer = server.get_tester(for_evaluation=True)
+    if data_file is not None:
+        tester.mutable_dataset_collection.transform_all_datasets(
+            transformer=lambda _: load_local_files([data_file]),
+        )
 
     with TempDir():
         save_dir = os.path.join(session.server_dir, "SFTTrainer")
