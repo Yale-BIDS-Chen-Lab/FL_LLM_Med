@@ -1,11 +1,19 @@
 import argparse
 import json
 
+import nervaluate
 from medical_NER_evaluation.common import find_tag
 from medical_NER_evaluation.html_form import html2bio
 from ner_metrics import classification_report
 from vllm_generator import get_vllm_output
-import nervaluate
+
+
+def flatten_extend(l: list) -> list:
+    flat_list = []
+    for e in l:
+        flat_list.extend(e)
+    return flat_list
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -50,21 +58,19 @@ if __name__ == "__main__":
         #     print(out_text)
         #     fdsfds
 
-        prediction += predicated_tags
-        ground_tags += tags
-
-    lenient = classification_report(
-        tags_true=ground_tags, tags_pred=prediction, mode="lenient"
-    )  # for lenient match
-    print("old metric lenient", json.dumps(lenient))
-
-    strict = classification_report(
-        tags_true=ground_tags, tags_pred=prediction, mode="strict"
-    )
-    print("old metric strict", json.dumps(strict))
+        prediction.append(predicated_tags)
+        ground_tags.append(tags)
 
     results = nervaluate.Evaluator(
         ground_tags, prediction, tags=list(entities), loader="list"
     ).evaluate()
     print("new metric results ", results[0])
     print("new metric results_per_tag ", results[1])
+
+    for mode in ("lenient", "strict"):
+        lenient = classification_report(
+            tags_true=flatten_extend(ground_tags),
+            tags_pred=flatten_extend(prediction),
+            mode=mode,
+        )  # for lenient match
+        print(mode, " metric ", json.dumps(lenient))
