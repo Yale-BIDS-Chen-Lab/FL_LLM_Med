@@ -31,6 +31,7 @@ def get_vllm_output(
     assert isinstance(server, LLMTextServer)
     tester: Inferencer = server.get_tester(for_evaluation=True)
     if data_file is not None:
+        print("use test data", data_file)
         tester.mutable_dataset_collection.transform_all_datasets(
             transformer=lambda _: load_local_files([data_file]),
         )

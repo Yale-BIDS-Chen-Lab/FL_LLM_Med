@@ -3,8 +3,8 @@ import argparse
 from ner_metrics import classification_report
 from vllm_generator import get_vllm_output
 
-from .medical_NER_evaluation.common import find_tag
-from .medical_NER_evaluation.html_form import html2bio
+from medical_NER_evaluation.common import find_tag
+from medical_NER_evaluation.html_form import html2bio
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -18,8 +18,8 @@ if __name__ == "__main__":
     ground_tags = []
     entities = ["problem", "treatment", "test", "drug"]
 
-    for sample, generated_text in get_vllm_output(
-        session_dir=args.session_dir, data_file=args.test_file
+    for sample, generated_text in list(
+        get_vllm_output(session_dir=args.session_dir, data_file=args.test_file)
     ):
         tags = sample["tags"]
         out_text = generated_text.outputs[0].text
