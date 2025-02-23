@@ -23,9 +23,10 @@ from server import LLMTextServer
 
 
 def get_vllm_output(
+    session_dir: str | None = None,
     data_file: str | None = None,
 ) -> Generator[tuple[dict, RequestOutput]]:
-    session = Session()
+    session = Session(session_dir=session_dir)
     server = get_server(config=session.config)
     assert isinstance(server, LLMTextServer)
     tester: Inferencer = server.get_tester(for_evaluation=True)
@@ -63,7 +64,10 @@ def get_vllm_output(
             # Generate texts from the prompts. The output is a list of RequestOutput objects
             # that contain the prompt, generated text, and other information.
             batch_size = batch["batch_size"]
-            batch_list: list[dict] = [{} for _ in range(batch_size)]
+            batch_list: list[dict] = [
+                {"tokenizer": tester.model_evaluator.tokenizer.tokenizer}
+                for _ in range(batch_size)
+            ]
             for k, v in batch.items():
                 if isinstance(v, list):
                     for idx, a in enumerate(v):

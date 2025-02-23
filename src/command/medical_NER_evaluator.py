@@ -1,15 +1,10 @@
 import argparse
-import json
-import os
 
 from ner_metrics import classification_report
-
-
-from nervaluate import Evaluator
 from vllm_generator import get_vllm_output
-from .medical_NER_evaluation.html_form import html2bio
-from .medical_NER_evaluation.common import find_tag
 
+from .medical_NER_evaluation.common import find_tag
+from .medical_NER_evaluation.html_form import html2bio
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
