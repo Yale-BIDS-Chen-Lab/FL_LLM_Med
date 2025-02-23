@@ -1,6 +1,8 @@
 import json
 from collections.abc import Generator
 
+from .common import find_tag
+
 
 def parse_prediction(prediction: str) -> list[tuple[str, str]]:
     res: list[tuple[str, str]] = []
@@ -39,26 +41,6 @@ def parse_prediction(prediction: str) -> list[tuple[str, str]]:
             continue
         new_res.append((a, b))
     return new_res
-
-
-def find_tag(token, pre_tokens, pre_tokens_lower, pre_tags) -> str:
-    # case sensitive
-    try:
-        idx = pre_tokens.index(token)
-        return pre_tags[idx]
-    except ValueError:
-        pass
-    # case insensitive
-    try:
-        idx = pre_tokens_lower.index(token.lower())
-        return pre_tags[idx]
-    except ValueError:
-        pass
-    # partial match
-    for idx, t in enumerate(pre_tokens_lower):
-        if t in token.lower() or token.lower() in t:
-            return pre_tags[idx]
-    return "O"
 
 
 def get_NER_metric(output_generator: Generator) -> tuple:
