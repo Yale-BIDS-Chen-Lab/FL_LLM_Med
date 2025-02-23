@@ -102,7 +102,9 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
         tokenizer = executor.model_evaluator.tokenizer.tokenizer
 
         def preprocess_function(examples):
-            # print(tokenizer.add_bos_token,tokenizer.add_eos_token)
+            # print(examples["input"][0])
+            # print(tokenizer)
+            # dfsfds
             # print(tokenizer.eos_token, tokenizer.pad_token)
             # print(examples["input"][0])
             res = tokenizer(
