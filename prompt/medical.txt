@@ -8,4 +8,4 @@ Your task is to extract specific entities from input text as [entities, entity t
 'drug': Denote the generic or brand name of a single medication or a collective name of a group of medication.
 ### Input Text: {space_join_tokens}
 
-#### Extracted Entities: {comma_join_annotated_phrases} <EOS>
+#### Extracted Entities: {comma_join_annotated_phrases}

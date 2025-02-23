@@ -13,5 +13,7 @@ Treatment: The procedures, interventions, and substances given to a patient for 
 Drug: Generic or brand name of a single medication or a collective name of a group of medication.
 Test: A medical procedure performed (i) to detect or diagnose a problem, (ii) to monitor diseases, disease processes, and susceptibility, or (iii) to determine a course of treatment.
 
-### Input Text: {space_join_tokens}
-### Output Text: Gastrointestinal : {html} {eos_token}
+### Input Text:
+{space_join_tokens}
+### Output Text:
+{html}
