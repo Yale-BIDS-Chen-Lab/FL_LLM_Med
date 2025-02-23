@@ -48,7 +48,7 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
         gradient_checkpointing=config.model_config.model_kwargs.get(
             "use_gradient_checkpointing", False
         ),
-        # max_grad_norm=0.3,
+        max_grad_norm=0.3,
         save_strategy="no",
         eval_strategy="no",
         report_to="none",
