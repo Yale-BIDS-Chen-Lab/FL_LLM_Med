@@ -109,7 +109,9 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
                 examples["input"],
                 truncation=True,
                 padding=True,
-                add_special_tokens=True,
+                max_length=self.config.dc_config.dataset_kwargs.get(
+                    "input_max_len", 1024
+                ),
             )
             return tensor_to(res, device=executor.device)
 
