@@ -48,6 +48,7 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
         gradient_checkpointing=config.model_config.model_kwargs.get(
             "use_gradient_checkpointing", False
         ),
+        # max_grad_norm=0.3,
         save_strategy="no",
         eval_strategy="no",
         report_to="none",
@@ -101,10 +102,16 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
         tokenizer = executor.model_evaluator.tokenizer.tokenizer
 
         def preprocess_function(examples):
-            return tensor_to(
-                tokenizer(examples["input"], truncation=True),
-                device=executor.device,
+            # print(tokenizer.add_bos_token,tokenizer.add_eos_token)
+            # print(tokenizer.eos_token, tokenizer.pad_token)
+            # print(examples["input"][0])
+            res = tokenizer(
+                examples["input"],
+                truncation=True,
+                padding=True,
+                add_special_tokens=True,
             )
+            return tensor_to(res, device=executor.device)
 
         return dataset.map(
             preprocess_function, batched=True, new_fingerprint=str(uuid.uuid4())
