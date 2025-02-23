@@ -22,7 +22,9 @@ dependencies = [
   "vllm",
   "peft",
   "sft",
-  "nervaluate"
+  "nervaluate",
+  "ner_metrics",
+  "bs4"
 ]
 
 

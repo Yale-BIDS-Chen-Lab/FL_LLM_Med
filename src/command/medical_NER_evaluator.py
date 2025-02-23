@@ -5,6 +5,7 @@ from medical_NER_evaluation.common import find_tag
 from medical_NER_evaluation.html_form import html2bio
 from ner_metrics import classification_report
 from vllm_generator import get_vllm_output
+import nervaluate
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -55,16 +56,15 @@ if __name__ == "__main__":
     lenient = classification_report(
         tags_true=ground_tags, tags_pred=prediction, mode="lenient"
     )  # for lenient match
-    print(json.dumps(lenient))
+    print("old metric lenient", json.dumps(lenient))
 
     strict = classification_report(
         tags_true=ground_tags, tags_pred=prediction, mode="strict"
     )
-    print(json.dumps(strict))
+    print("old metric strict", json.dumps(strict))
 
-    # print(tag_set)
-    # return Evaluator(
-    #     ground_tags, prediction, tags=list(tag_set), loader="list"
-    # ).evaluate()
-    # print("NER test results ", results)
-    # print("NER test results_per_tag ", results_per_tag)
+    results = nervaluate.Evaluator(
+        ground_tags, prediction, tags=list(entities), loader="list"
+    ).evaluate()
+    print("new metric results ", results[0])
+    print("new metric results_per_tag ", results[1])
