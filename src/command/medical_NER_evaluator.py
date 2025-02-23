@@ -1,92 +1,40 @@
+import argparse
 import json
 import os
 
-from cyy_naive_lib.log import set_level
-
-os.environ["WANDB_DISABLED"] = "true"
+from ner_metrics import classification_report
 
 
 from nervaluate import Evaluator
 from vllm_generator import get_vllm_output
+from .medical_NER_evaluation.html_form import html2bio
+from .medical_NER_evaluation.common import find_tag
 
 
-def parse_prediction(prediction: str) -> list[tuple[str, str]]:
-    res: list[tuple[str, str]] = []
-    prediction = (
-        prediction.replace("['", '["')
-        .replace("']", '"]')
-        .replace("', '", '", "')
-        .replace("','", '","')
-        .replace("\", '", '", "')
-        .replace("[[", "[")
-        .replace("]]", "]")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        prog="Analyze NER result",
     )
-    while prediction:
-        idx = prediction.find('["')
-        if not idx >= 0:
-            break
-        prediction = prediction[idx:]
-        end_idx = prediction.find('"]')
-        if not end_idx >= 0:
-            break
-        item = prediction[: end_idx + 2]
-        prediction = prediction[end_idx + 2 :]
-        try:
-            predicated_pair = json.loads(item)
-            if len(predicated_pair) != 2:
-                continue
-            res.append(predicated_pair)
-        except Exception:
-            break
+    parser.add_argument("--session_dir", help="session dir", type=str, required=True)
+    parser.add_argument("--test_file", help="test file", type=str, default=None)
+    args = parser.parse_args()
 
-    new_res = []
-    for a, b in res:
-        if not isinstance(a, str) or not isinstance(b, str):
-            continue
-        if not a:
-            continue
-        new_res.append((a, b))
-    return new_res
-
-
-def find_tag(token, pre_tokens, pre_tokens_lower, pre_tags) -> str:
-    # case sensitive
-    try:
-        idx = pre_tokens.index(token)
-        return pre_tags[idx]
-    except ValueError:
-        pass
-    # case insensitive
-    try:
-        idx = pre_tokens_lower.index(token.lower())
-        return pre_tags[idx]
-    except ValueError:
-        pass
-    # partial match
-    for idx, t in enumerate(pre_tokens_lower):
-        if t in token.lower() or token.lower() in t:
-            return pre_tags[idx]
-    return "O"
-
-
-def get_NER_metric() -> tuple:
     prediction = []
     ground_tags = []
-    tag_set = set()
-    for sample, generated_text in get_vllm_output():
+    entities = ["problem", "treatment", "test", "drug"]
+
+    for sample, generated_text in get_vllm_output(
+        session_dir=args.session_dir, data_file=args.test_file
+    ):
         tags = sample["tags"]
-        for tag in tags:
-            if tag != "O":
-                tag_set.add(tag[2:])
+        out_text = generated_text.outputs[0].text
+        tokenizer = sample["tokenizer"]
         tokens = sample["tokens"]
-        predicated_tokens = []
         predicated_tags = []
         predicated_candidate_tags = []
-        out_text = generated_text.outputs[0].text
-        for phrase, tag in parse_prediction(out_text):
-            phrase_tokens = phrase.split(" ")
-            predicated_tokens += phrase_tokens
-            predicated_candidate_tags += [tag] * len(phrase_tokens)
+        predicated_tokens, predicated_candidate_tags = html2bio(
+            html=out_text, entities=entities, tokenizer=tokenizer
+        )
         predicated_tokens_lower = [a.lower() for a in predicated_tokens]
         for token in tokens:
             predicated_tags.append(
@@ -97,25 +45,30 @@ def get_NER_metric() -> tuple:
                     predicated_candidate_tags,
                 )
             )
-        if len(set(tags)) > 1:
-            print(tags)
-            print(predicated_tags)
-            print("print tokens", sample["tokens"])
-            print("print input",generated_text.prompt)
-            print("print output",generated_text.outputs[0].text)
-            print(out_text)
-            fdsfds
+        # if len(set(tags)) > 1:
+        #     print(tags)
+        #     print(predicated_tags)
+        #     print("print tokens", sample["tokens"])
+        #     print("print input", generated_text.prompt)
+        #     print("print output", generated_text.outputs[0].text)
+        #     print(out_text)
+        #     fdsfds
 
         prediction.append(predicated_tags)
         ground_tags.append(tags)
-    print(tag_set)
-    return Evaluator(
-        ground_tags, prediction, tags=list(tag_set), loader="list"
-    ).evaluate()
 
+    lenient = classification_report(
+        tags_true=ground_tags, tags_pred=prediction, mode="lenient"
+    )  # for lenient match
+    print(lenient)
+    strict = classification_report(
+        tags_true=ground_tags, tags_pred=prediction, mode="strict"
+    )
+    print(strict)
 
-if __name__ == "__main__":
-    set_level("INFO")
-    results, results_per_tag, result_indices, result_indices_by_tag = get_NER_metric()
-    print("NER test results ", results)
-    print("NER test results_per_tag ", results_per_tag)
+    # print(tag_set)
+    # return Evaluator(
+    #     ground_tags, prediction, tags=list(tag_set), loader="list"
+    # ).evaluate()
+    # print("NER test results ", results)
+    # print("NER test results_per_tag ", results_per_tag)
