@@ -28,6 +28,8 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
         super()._before_training()
 
     def _train(self, first_training: bool) -> None:
+        if first_training:
+            self.trainer._prepare_execution()
         sft_trainer = self.get_sft_trainer(self.trainer)
         sft_trainer.train()
         self.clear_sft_trainer()
