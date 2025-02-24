@@ -29,10 +29,10 @@ if __name__ == "__main__":
 
     prediction = []
     ground_tags = []
-    entities = ["problem", "treatment", "test", "drug"]
+    canonical_tags = ["problem", "treatment", "test", "drug"]
     output_f = None
     if args.output_file is not None:
-        output_f = open(args.output_file, "wt", encoding="utf8")
+        output_f = open(args.output_file, "w", encoding="utf8")
 
     for sample, generated_text in list(
         get_vllm_output(session_dir=args.session_dir, data_file=args.test_file)
@@ -53,7 +53,7 @@ if __name__ == "__main__":
             output_f.write(">>>>>>>>>>>>>>\n")
             output_f.write(f"{out_text}\n")
         predicated_tokens, predicated_candidate_tags = html2bio(
-            html=out_text, entities=entities, tokenizer=tokenizer
+            html=out_text, canonical_tags=canonical_tags, tokenizer=tokenizer
         )
         predicated_tokens_lower = [a.lower() for a in predicated_tokens]
         for token in tokens:
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         output_f.close()
 
     results = nervaluate.Evaluator(
-        ground_tags, prediction, tags=list(entities), loader="list"
+        ground_tags, prediction, tags=list(canonical_tags), loader="list"
     ).evaluate()
     print("new metric results ", results[0])
     print("new metric results_per_tag ", results[1])

@@ -10,6 +10,7 @@ class IOBRecord:
         self.__last_tag: str = "O"
 
     def add_line(self, token: str, token_tag: str) -> None:
+        assert " " not in token
         self.__tokens.append(token)
         self.__token_tags.append(token_tag)
         if token_tag == "O":
