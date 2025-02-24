@@ -4,7 +4,7 @@ import logging
 
 import nervaluate
 from cyy_naive_lib.log import set_level
-from medical_NER_evaluation.common import find_tag
+from medical_NER_evaluation.common import match_tokens
 from medical_NER_evaluation.html_form import html2bio
 from ner_metrics import classification_report
 from vllm_generator import get_vllm_output
@@ -52,27 +52,10 @@ if __name__ == "__main__":
             output_f.write(f"{joined_tags}\n")
             output_f.write(">>>>>>>>>>>>>>\n")
             output_f.write(f"{out_text}\n")
-        predicated_tokens, predicated_candidate_tags = html2bio(
+        predicated_tokens = html2bio(
             html=out_text, canonical_tags=canonical_tags, tokenizer=tokenizer
         )
-        predicated_tokens_lower = [a.lower() for a in predicated_tokens]
-        for token in tokens:
-            predicated_tags.append(
-                find_tag(
-                    token,
-                    predicated_tokens,
-                    predicated_tokens_lower,
-                    predicated_candidate_tags,
-                )
-            )
-        # if len(set(tags)) > 1:
-        #     print(tags)
-        #     print(predicated_tags)
-        #     print("print tokens", sample["tokens"])
-        #     print("print input", generated_text.prompt)
-        #     print("print output", generated_text.outputs[0].text)
-        #     print(out_text)
-        #     fdsfds
+        predicated_tags = match_tokens(tokens, predicated_tokens)
 
         prediction.append(predicated_tags)
         ground_tags.append(tags)
@@ -91,4 +74,4 @@ if __name__ == "__main__":
             tags_pred=flatten_extend(prediction),
             mode=mode,
         )  # for lenient match
-        print(mode, " metric ", json.dumps(lenient))
+        print(mode, " metric ", json.dumps(lenient, sort_keys=True))
