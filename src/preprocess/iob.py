@@ -7,27 +7,32 @@ class IOBRecord:
     def __init__(self) -> None:
         self.__tokens: list[str | tuple[list[str], str]] = []
         self.__token_tags: list[str] = []
-        self.last_tag: str | None = None
+        self.__last_tag: str = "O"
 
     def add_line(self, token: str, token_tag: str) -> None:
         self.__tokens.append(token)
         self.__token_tags.append(token_tag)
         if token_tag == "O":
-            self.last_tag = None
+            self.__last_tag = token_tag
         elif token_tag.startswith("B-"):
-            self.last_tag = token_tag[2:]
+            old_last_tag = self.__last_tag
+            self.__last_tag = token_tag
             self.__tokens.pop()
-            self.__tokens.append(([token], self.last_tag))
+            self.__tokens.append(([token], self.__last_tag[2:]))
         elif token_tag.startswith("I-"):
-            this_tag = token_tag[2:]
-            if self.last_tag == this_tag:
+            old_last_tag = self.__last_tag
+            self.__last_tag = token_tag
+            if self.__last_tag[2:] == old_last_tag[2:]:
                 self.__tokens.pop()
                 assert isinstance(self.__tokens[-1], tuple)
+                assert self.__tokens[-1][1] == self.__last_tag[2:]
                 self.__tokens[-1][0].append(token)
             else:
-                self.last_tag = this_tag
                 self.__tokens.pop()
-                self.__tokens.append(([token], self.last_tag))
+                # In principle, this should be I tag, but it's changed to B-tag for easier evaluation
+                self.__token_tags.pop()
+                self.__token_tags.append("B-" + token_tag[2:])
+                self.__tokens.append(([token], self.__last_tag[2:]))
         else:
             raise RuntimeError(f"invalid line:{token} {token_tag}")
 
@@ -41,7 +46,6 @@ class IOBRecord:
 
         return {
             "tokens": tokens,
-            "annotated_phrases": self.annotated_phrases,
             "tags": self.token_tags,
             "html": self.html,
         }
