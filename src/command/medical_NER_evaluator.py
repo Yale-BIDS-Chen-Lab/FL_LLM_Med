@@ -24,11 +24,15 @@ if __name__ == "__main__":
     )
     parser.add_argument("--session_dir", help="session dir", type=str, required=True)
     parser.add_argument("--test_file", help="test file", type=str, default=None)
+    parser.add_argument("--output_file", help="outputfile", type=str, default=None)
     args = parser.parse_args()
 
     prediction = []
     ground_tags = []
     entities = ["problem", "treatment", "test", "drug"]
+    output_f = None
+    if args.output_file is not None:
+        output_f = open(args.output_file, "wt", encoding="utf8")
 
     for sample, generated_text in list(
         get_vllm_output(session_dir=args.session_dir, data_file=args.test_file)
@@ -39,6 +43,15 @@ if __name__ == "__main__":
         tokens = sample["tokens"]
         predicated_tags = []
         predicated_candidate_tags = []
+        if output_f is not None:
+            joined_tokens = " ".join(tokens)
+            output_f.write("<<<<<<<<<<<<<<\n")
+            output_f.write(f"{joined_tokens}\n")
+            output_f.write("==============\n")
+            joined_tags = " ".join(tags)
+            output_f.write(f"{joined_tags}\n")
+            output_f.write(">>>>>>>>>>>>>>\n")
+            output_f.write(f"{out_text}\n")
         predicated_tokens, predicated_candidate_tags = html2bio(
             html=out_text, entities=entities, tokenizer=tokenizer
         )
@@ -63,6 +76,8 @@ if __name__ == "__main__":
 
         prediction.append(predicated_tags)
         ground_tags.append(tags)
+    if output_f is not None:
+        output_f.close()
 
     results = nervaluate.Evaluator(
         ground_tags, prediction, tags=list(entities), loader="list"

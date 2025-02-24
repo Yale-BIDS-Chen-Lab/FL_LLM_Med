@@ -1,5 +1,4 @@
 import copy
-import torch
 import os
 import sys
 from collections.abc import Generator
@@ -59,18 +58,13 @@ def get_vllm_output(
             model="./finetuned_model",
             generation_config="auto",
             tokenizer=model_name,
-            dtype=torch.float32,
+            dtype="bfloat16",
         )
         tester.model_evaluator.tokenizer.tokenizer.padding_side = "left"
         llm.set_tokenizer(tester.model_evaluator.tokenizer.tokenizer)
-        # print(llm.get_tokenizer())
-        # print("============================================================================")
-        # print(tester.model_evaluator.tokenizer.tokenizer)
-        # gdfgdf
 
-        # tokenizer=tester.model_evaluator.tokenizer.tokenizer,
         # Load the default sampling parameters from the model.
-        sampling_params = SamplingParams(n=1, max_tokens=512, temperature=0)
+        sampling_params = SamplingParams(n=1, max_tokens=1024, temperature=0)
 
         for batch in tester.dataloader:
             # Generate texts from the prompts. The output is a list of RequestOutput objects
