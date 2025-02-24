@@ -1,11 +1,11 @@
+import logging
 import os
 import sys
-import logging
 from contextlib import redirect_stdout
 
 from cyy_naive_lib.log import (
-    replace_default_logger,
     initialize_proxy_logger,
+    replace_default_logger,
     replace_logger,
 )
 
