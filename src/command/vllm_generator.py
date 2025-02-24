@@ -1,4 +1,5 @@
 import copy
+import torch
 import os
 import sys
 from collections.abc import Generator
@@ -16,7 +17,6 @@ from peft.peft_model import PeftModel
 from transformers import AutoModelForCausalLM
 from vllm import LLM, RequestOutput, SamplingParams
 
-os.environ["WANDB_DISABLED"] = "true"
 os.environ["NO_TOKENIZER_TRANSFORMS"] = "true"
 
 import method  # noqa: F401
@@ -56,7 +56,10 @@ def get_vllm_output(
         # you should set the generation_config to "auto".
 
         llm = LLM(
-            model="./finetuned_model", generation_config="auto", tokenizer=model_name
+            model="./finetuned_model",
+            generation_config="auto",
+            tokenizer=model_name,
+            dtype=torch.float32,
         )
         tester.model_evaluator.tokenizer.tokenizer.padding_side = "left"
         llm.set_tokenizer(tester.model_evaluator.tokenizer.tokenizer)

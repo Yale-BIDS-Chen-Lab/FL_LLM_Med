@@ -1,7 +1,9 @@
 import argparse
 import json
+import logging
 
 import nervaluate
+from cyy_naive_lib.log import set_level
 from medical_NER_evaluation.common import find_tag
 from medical_NER_evaluation.html_form import html2bio
 from ner_metrics import classification_report
@@ -16,6 +18,7 @@ def flatten_extend(l: list) -> list:
 
 
 if __name__ == "__main__":
+    set_level(logging.INFO)
     parser = argparse.ArgumentParser(
         prog="Analyze NER result",
     )
