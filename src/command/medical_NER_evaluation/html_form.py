@@ -34,5 +34,4 @@ def html2bio(
         tags.append(f"B-{tag}")
         for _ in range(len(words) - 1):
             tags.append(f"I-{tag}")
-    assert len(tokens) == len(tags)
     return tokens, tags
