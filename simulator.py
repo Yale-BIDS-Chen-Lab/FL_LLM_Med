@@ -9,6 +9,7 @@ from cyy_naive_lib.log import (
 )
 
 os.environ["TQDM_DISABLE"] = "1"
+os.environ["LEAST_REQUIRED_DEVICE_MEMORY_IN_GB"] = "10"
 from distributed_learning_simulation import (
     load_config,
     train,
