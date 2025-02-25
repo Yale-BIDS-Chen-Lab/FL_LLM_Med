@@ -39,6 +39,14 @@ sys.path.insert(0, src_path)
 import method  # noqa: F401
 
 if __name__ == "__main__":
+    # disable hydra output dir
+    for option in [
+        "hydra.run.dir=.",
+        "hydra.output_subdir=null",
+        "hydra/job_logging=disabled",
+        "hydra/hydra_logging=disabled",
+    ]:
+        sys.argv.append(option)
     replace_default_logger()
     replace_logger("transformers")
     initialize_proxy_logger()
