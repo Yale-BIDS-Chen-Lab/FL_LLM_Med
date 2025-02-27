@@ -18,6 +18,7 @@ classifiers = [
 dependencies = [
   "distributed_learning_simulation@git+https://github.com/cyyever/distributed_learning_simulation_lib.git",
   "cyy_huggingface_toolbox@git+https://github.com/cyyever/huggingface_toolbox.git",
+  "cyy_torch_text@git+https://github.com/cyyever/torch_text.git",
   "nervaluate",
   "vllm",
   "peft",
