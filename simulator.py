@@ -20,6 +20,7 @@ if __name__ == "__main__":
         config = load_config(
             config_path=config_path,
             global_conf_path=os.path.join(config_path, "global.yaml"),
+            import_libs=False,
         )
         # config.heavy_server = False
         # if config.trainer_config.hook_config.use_amp:
