@@ -113,8 +113,8 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
                 max_length=self.config.dc_config.dataset_kwargs.get(
                     "input_max_len", 1024
                 ),
-            )
-            return tensor_to(res, device=executor.device)
+            ).to(device=executor.device, non_blocking=True)
+            return res
 
         return dataset.map(
             preprocess_function, batched=True, new_fingerprint=str(uuid.uuid4())
