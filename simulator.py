@@ -10,12 +10,12 @@ from distributed_learning_simulation import (
     train,
 )
 
-src_path = os.path.join(os.path.dirname(__file__), "src")
-sys.path.insert(0, src_path)
-import method  # noqa: F401
+project_path = os.path.join(os.path.dirname(__file__))
+sys.path.insert(0, project_path)
+import src.method # noqa: F401
 
 if __name__ == "__main__":
-    config_path = os.path.join(src_path, "..", "conf")
+    config_path = os.path.join(project_path, "conf")
     with redirect_stdout_to_logger(logger_names=["transformers"]):
         config = load_config(
             config_path=config_path,
