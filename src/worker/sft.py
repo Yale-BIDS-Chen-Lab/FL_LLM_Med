@@ -9,7 +9,7 @@ from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
 from cyy_naive_lib.log import log_info
 from cyy_torch_toolbox import TensorDict
 
-from sft import SFTTrainerMinxin, load_perf_model_state_dict
+from ..sft import SFTTrainerMinxin, load_perf_model_state_dict
 
 from .common import LLMTextWorker
 

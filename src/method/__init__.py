@@ -8,4 +8,4 @@ for entry in os.scandir(os.path.dirname(os.path.abspath(__file__))):
         continue
     if entry.name.startswith(".") or entry.name.startswith("__"):
         continue
-    importlib.import_module(f".{entry.name}", "method")
+    importlib.import_module(f".{entry.name}", "src.method")
