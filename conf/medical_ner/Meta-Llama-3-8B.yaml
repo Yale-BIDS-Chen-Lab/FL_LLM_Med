@@ -4,6 +4,9 @@ batch_size: 4
 epoch: 1
 learning_rate: 2e-4
 model_kwargs:
+  finetune_config:
+    r: 16
+    lora_alpha: 64
   finetune_modules:
     - q_proj
     - o_proj
