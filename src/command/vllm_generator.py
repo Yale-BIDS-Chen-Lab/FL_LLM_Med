@@ -3,7 +3,7 @@ import os
 import sys
 from collections.abc import Generator
 
-src_path = os.path.join(os.path.dirname(__file__), "..", "..", "src")
+src_path = os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.insert(0, src_path)
 
 from cyy_naive_lib.fs.tempdir import TempDir
@@ -18,7 +18,7 @@ from vllm import LLM, RequestOutput, SamplingParams
 
 os.environ["NO_TOKENIZER_TRANSFORMS"] = "true"
 
-import method  # noqa: F401
+import src.method  # noqa: F401
 from server import LLMTextServer
 
 
