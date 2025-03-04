@@ -19,7 +19,7 @@ from vllm import LLM, RequestOutput, SamplingParams
 os.environ["NO_TOKENIZER_TRANSFORMS"] = "true"
 
 import src.method  # noqa: F401
-from server import LLMTextServer
+from src.server import LLMTextServer
 
 
 def get_vllm_output(
