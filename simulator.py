@@ -1,10 +1,10 @@
 import os
 import sys
 
-from cyy_naive_lib.log import redirect_stdout_to_logger
-
 os.environ["TQDM_DISABLE"] = "1"
 os.environ["LEAST_REQUIRED_DEVICE_MEMORY_IN_GB"] = "10"
+
+from cyy_naive_lib.log import redirect_stdout_to_logger
 from distributed_learning_simulation import (
     load_config,
     train,
@@ -12,7 +12,7 @@ from distributed_learning_simulation import (
 
 project_path = os.path.join(os.path.dirname(__file__))
 sys.path.insert(0, project_path)
-import src.method # noqa: F401
+import src.method  # noqa: F401
 
 if __name__ == "__main__":
     config_path = os.path.join(project_path, "conf")
