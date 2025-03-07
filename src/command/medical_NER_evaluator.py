@@ -1,4 +1,5 @@
 import argparse
+import copy
 import json
 import logging
 
@@ -10,11 +11,24 @@ from ner_metrics import classification_report
 from vllm_generator import get_vllm_output
 
 
-def flatten_extend(l: list) -> list:
+def flatten_extend(l: list[list]) -> list:
     flat_list = []
     for e in l:
         flat_list.extend(e)
     return flat_list
+
+
+def replace_tag(l: list[list[str]]) -> list[list[str]]:
+    res = []
+    for a in l:
+        new_tags = copy.deepcopy(a)
+        for idx, b in enumerate(new_tags):
+            for canonical_tag in canonical_tags:
+                if canonical_tag in b:
+                    new_tags[idx] = b.replace(canonical_tag, "unified_class")
+                    break
+        res.append(new_tags)
+    return res
 
 
 if __name__ == "__main__":
@@ -27,8 +41,8 @@ if __name__ == "__main__":
     parser.add_argument("--output_file", help="outputfile", type=str, default=None)
     args = parser.parse_args()
 
-    prediction = []
-    ground_tags = []
+    prediction: list[list[str]] = []
+    ground_tags: list[list[str]] = []
     canonical_tags = ["problem", "treatment", "test", "drug"]
     output_f = None
     if args.output_file is not None:
@@ -41,8 +55,8 @@ if __name__ == "__main__":
         out_text = generated_text.outputs[0].text
         tokenizer = sample["tokenizer"]
         tokens = sample["tokens"]
-        predicated_tags = []
-        predicated_candidate_tags = []
+        predicated_tags: list[str] = []
+        predicated_candidate_tags: list[str] = []
         if output_f is not None:
             joined_tokens = " ".join(tokens)
             output_f.write("<<<<<<<<<<<<<<\n")
@@ -72,6 +86,14 @@ if __name__ == "__main__":
         lenient = classification_report(
             tags_true=flatten_extend(ground_tags),
             tags_pred=flatten_extend(prediction),
+            mode=mode,
+        )  # for lenient match
+        print(mode, " metric ", json.dumps(lenient, sort_keys=True))
+
+    for mode in ("lenient", "strict"):
+        lenient = classification_report(
+            tags_true=flatten_extend(replace_tag(ground_tags)),
+            tags_pred=flatten_extend(replace_tag(prediction)),
             mode=mode,
         )  # for lenient match
         print(mode, " metric ", json.dumps(lenient, sort_keys=True))
