@@ -53,9 +53,7 @@ if __name__ == "__main__":
             output_f.write(f"{joined_tags}\n")
             output_f.write(">>>>>>>>>>>>>>\n")
             output_f.write(f"{out_text}\n")
-        predicated_tokens = html2bio(
-            html=out_text, canonical_tags=canonical_tags, tokenizer=tokenizer
-        )
+        predicated_tokens = html2bio(html=out_text, canonical_tags=canonical_tags)
         predicated_tags = match_tokens(tokens, predicated_tokens)
 
         prediction.append(predicated_tags)
