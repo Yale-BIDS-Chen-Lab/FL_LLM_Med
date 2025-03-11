@@ -32,8 +32,8 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
     # torch.backends.cudnn.benchmark = True
     learning_rate = 2.0e-5
     if isinstance(executor, Trainer):
+        assert isinstance(executor.hyper_parameter.learning_rate, float)
         learning_rate = executor.hyper_parameter.learning_rate
-    assert isinstance(learning_rate, float)
     accelerate_config = AcceleratorConfig()
     accelerate_config.non_blocking = True
     return SFTConfig(
@@ -101,11 +101,6 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
         tokenizer = executor.model_evaluator.tokenizer
 
         def preprocess_function(examples):
-            # print(examples["input"][0])
-            # print(tokenizer)
-            # dfsfds
-            # print(tokenizer.eos_token, tokenizer.pad_token)
-            # print(examples["input"][0])
             res = tokenizer(
                 examples["input"],
                 truncation=True,
