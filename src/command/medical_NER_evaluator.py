@@ -43,14 +43,22 @@ if __name__ == "__main__":
 
     prediction: list[list[str]] = []
     ground_tags: list[list[str]] = []
-    canonical_tags = ["problem", "treatment", "test", "drug"]
     output_f = None
     if args.output_file is not None:
         output_f = open(args.output_file, "w", encoding="utf8")
-
-    for sample, generated_text in list(
+    vllm_output = list(
         get_vllm_output(session_dir=args.session_dir, data_file=args.test_file)
-    ):
+    )
+    canonical_tags: set[str] = set()
+    for sample, _ in vllm_output:
+        tags = sample["tags"]
+        canonical_tags.update(tags)
+    canonical_tags.remove("O")
+    canonical_tags = {
+        tag.removeprefix("I-").removeprefix("B-") for tag in canonical_tags
+    }
+
+    for sample, generated_text in vllm_output:
         tags = sample["tags"]
         out_text = generated_text.outputs[0].text
         tokenizer = sample["tokenizer"]
