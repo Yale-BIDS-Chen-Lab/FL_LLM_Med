@@ -98,7 +98,7 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
         log_info("dataset size is %s", len(executor.dataloader.dataset))
         dataset = Dataset.from_list(executor.dataloader.dataset)
         assert isinstance(executor.model_evaluator, HuggingFaceModelEvaluator)
-        tokenizer = executor.model_evaluator.tokenizer.tokenizer
+        tokenizer = executor.model_evaluator.tokenizer
 
         def preprocess_function(examples):
             # print(examples["input"][0])

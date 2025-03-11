@@ -60,4 +60,4 @@ select = [
   # ruff
   "RUF",
 ]
-ignore = ["F403","E402"]
+ignore = ["F403","E402","PLR2004","E501"]

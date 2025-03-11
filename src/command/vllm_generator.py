@@ -59,8 +59,8 @@ def get_vllm_output(
             tokenizer=model_name,
             dtype="bfloat16",
         )
-        tester.model_evaluator.tokenizer.tokenizer.padding_side = "left"
-        llm.set_tokenizer(tester.model_evaluator.tokenizer.tokenizer)
+        tester.model_evaluator.tokenizer.padding_side = "left"
+        llm.set_tokenizer(tester.model_evaluator.tokenizer)
 
         # Load the default sampling parameters from the model.
         sampling_params = SamplingParams(n=1, max_tokens=1024, temperature=0)
@@ -70,7 +70,7 @@ def get_vllm_output(
             # that contain the prompt, generated text, and other information.
             batch_size = batch["batch_size"]
             batch_list: list[dict] = [
-                {"tokenizer": tester.model_evaluator.tokenizer.tokenizer}
+                {"tokenizer": tester.model_evaluator.tokenizer}
                 for _ in range(batch_size)
             ]
             for k, v in batch.items():
