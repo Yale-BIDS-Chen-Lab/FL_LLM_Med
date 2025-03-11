@@ -1,35 +1,14 @@
 import argparse
-import copy
 import json
 import logging
 
 import nervaluate
+from cyy_naive_lib.algorithm.sequence_op import flatten_list
 from cyy_naive_lib.log import set_level
-from medical_NER_evaluation.common import match_tokens
+from medical_NER_evaluation.common import match_tokens, replace_tag
 from medical_NER_evaluation.html_form import html2bio
 from ner_metrics import classification_report
 from vllm_generator import get_vllm_output
-
-
-def flatten_extend(l: list[list]) -> list:
-    flat_list = []
-    for e in l:
-        flat_list.extend(e)
-    return flat_list
-
-
-def replace_tag(l: list[list[str]]) -> list[list[str]]:
-    res = []
-    for a in l:
-        new_tags = copy.deepcopy(a)
-        for idx, b in enumerate(new_tags):
-            for canonical_tag in canonical_tags:
-                if canonical_tag in b:
-                    new_tags[idx] = b.replace(canonical_tag, "unified_class")
-                    break
-        res.append(new_tags)
-    return res
-
 
 if __name__ == "__main__":
     set_level(logging.INFO)
@@ -92,16 +71,16 @@ if __name__ == "__main__":
 
     for mode in ("lenient", "strict"):
         lenient = classification_report(
-            tags_true=flatten_extend(ground_tags),
-            tags_pred=flatten_extend(prediction),
+            tags_true=flatten_list(ground_tags),
+            tags_pred=flatten_list(prediction),
             mode=mode,
         )  # for lenient match
         print(mode, " metric ", json.dumps(lenient, sort_keys=True))
 
     for mode in ("lenient", "strict"):
         lenient = classification_report(
-            tags_true=flatten_extend(replace_tag(ground_tags)),
-            tags_pred=flatten_extend(replace_tag(prediction)),
+            tags_true=flatten_list(replace_tag(ground_tags, canonical_tags)),
+            tags_pred=flatten_list(replace_tag(prediction, canonical_tags)),
             mode=mode,
         )  # for lenient match
         print(mode, " metric ", json.dumps(lenient, sort_keys=True))

@@ -1,5 +1,6 @@
+from collections.abc import Iterable
+
 import bs4
-from typing import Iterable
 import transformers
 
 

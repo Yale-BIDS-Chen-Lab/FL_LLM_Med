@@ -1,3 +1,6 @@
+import copy
+
+
 def match_token(a: str, b: str, strict: bool = False) -> bool:
     if strict:
         return a == b
@@ -45,3 +48,16 @@ def match_tokens(
             tokens = tokens[1:]
     assert len(tags) == token_len
     return tags
+
+
+def replace_tag(l: list[list[str]], canonical_tags: set[str]) -> list[list[str]]:
+    res = []
+    for a in l:
+        new_tags = copy.deepcopy(a)
+        for idx, b in enumerate(new_tags):
+            for canonical_tag in canonical_tags:
+                if canonical_tag in b:
+                    new_tags[idx] = b.replace(canonical_tag, "unified_class")
+                    break
+        res.append(new_tags)
+    return res
