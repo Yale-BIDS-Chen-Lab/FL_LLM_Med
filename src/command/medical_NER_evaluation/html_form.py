@@ -1,4 +1,5 @@
 import bs4
+from typing import Iterable
 import transformers
 
 
@@ -8,11 +9,12 @@ def tokenize(txt: str, tokenizer: transformers.PreTrainedTokenizerFast) -> list[
 
 def html2bio(
     html: str,
-    canonical_tags: list[str],
+    canonical_tags: Iterable[str],
     tokenizer: transformers.PreTrainedTokenizerFast,
 ) -> list[tuple[list[str], list[str]] | str]:
     tokens: list[tuple[list[str], list[str]] | str] = []
     assert html
+    canonical_tags = list(canonical_tags)
     assert canonical_tags
     canonical_tag_lower = [e.lower() for e in canonical_tags]
 
