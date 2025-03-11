@@ -1,17 +1,15 @@
 from collections.abc import Iterable
 
 import bs4
-import transformers
 
 
-def tokenize(txt: str, tokenizer: transformers.PreTrainedTokenizerFast) -> list[str]:
+def tokenize(txt: str) -> list[str]:
     return txt.strip().split(" ")
 
 
 def html2bio(
     html: str,
     canonical_tags: Iterable[str],
-    tokenizer: transformers.PreTrainedTokenizerFast,
 ) -> list[tuple[list[str], list[str]] | str]:
     tokens: list[tuple[list[str], list[str]] | str] = []
     assert html
@@ -24,9 +22,9 @@ def html2bio(
     for child in soup:
         match child:
             case bs4.element.NavigableString():
-                tokens += tokenize(child.get_text(), tokenizer)
+                tokens += tokenize(child.get_text())
             case bs4.element.Tag():
-                words = tokenize(child.get_text(), tokenizer)
+                words = tokenize(child.get_text())
                 if not words:
                     continue
                 if child.name.lower() != "span":
