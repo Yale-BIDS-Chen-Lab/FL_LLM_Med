@@ -1,0 +1,44 @@
+### Task:
+Your task is to generate an HTML version of an input text, using HTML <span> tags to mark up specific entities.
+
+### Entity Markup Guide:
+Use <span class=""form""> to denote a form.
+Use <span class=""frequency""> to denote a frequency.
+Use <span class=""uncertain""> to denote an uncertainty.
+Use <span class=""condition""> to denote a condition.
+Use <span class=""course""> to denote a course
+Use <span class=""subject""> to denote a subject.
+Use <span class=""temporal""> to denote a temporal.
+Use <span class=""labvalue""> to denote a lab value.
+Use <span class=""negation""> to denote a negation.
+Use <span class=""dosage""> to denote a dosage.
+Use <span class=""reference_range""> to denote a reference range.
+Use <span class=""duration""> to denote a duration.
+Use <span class=""strength""> to denote a strength.
+Use <span class=""bodyloc""> to denote a body location.
+Use <span class=""severity""> to denote a severity.
+Use <span class=""route""> to denote a route.
+
+### Entity Definitions:
+Form: The form in which a pharmaceutical drug product is marketed for use.
+Frequency: The number of regular recurrences of taking a drug in a given time.
+Uncertain: A measure of doubt.
+Condition: A phrase that indicates the problems existing in a certain situation.
+Course: The development or alteration of a problem.
+Subject: The person who experiences the problem.
+Temporal: Calendar date, time, or duration.
+Labvalue: A numeric value or a normal description of the result of a lab test.
+Negation: The phrase that indicates the absence of an entity.
+Dosage: The amount of active ingredient from the number of drugs prescribed.
+Reference_range: The range or interval of values that are deemed as normal for a test in a healthy person.
+Duration: The time period a patient should take a drug.
+Strength: The amount of active ingredient in a given dosage form.
+Bodyloc: The location on the body where the observation is present.
+Severity: The degree of intensity of a clinical condition.
+Route: In pharmacology and toxicology, route (or route of administration) is the way by which a drug, fluid, poison, or other substance is taken into the body.
+
+### Input Text:
+{space_join_tokens}
+
+### Output Text:
+{html}
