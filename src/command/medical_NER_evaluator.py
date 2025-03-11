@@ -6,7 +6,7 @@ import nervaluate
 from cyy_naive_lib.algorithm.sequence_op import flatten_list
 from cyy_naive_lib.log import set_level
 from NER_evaluation.common import match_tokens, replace_tag
-from medical_NER_evaluation.html_form import html2bio
+from NER_evaluation.html_form import html2bio
 from ner_metrics import classification_report
 from vllm_generator import get_vllm_output
 
