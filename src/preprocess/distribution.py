@@ -1,6 +1,3 @@
-import collections
-import heapq
-from dataclasses import dataclass, field
 
 from .iob import IOBRecord
 

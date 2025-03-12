@@ -1,13 +1,11 @@
 import argparse
-import collections
-import json
 import os
 import sys
 
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 
-from preprocess import IOBRecord, parse_dir
+from preprocess import parse_dir
 from preprocess.distribution import token_distribution
 
 if __name__ == "__main__":

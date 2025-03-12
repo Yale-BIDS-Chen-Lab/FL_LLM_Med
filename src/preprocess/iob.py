@@ -1,4 +1,3 @@
-import os
 
 from .parser import Parser
 
@@ -100,10 +99,7 @@ class IOB(Parser):
         for _line in lines:
             line = _line.strip()
             if not line:
-                skip_empty_line = os.getenv("SKIP_EMPTY_LINE")
-                assert skip_empty_line is not None
-                assert int(skip_empty_line)
-                if int(skip_empty_line) and record.tokens:
+                if record.tokens:
                     results.append(record)
                     record = IOBRecord()
                 continue
