@@ -52,6 +52,18 @@ class IOBRecord:
         }
 
     @property
+    def annotated_tokens(self) -> list[tuple[str, str]]:
+        result: list[tuple[str, str]] = []
+        for t in self.__tokens:
+            if isinstance(t, str):
+                result.append((t, "O"))
+            else:
+                tag = t[1]
+                for token in t[0]:
+                    result.append((token, tag))
+        return result
+
+    @property
     def tokens(self) -> list[str]:
         result: list[str] = []
         for t in self.__tokens:
