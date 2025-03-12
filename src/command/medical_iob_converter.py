@@ -15,11 +15,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output_file", help="output json file", type=str, required=True
     )
-    parser.add_argument(
-        "--skip_empty", help="skip empty lines", type=bool, default=True
-    )
     args = parser.parse_args()
-    os.environ["SKIP_EMPTY_LINE"] = str(int(args.skip_empty))
 
     result = parse_dir(args.data_dir, "bio")
     result |= parse_dir(args.data_dir, "iob")

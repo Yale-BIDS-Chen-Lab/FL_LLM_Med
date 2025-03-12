@@ -17,9 +17,6 @@ if __name__ == "__main__":
     parser.add_argument("--data_dir", help="raw data dir", type=str, required=True)
     parser.add_argument("--sub_dirs", help="raw data sub-dir", type=str, default=None)
     parser.add_argument(
-        "--skip_empty", help="skip empty lines", type=bool, default=True
-    )
-    parser.add_argument(
         "--split_number", help="number to split", type=int, required=True
     )
     parser.add_argument(
@@ -29,7 +26,6 @@ if __name__ == "__main__":
         required=True,
     )
     args = parser.parse_args()
-    os.environ["SKIP_EMPTY_LINE"] = str(int(args.skip_empty))
     split_number = int(args.split_number)
     allocation: dict[int, list] = {i: [] for i in range(split_number)}
     data_dir = args.data_dir
