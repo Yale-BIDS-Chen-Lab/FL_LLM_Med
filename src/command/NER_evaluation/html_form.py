@@ -30,7 +30,7 @@ def html2bio(
                 if child.name.lower() != "span":
                     tokens += words
                     continue
-                classes = child.attrs.get("class", [])
+                classes: str | Iterable = child.attrs.get("class", [])
                 if isinstance(classes, str):
                     classes = [classes]
                 if not classes:
