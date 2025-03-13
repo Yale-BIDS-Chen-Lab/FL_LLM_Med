@@ -12,7 +12,7 @@ from preprocess.allocation import allocate
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog="Analyze IBO Distribution",
+        prog="IBO IID split",
     )
     parser.add_argument("--data_dir", help="raw data dir", type=str, required=True)
     parser.add_argument("--sub_dirs", help="raw data sub-dir", type=str, default=None)
