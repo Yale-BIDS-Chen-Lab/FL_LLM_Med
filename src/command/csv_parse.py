@@ -77,7 +77,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     prompt = None
-    dataset = load_dataset("csv", data_files=[args.csv_files], split="all").to_dict()
+    dataset = load_dataset(
+        "csv", data_files=args.csv_files.split(" "), split="all"
+    ).to_dict()
 
     pairs = []
     prompt_set = set()
