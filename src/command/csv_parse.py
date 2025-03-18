@@ -55,12 +55,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     prompt = None
-    dataset = load_dataset("csv", data_files=[args.csv_file], split="train")
+    dataset = load_dataset("csv", data_files=[args.csv_file], split="all").to_dict()
 
     pairs = []
     prompt_set = set()
+    print("sample size", len(dataset["unprocessed"]))
     for i in range(len(dataset["unprocessed"])):
-        print("deal with ", i)
         text = f"{dataset['unprocessed'][i]} {dataset['processed'][i]}".strip()
         lines = text.splitlines()
         text = "\n".join(line.strip() for line in lines)
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     with open(
         os.path.join(
             args.output_dir,
-            os.path.basename(args.csv_file.replace(".csv", "_new.json")),
+            os.path.basename(args.csv_file.replace(".csv", ".json")),
         ),
         "w",
         encoding="utf8",
