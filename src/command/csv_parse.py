@@ -81,7 +81,6 @@ if __name__ == "__main__":
 
     pairs = []
     prompt_set = set()
-    # print("sample size", len(dataset["unprocessed"]))
     for i in range(len(dataset["unprocessed"])):
         text = f"{dataset['unprocessed'][i]} {dataset['processed'][i]}".strip()
         text = strip_text(text)
@@ -128,7 +127,7 @@ if __name__ == "__main__":
     with open(
         os.path.join(
             args.output_dir,
-            os.path.basename(args.csv_file.replace(".csv", ".json")),
+            os.path.basename(args.csv_files.replace(".csv", ".json")),
         ),
         "w",
         encoding="utf8",
