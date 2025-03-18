@@ -124,10 +124,11 @@ if __name__ == "__main__":
 
     assert prompt is not None
     prompt = format_prompt(prompt)
+    print(prompt)
 
     with open(
         args.output_file,
         "w",
         encoding="utf8",
     ) as f:
-        json.dump({"prompt": prompt, "data": pairs}, f)
+        json.dump(pairs, f)
