@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import sys
+
 from datasets import load_dataset
 
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
@@ -26,10 +27,12 @@ def refine_prompt(prompt: str) -> str:
             "denote a calendar date, time, or duration related to a drug.",
             "denote a calendar date, time, or duration related to a test/treatment/problem/drug.",
         )
+        .strip()
     )
 
 
 def add_class(prompt: str, line: str) -> str | None:
+    assert line
     if not line.startswith("Use <span class="):
         return None
     tag_idx = line.find(">")
@@ -38,7 +41,14 @@ def add_class(prompt: str, line: str) -> str | None:
     tag = line[:tag_idx]
     if tag in prompt:
         return None
-    return "\n".join([prompt, line])
+    return f"{prompt}\n{line}"
+
+
+def strip_text(content: str) -> str:
+    lines = content.splitlines()
+    lines = [line.strip() for line in lines]
+    lines = [line for line in lines if line]
+    return "\n".join(lines)
 
 
 if __name__ == "__main__":
@@ -62,8 +72,7 @@ if __name__ == "__main__":
     print("sample size", len(dataset["unprocessed"]))
     for i in range(len(dataset["unprocessed"])):
         text = f"{dataset['unprocessed'][i]} {dataset['processed'][i]}".strip()
-        lines = text.splitlines()
-        text = "\n".join(line.strip() for line in lines)
+        text = strip_text(text)
         idx = text.find("### Input")
         assert idx >= 0
         new_prompt = text[:idx]
@@ -77,6 +86,7 @@ if __name__ == "__main__":
             if prompt_set.issubset(new_prompt_set):
                 prompt = new_prompt
                 prompt_set = set(prompt.splitlines())
+                assert "" not in prompt_set
             else:
                 while not new_prompt_set.issubset(prompt_set):
                     for line in new_prompt_set:
@@ -88,6 +98,7 @@ if __name__ == "__main__":
                             prompt_set = set(prompt.splitlines())
                             break
 
+        text = strip_text(text)
         lines = text.splitlines()
         assert len(lines) == 2
         prefix = "### Input Text:"
@@ -97,6 +108,7 @@ if __name__ == "__main__":
         assert lines[1].startswith(prefix)
         output_text = lines[1][len(prefix) :].replace("<EOS>", "").strip()
         pairs.append({"input": input_text, "output": output_text})
+    print(prompt)
     with open(
         os.path.join(
             args.output_dir,
