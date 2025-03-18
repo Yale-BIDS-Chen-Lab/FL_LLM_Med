@@ -85,6 +85,7 @@ if __name__ == "__main__":
     prompt_set = set()
     for i in range(len(dataset["unprocessed"])):
         text = f"{dataset['unprocessed'][i]} {dataset['processed'][i]}".strip()
+        text.replace("<EOS>", "")
         text = strip_text(text)
         idx = text.find("### Input")
         assert idx >= 0
