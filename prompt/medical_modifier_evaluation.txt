@@ -19,6 +19,6 @@ Use <span class="temporal"> to denote a calendar date, time, or duration related
 Use <span class="uncertain"> to denote a measure of doubt.
 
 ### Input Text:
-{space_join_tokens}
+{input}
 
 ### Output Text:
