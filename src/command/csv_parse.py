@@ -65,9 +65,9 @@ def strip_text(content: str) -> str:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog="IBO IID split",
+        prog="CSV parser",
     )
-    parser.add_argument("--csv_file", help="raw data dir", type=str, required=True)
+    parser.add_argument("--csv_files", help="CSV filess", type=str, required=True)
     parser.add_argument(
         "--output_dir",
         help="output dir for json files",
@@ -77,11 +77,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     prompt = None
-    dataset = load_dataset("csv", data_files=[args.csv_file], split="all").to_dict()
+    dataset = load_dataset("csv", data_files=[args.csv_files], split="all").to_dict()
 
     pairs = []
     prompt_set = set()
-    print("sample size", len(dataset["unprocessed"]))
+    # print("sample size", len(dataset["unprocessed"]))
     for i in range(len(dataset["unprocessed"])):
         text = f"{dataset['unprocessed'][i]} {dataset['processed'][i]}".strip()
         text = strip_text(text)
@@ -123,6 +123,7 @@ if __name__ == "__main__":
 
     assert prompt is not None
     prompt = format_prompt(prompt)
+    print(prompt)
 
     with open(
         os.path.join(
