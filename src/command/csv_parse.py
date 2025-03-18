@@ -9,6 +9,18 @@ lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 
 
+def format_prompt(prompt: str) -> str:
+    assert prompt is not None
+    lines = prompt.splitlines()
+    i = 0
+    for i, line in enumerate(lines):
+        if line.startswith("Use <span class="):
+            break
+    assert i != 0
+    prompt = "\n".join(lines[:i] + sorted(lines[i:]))
+    return prompt
+
+
 def refine_prompt(prompt: str) -> str:
     return (
         prompt.replace(
@@ -108,7 +120,10 @@ if __name__ == "__main__":
         assert lines[1].startswith(prefix)
         output_text = lines[1][len(prefix) :].replace("<EOS>", "").strip()
         pairs.append({"input": input_text, "output": output_text})
-    print(prompt)
+
+    assert prompt is not None
+    prompt = format_prompt(prompt)
+
     with open(
         os.path.join(
             args.output_dir,
