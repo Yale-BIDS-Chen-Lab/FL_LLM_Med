@@ -69,8 +69,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("--csv_files", help="CSV filess", type=str, required=True)
     parser.add_argument(
-        "--output_dir",
-        help="output dir for json files",
+        "--output_file",
+        help="output filename",
         type=str,
         required=True,
     )
@@ -127,10 +127,7 @@ if __name__ == "__main__":
     print(prompt)
 
     with open(
-        os.path.join(
-            args.output_dir,
-            os.path.basename(args.csv_files.replace(".csv", ".json")),
-        ),
+        args.output_file,
         "w",
         encoding="utf8",
     ) as f:
