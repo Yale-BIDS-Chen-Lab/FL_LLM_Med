@@ -155,7 +155,7 @@ if __name__ == "__main__":
 
     assert prompt is not None
     prompt = format_prompt(prompt)
-    print(prompt)
+    # print(prompt)
 
     with open(
         args.output_file,
