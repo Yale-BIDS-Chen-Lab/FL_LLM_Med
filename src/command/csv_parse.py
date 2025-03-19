@@ -120,15 +120,6 @@ if __name__ == "__main__":
         prefix = "### Input Text:"
         assert lines[0].startswith(prefix)
         input_text = lines[0].removeprefix(prefix).strip()
-        tags: list[str] = []
-        tokens: list[str] = []
-        for token in html2bio(input_text):
-            if isinstance(token, str):
-                tokens.append(token)
-                tags.append("O")
-            else:
-                tokens += token[0]
-                tags += token[1]
         # if len(tags) != input_text.split(" "):
         #     print("====================")
         #     print(input_text)
@@ -140,11 +131,24 @@ if __name__ == "__main__":
         #             print(tag[0])
         #     print("====================")
 
-        assert tokens
-        assert tags
         prefix = "### Output Text:"
         assert lines[1].startswith(prefix)
         output_text = lines[1].removeprefix(prefix).strip()
+        # print("=====")
+        # print(input_text)
+        # print(output_text)
+        # print("=====")
+        tags: list[str] = []
+        tokens: list[str] = []
+        for token in html2bio(output_text):
+            if isinstance(token, str):
+                tokens.append(token)
+                tags.append("O")
+            else:
+                tokens += token[0]
+                tags += token[1]
+        assert tokens
+        assert tags
         pairs.append(
             {"input": input_text, "output": output_text, "tags": tags, "tokens": tokens}
         )
