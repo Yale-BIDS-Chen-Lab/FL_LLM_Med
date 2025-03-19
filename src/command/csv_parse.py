@@ -118,6 +118,7 @@ if __name__ == "__main__":
         prefix = "### Input Text:"
         assert lines[0].startswith(prefix)
         input_text = lines[0][len(prefix) :].strip()
+
         prefix = "### Output Text:"
         assert lines[1].startswith(prefix)
         output_text = lines[1][len(prefix) :].replace("<EOS>", "").strip()
