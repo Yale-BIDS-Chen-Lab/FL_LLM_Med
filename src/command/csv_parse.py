@@ -119,13 +119,16 @@ if __name__ == "__main__":
         assert len(lines) == 2
         prefix = "### Input Text:"
         assert lines[0].startswith(prefix)
-        input_text = lines[0][len(prefix) :].strip()
-        tags = []
-        for tag in html2bio(input_text):
-            if isinstance(tag, str):
+        input_text = lines[0].removeprefix(prefix).strip()
+        tags: list[str] = []
+        tokens: list[str] = []
+        for token in html2bio(input_text):
+            if isinstance(token, str):
+                tokens.append(token)
                 tags.append("O")
             else:
-                tags += tag[1]
+                tokens += token[0]
+                tags += token[1]
         # if len(tags) != input_text.split(" "):
         #     print("====================")
         #     print(input_text)
@@ -137,10 +140,14 @@ if __name__ == "__main__":
         #             print(tag[0])
         #     print("====================")
 
+        assert tokens
+        assert tags
         prefix = "### Output Text:"
         assert lines[1].startswith(prefix)
-        output_text = lines[1][len(prefix) :].strip()
-        pairs.append({"input": input_text, "output": output_text})
+        output_text = lines[1].removeprefix(prefix).strip()
+        pairs.append(
+            {"input": input_text, "output": output_text, "tags": tags, "tokens": tokens}
+        )
 
     assert prompt is not None
     prompt = format_prompt(prompt)
