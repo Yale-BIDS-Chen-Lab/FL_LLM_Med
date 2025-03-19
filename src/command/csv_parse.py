@@ -8,6 +8,8 @@ from datasets import load_dataset
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 
+from NER_evaluation.html_form import html2bio
+
 
 def format_prompt(prompt: str) -> str:
     assert prompt is not None
@@ -85,7 +87,7 @@ if __name__ == "__main__":
     prompt_set = set()
     for i in range(len(dataset["unprocessed"])):
         text = f"{dataset['unprocessed'][i]} {dataset['processed'][i]}".strip()
-        text.replace("<EOS>", "")
+        text = text.replace("<EOS>", "")
         text = strip_text(text)
         idx = text.find("### Input")
         assert idx >= 0
@@ -118,10 +120,26 @@ if __name__ == "__main__":
         prefix = "### Input Text:"
         assert lines[0].startswith(prefix)
         input_text = lines[0][len(prefix) :].strip()
+        tags = []
+        for tag in html2bio(input_text):
+            if isinstance(tag, str):
+                tags.append("O")
+            else:
+                tags += tag[1]
+        # if len(tags) != input_text.split(" "):
+        #     print("====================")
+        #     print(input_text)
+        #     print("====================")
+        #     for tag in html2bio(input_text):
+        #         if isinstance(tag, str):
+        #             print(tag)
+        #         else:
+        #             print(tag[0])
+        #     print("====================")
 
         prefix = "### Output Text:"
         assert lines[1].startswith(prefix)
-        output_text = lines[1][len(prefix) :].replace("<EOS>", "").strip()
+        output_text = lines[1][len(prefix) :].strip()
         pairs.append({"input": input_text, "output": output_text})
 
     assert prompt is not None
