@@ -17,14 +17,14 @@ if __name__ == "__main__":
     )
     parser.add_argument("--session_dir", help="session dir", type=str, required=True)
     parser.add_argument("--test_file", help="test file", type=str, default=None)
-    parser.add_argument("--output_file", help="outputfile", type=str, default=None)
+    parser.add_argument("--debug_file", help="contains debug info", type=str, default=None)
     args = parser.parse_args()
 
     prediction: list[list[str]] = []
     ground_tags: list[list[str]] = []
-    output_f = None
-    if args.output_file is not None:
-        output_f = open(args.output_file, "w", encoding="utf8")
+    debug_f = None
+    if args.debug_file is not None:
+        debug_f = open(args.debug_file, "w", encoding="utf8")
     vllm_output = list(
         get_vllm_output(session_dir=args.session_dir, data_file=args.test_file)
     )
@@ -47,20 +47,20 @@ if __name__ == "__main__":
         predicated_tokens = html2bio(html=out_text, canonical_tags=canonical_tags)
         predicated_tags = match_tokens(tokens, predicated_tokens)
         if len(set(tags)) > 1 and set(predicated_tags) == {"O"}:
-            if output_f is not None:
+            if debug_f is not None:
                 joined_tokens = " ".join(tokens)
-                output_f.write("<<<<<<<<<<<<<<\n")
-                output_f.write(f"{joined_tokens}\n")
-                output_f.write("==============\n")
+                debug_f.write("<<<<<<<<<<<<<<\n")
+                debug_f.write(f"{joined_tokens}\n")
+                debug_f.write("==============\n")
                 joined_tags = " ".join(tags)
-                output_f.write(f"{joined_tags}\n")
-                output_f.write(">>>>>>>>>>>>>>\n")
-                output_f.write(f"{out_text}\n")
+                debug_f.write(f"{joined_tags}\n")
+                debug_f.write(">>>>>>>>>>>>>>\n")
+                debug_f.write(f"{out_text}\n")
 
         prediction.append(predicated_tags)
         ground_tags.append(tags)
-    if output_f is not None:
-        output_f.close()
+    if debug_f is not None:
+        debug_f.close()
 
     results = nervaluate.Evaluator(
         ground_tags, prediction, tags=list(canonical_tags), loader="list"
