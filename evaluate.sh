@@ -2,5 +2,5 @@ export SESSION_DIR="session/adaptor_avg/hugging_face_yale_ner_iid/hugging_face_c
 test_dir=$HOME/NER_data/test/
 # for file in MIMIC3.json UTP.json MTSamples.json; do
 for file in MTSamples.json; do
-  python3 ./src/command/medical_NER_evaluator.py --session_dir="${SESSION_DIR}" --test_file="${test_dir}/${file}"
+  python3 ./src/command/NER_evaluator.py --session_dir="${SESSION_DIR}" --test_file="${test_dir}/${file}"
 done

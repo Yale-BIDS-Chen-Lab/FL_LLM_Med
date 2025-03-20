@@ -44,17 +44,18 @@ if __name__ == "__main__":
         tokens = sample["tokens"]
         predicated_tags: list[str] = []
         predicated_candidate_tags: list[str] = []
-        if output_f is not None:
-            joined_tokens = " ".join(tokens)
-            output_f.write("<<<<<<<<<<<<<<\n")
-            output_f.write(f"{joined_tokens}\n")
-            output_f.write("==============\n")
-            joined_tags = " ".join(tags)
-            output_f.write(f"{joined_tags}\n")
-            output_f.write(">>>>>>>>>>>>>>\n")
-            output_f.write(f"{out_text}\n")
         predicated_tokens = html2bio(html=out_text, canonical_tags=canonical_tags)
         predicated_tags = match_tokens(tokens, predicated_tokens)
+        if len(set(tags)) > 1 and set(predicated_tags) == {"O"}:
+            if output_f is not None:
+                joined_tokens = " ".join(tokens)
+                output_f.write("<<<<<<<<<<<<<<\n")
+                output_f.write(f"{joined_tokens}\n")
+                output_f.write("==============\n")
+                joined_tags = " ".join(tags)
+                output_f.write(f"{joined_tags}\n")
+                output_f.write(">>>>>>>>>>>>>>\n")
+                output_f.write(f"{out_text}\n")
 
         prediction.append(predicated_tags)
         ground_tags.append(tags)
@@ -68,17 +69,17 @@ if __name__ == "__main__":
     print("new metric results_per_tag ", results[1])
 
     for mode in ("lenient", "strict"):
-        lenient = classification_report(
+        result = classification_report(
             tags_true=flatten_list(ground_tags),
             tags_pred=flatten_list(prediction),
             mode=mode,
-        )  # for lenient match
-        print(mode, " metric ", json.dumps(lenient, sort_keys=True))
+        )
+        print(mode, " metric ", json.dumps(result, sort_keys=True))
 
     for mode in ("lenient", "strict"):
-        lenient = classification_report(
+        result = classification_report(
             tags_true=flatten_list(replace_tag(ground_tags, canonical_tags)),
             tags_pred=flatten_list(replace_tag(prediction, canonical_tags)),
             mode=mode,
-        )  # for lenient match
-        print(mode, " metric ", json.dumps(lenient, sort_keys=True))
+        )
+        print(mode, " metric ", json.dumps(result, sort_keys=True))
