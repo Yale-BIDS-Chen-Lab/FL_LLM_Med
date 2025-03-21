@@ -15,9 +15,10 @@ def format_prompt(prompt: str) -> str:
     assert prompt is not None
     lines = prompt.splitlines()
     i = 0
-    for i, line in enumerate(lines):
+    for line in lines:
         if line.startswith("Use <span class="):
             break
+        i += 1
     assert i != 0
     prompt = "\n".join(lines[:i] + sorted(lines[i:]))
     return prompt

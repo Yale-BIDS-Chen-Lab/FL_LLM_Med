@@ -17,7 +17,9 @@ if __name__ == "__main__":
     )
     parser.add_argument("--session_dir", help="session dir", type=str, required=True)
     parser.add_argument("--test_file", help="test file", type=str, default=None)
-    parser.add_argument("--debug_file", help="contains debug info", type=str, default=None)
+    parser.add_argument(
+        "--debug_file", help="contains debug info", type=str, default=None
+    )
     args = parser.parse_args()
 
     prediction: list[list[str]] = []
@@ -46,16 +48,15 @@ if __name__ == "__main__":
         predicated_candidate_tags: list[str] = []
         predicated_tokens = html2bio(html=out_text, canonical_tags=canonical_tags)
         predicated_tags = match_tokens(tokens, predicated_tokens)
-        if len(set(tags)) > 1 and set(predicated_tags) == {"O"}:
-            if debug_f is not None:
-                joined_tokens = " ".join(tokens)
-                debug_f.write("<<<<<<<<<<<<<<\n")
-                debug_f.write(f"{joined_tokens}\n")
-                debug_f.write("==============\n")
-                joined_tags = " ".join(tags)
-                debug_f.write(f"{joined_tags}\n")
-                debug_f.write(">>>>>>>>>>>>>>\n")
-                debug_f.write(f"{out_text}\n")
+        if len(set(tags)) > 1 and set(predicated_tags) == {"O"} and debug_f is not None:
+            joined_tokens = " ".join(tokens)
+            debug_f.write("<<<<<<<<<<<<<<\n")
+            debug_f.write(f"{joined_tokens}\n")
+            debug_f.write("==============\n")
+            joined_tags = " ".join(tags)
+            debug_f.write(f"{joined_tags}\n")
+            debug_f.write(">>>>>>>>>>>>>>\n")
+            debug_f.write(f"{out_text}\n")
 
         prediction.append(predicated_tags)
         ground_tags.append(tags)

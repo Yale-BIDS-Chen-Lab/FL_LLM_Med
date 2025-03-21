@@ -11,9 +11,7 @@ class LLMTextWorker(AggregationWorker, DatapipelineMixin):
     def _before_training(self) -> None:
         self._send_parameter_diff: bool = False
         super()._before_training()
-        for transform in self.get_text_pipeline().transforms:
-            self.dataset_collection.append_text_transform(transform)
-        self.dataset_collection.set_prompt(self.read_prompt())
+        self.set_prompt(self.dataset_collection, for_evaluation=False)
 
     @property
     def dataset_collection(self) -> TextDatasetCollection:

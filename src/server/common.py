@@ -8,9 +8,7 @@ from ..datapipeline_mixin import DatapipelineMixin
 
 
 class LLMTextServer(AggregationServer, DatapipelineMixin):
-    added_transform = False
-
-    def get_tester(self, for_evaluation: bool = False) -> Inferencer:
+    def get_tester(self, for_evaluation: bool) -> Inferencer:
         self.config.model_config.model_kwargs.pop("load_in_4bit", None)
         self.config.model_config.model_kwargs.pop("load_in_8bit", None)
         if "finetune_config" not in self.config.model_config.model_kwargs:
@@ -20,15 +18,11 @@ class LLMTextServer(AggregationServer, DatapipelineMixin):
         )
         inferencer = super().get_tester()
         assert isinstance(inferencer.dataset_collection, TextDatasetCollection)
-        if not self.added_transform:
-            for transform in self.get_text_pipeline().transforms:
-                inferencer.dataset_collection.append_text_transform(transform)
-            self.added_transform = True
         if for_evaluation:
             assert inferencer.dataset_collection.prompt is None
         if inferencer.dataset_collection.prompt is None:
-            inferencer.dataset_collection.set_prompt(
-                self.read_prompt(for_evaluation=for_evaluation)
+            self.set_prompt(
+                dc=inferencer.dataset_collection, for_evaluation=for_evaluation
             )
         return inferencer
 
@@ -41,7 +35,7 @@ class FinetuneAdaptorServer(LLMTextServer):
 
     def _server_exit(self) -> None:
         assert self.current_aggregated_model.has_data
-        tester = self.get_tester()
+        tester = self.get_tester(for_evaluation=False)
         # merge Rola layers
         tester.replace_model(lambda old_model: old_model.merge_and_unload())
         model_evaluator = tester.model_evaluator
