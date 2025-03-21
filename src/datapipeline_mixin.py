@@ -16,13 +16,14 @@ class MedicalREPromptReduction(Transform):
         assert isinstance(data, dict)
         assert "input" in data
         tags: set[str] = set()
-        lines = data["input"].splitlines()
+        input_text: str = data["input"]
+        lines: list[str] = input_text.splitlines()
         remain_lines = []
         for line in lines:
             prefix = 'Use <span class="'
             if line.startswith(prefix):
                 tmp_line = line.removeprefix(prefix)
-                idx = tmp_line.indexOf('"')
+                idx = tmp_line.index('"')
                 assert idx > 0
                 tags.add(tmp_line[:idx])
             else:
@@ -33,7 +34,7 @@ class MedicalREPromptReduction(Transform):
             has_tag = any(tag in line for line in remain_lines)
             if not has_tag:
                 unused_tags.add(tag)
-        lines = data["input"].splitlines()
+        lines = input_text.splitlines()
         input_lines = []
         for line in lines:
             keep_line = True
