@@ -8,7 +8,7 @@ from ..datapipeline_mixin import DatapipelineMixin
 
 
 class LLMTextServer(AggregationServer, DatapipelineMixin):
-    def get_tester(self, for_evaluation: bool) -> Inferencer:
+    def get_tester(self, for_evaluation: bool = False) -> Inferencer:
         self.config.model_config.model_kwargs.pop("load_in_4bit", None)
         self.config.model_config.model_kwargs.pop("load_in_8bit", None)
         if "finetune_config" not in self.config.model_config.model_kwargs:
