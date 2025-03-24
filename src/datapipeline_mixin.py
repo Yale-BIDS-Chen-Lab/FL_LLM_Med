@@ -61,7 +61,7 @@ class DatapipelineMixin(ExecutorProtocol):
         with open(prompt_file, encoding="utf8") as f:
             prompt = f.read()
             dc.set_prompt(prompt)
-        if self.config.dc_config.dataset_kwargs.get(
+        if not for_evaluation and self.config.dc_config.dataset_kwargs.get(
             "tailor_prompt_for_training", False
         ):
             dc.append_post_prompt_text_transform(transform=MedicalREPromptReduction())
