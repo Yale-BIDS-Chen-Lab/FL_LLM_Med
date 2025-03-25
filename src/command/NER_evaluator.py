@@ -41,14 +41,15 @@ if __name__ == "__main__":
     canonical_tags = {
         tag.removeprefix("I-").removeprefix("B-") for tag in canonical_tags
     }
-    assert canonical_tags
     skipped_tags: set[str] = set()
     if args.skipped_tags is not None:
         skipped_tags = set(args.skipped_tags.split(" "))
     if skipped_tags:
         canonical_tags = canonical_tags - skipped_tags
+    assert canonical_tags
 
     print("canonical_tags are", canonical_tags)
+    print("skipped_tags are", skipped_tags)
 
     for sample, generated_text in vllm_output:
         tags = sample["tags"]

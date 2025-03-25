@@ -52,6 +52,7 @@ def match_tokens(
 
 def replace_tag(l: list[list[str]], canonical_tags: set[str]) -> list[list[str]]:
     res = []
+    assert "unified_class" not in canonical_tags
     for a in l:
         new_tags = copy.deepcopy(a)
         for idx, b in enumerate(new_tags):
