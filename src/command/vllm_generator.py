@@ -29,6 +29,8 @@ def get_vllm_output(
     session = Session(session_dir=session_dir)
     config = copy.deepcopy(session.config)
     config.hyper_parameter_config.batch_size = 1024
+
+    config.apply_global_config()
     server = get_server(config=config)
     assert isinstance(server, LLMTextServer)
     tester: Inferencer = server.get_tester(for_evaluation=True)
