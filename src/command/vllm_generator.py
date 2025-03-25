@@ -60,12 +60,13 @@ def get_vllm_output(
             generation_config="auto",
             tokenizer=model_name,
             dtype="bfloat16",
+            max_model_len=2048,
         )
         tester.model_evaluator.tokenizer.padding_side = "left"
         llm.set_tokenizer(tester.model_evaluator.tokenizer)
 
         # Load the default sampling parameters from the model.
-        sampling_params = SamplingParams(n=1, max_tokens=1024, temperature=0)
+        sampling_params = SamplingParams(n=1, max_tokens=2048, temperature=0)
 
         for batch in tester.dataloader:
             # Generate texts from the prompts. The output is a list of RequestOutput objects
