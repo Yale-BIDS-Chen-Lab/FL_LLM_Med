@@ -17,7 +17,8 @@ def html2bio(
     canonical_tags: Iterable[str] | None = None,
 ) -> list[tuple[list[str], list[str]] | str]:
     tokens: list[tuple[list[str], list[str]] | str] = []
-    assert html
+    if not html:
+        return []
     canonical_tag_lower: list[str] | None = None
     if canonical_tags is not None:
         canonical_tags = list(canonical_tags)

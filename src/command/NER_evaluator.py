@@ -20,6 +20,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--debug_file", help="contains debug info", type=str, default=None
     )
+    parser.add_argument(
+        "--skipped_tags", help="tags to skip evaluation", type=str, default=None
+    )
     args = parser.parse_args()
 
     prediction: list[list[str]] = []
@@ -38,6 +41,12 @@ if __name__ == "__main__":
     canonical_tags = {
         tag.removeprefix("I-").removeprefix("B-") for tag in canonical_tags
     }
+    assert canonical_tags
+    if args.skipped_tags is not None:
+        for tag in args.skipped_tags.split(" "):
+            canonical_tags.remove(tag)
+
+    print("canonical_tags are", canonical_tags)
 
     for sample, generated_text in vllm_output:
         tags = sample["tags"]
