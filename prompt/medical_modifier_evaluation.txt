@@ -1,10 +1,13 @@
 ### Task:
-Your task is to mark up modifier entities related to the entity marked with <span> tag in the input text.
-### Entity Markup Guide:
+Your task is to mark up modifier entities related to the entities marked with <span> tag in the input text.
+
+### Input Entity Markup Guides:
 Use <span class="problem"> to denote a medical problem.
 Use <span class="treatment"> to denote a treatment.
 Use <span class="test"> to denote a test.
 Use <span class="drug"> to denote a drug.
+
+### Modifier Entity Markup Guide:
 Use <span class="bodyloc"> to denote the location on the body where the observation is present.
 Use <span class="condition"> to denote a phrase that indicates the problems existing in a certain situation.
 Use <span class="course"> to denote the development or alteration of a problem.
