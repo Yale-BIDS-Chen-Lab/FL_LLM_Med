@@ -42,19 +42,23 @@ if __name__ == "__main__":
         tag.removeprefix("I-").removeprefix("B-") for tag in canonical_tags
     }
     assert canonical_tags
+    skipped_tags: set[str] = set()
     if args.skipped_tags is not None:
-        for tag in args.skipped_tags.split(" "):
-            canonical_tags.remove(tag)
+        skipped_tags = set(args.skipped_tags.split(" "))
+    if skipped_tags:
+        canonical_tags = canonical_tags - skipped_tags
 
     print("canonical_tags are", canonical_tags)
 
     for sample, generated_text in vllm_output:
         tags = sample["tags"]
+        if skipped_tags:
+            for i, tag in enumerate(tags):
+                if tag in skipped_tags:
+                    tags[i] = "O"
         out_text = generated_text.outputs[0].text
         tokenizer = sample["tokenizer"]
         tokens = sample["tokens"]
-        predicated_tags: list[str] = []
-        predicated_candidate_tags: list[str] = []
         predicated_tokens = html2bio(html=out_text, canonical_tags=canonical_tags)
         predicated_tags = match_tokens(tokens, predicated_tokens)
         if len(set(tags)) > 1 and set(predicated_tags) == {"O"} and debug_f is not None:
