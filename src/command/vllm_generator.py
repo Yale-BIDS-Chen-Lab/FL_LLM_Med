@@ -32,6 +32,12 @@ def get_vllm_output(
         assert os.path.isfile(data_file)
     session = Session(session_dir=session_dir)
     config = copy.deepcopy(session.config)
+    if "train_files" in config.dc_config.dataset_kwargs:
+        for f in config.dc_config.dataset_kwargs["train_files"]:
+            assert os.path.isfile(f)
+    if "test_files" in config.dc_config.dataset_kwargs:
+        for f in config.dc_config.dataset_kwargs["test_files"]:
+            assert os.path.isfile(f)
     config.hyper_parameter_config.batch_size = 1024
 
     config.apply_global_config()
