@@ -27,17 +27,17 @@ def get_vllm_output(
     data_file: str | None = None,
 ) -> Generator[tuple[dict, RequestOutput]]:
     if session_dir is not None:
-        assert os.path.isdir(session_dir)
+        assert os.path.isdir(session_dir), session_dir
     if data_file is not None:
-        assert os.path.isfile(data_file)
+        assert os.path.isfile(data_file), data_file
     session = Session(session_dir=session_dir)
     config = copy.deepcopy(session.config)
     if "train_files" in config.dc_config.dataset_kwargs:
         for f in config.dc_config.dataset_kwargs["train_files"]:
-            assert os.path.isfile(f)
+            assert os.path.isfile(f), f
     if "test_files" in config.dc_config.dataset_kwargs:
         for f in config.dc_config.dataset_kwargs["test_files"]:
-            assert os.path.isfile(f)
+            assert os.path.isfile(f), f
     config.hyper_parameter_config.batch_size = 1024
 
     config.apply_global_config()
