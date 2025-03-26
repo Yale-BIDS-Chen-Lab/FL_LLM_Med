@@ -34,16 +34,20 @@ if __name__ == "__main__":
         get_vllm_output(session_dir=args.session_dir, data_file=args.test_file)
     )
     canonical_tags: set[str] = set()
+    skipped_tags: set[str] = set()
+    if args.skipped_tags is not None:
+        skipped_tags = set(args.skipped_tags.split(" "))
+
     for sample, _ in vllm_output:
-        tags = sample["tags"]
-        canonical_tags.update(tags)
+        if skipped_tags:
+            for i, tag in enumerate(sample["tags"]):
+                if tag.removeprefix("I-").removeprefix("B-") in skipped_tags:
+                    sample["tags"][i] = "O"
+        canonical_tags.update(sample["tags"])
     canonical_tags.remove("O")
     canonical_tags = {
         tag.removeprefix("I-").removeprefix("B-") for tag in canonical_tags
     }
-    skipped_tags: set[str] = set()
-    if args.skipped_tags is not None:
-        skipped_tags = set(args.skipped_tags.split(" "))
     if skipped_tags:
         canonical_tags = canonical_tags - skipped_tags
     assert canonical_tags
@@ -53,10 +57,6 @@ if __name__ == "__main__":
 
     for sample, generated_text in vllm_output:
         tags = sample["tags"]
-        if skipped_tags:
-            for i, tag in enumerate(tags):
-                if tag in skipped_tags:
-                    tags[i] = "O"
         out_text = generated_text.outputs[0].text
         tokenizer = sample["tokenizer"]
         tokens = sample["tokens"]
