@@ -26,6 +26,10 @@ def get_vllm_output(
     session_dir: str | None = None,
     data_file: str | None = None,
 ) -> Generator[tuple[dict, RequestOutput]]:
+    if session_dir is not None:
+        assert os.path.isdir(session_dir)
+    if data_file is not None:
+        assert os.path.isfile(data_file)
     session = Session(session_dir=session_dir)
     config = copy.deepcopy(session.config)
     config.hyper_parameter_config.batch_size = 1024
