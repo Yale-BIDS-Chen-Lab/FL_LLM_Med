@@ -15,5 +15,5 @@ dataset_kwargs:
     - RE_UTP_test.json
   no_validation: true
   prompt_file: medical_modifier.txt
-  tailor_prompt_for_training: false
+  tailor_prompt_for_training: true
   evaluation_prompt_file: medical_modifier_evaluation.txt
