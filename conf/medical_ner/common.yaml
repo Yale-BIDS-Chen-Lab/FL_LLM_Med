@@ -16,3 +16,4 @@ dataset_kwargs:
   no_validation: true
   prompt_file: medical_html.txt
   evaluation_prompt_file: medical_html_evaluation.txt
+defaults: [../global@_here_, _self_]

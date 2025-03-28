@@ -17,3 +17,4 @@ dataset_kwargs:
   prompt_file: medical_modifier.txt
   tailor_prompt_for_training: true
   evaluation_prompt_file: medical_modifier_evaluation.txt
+defaults: [../global@_here_, _self_]
