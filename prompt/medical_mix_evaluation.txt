@@ -49,9 +49,3 @@ __if__{__html_defined__}
 __endif__
 
 ### Output Text:
-__if__{__output_defined__}
-{output}
-__endif__
-__if__{__html_defined__}
-{html}
-__endif__
