@@ -60,6 +60,26 @@ class DatapipelineMixin(ExecutorProtocol):
         prompt_file = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "..", "prompt", prompt_file
         )
+
+
+class DatapipelineMixin(ExecutorProtocol):
+    def get_prompt_file(self, for_evaluation: bool) -> str:
+        key = ""
+        if for_evaluation:
+            key = "evaluation_prompt_file"
+        else:
+            key = "prompt_file"
+        if key not in self.config.dc_config.dataset_kwargs:
+            key = key + "s"
+        prompt_file = self.config.dc_config.dataset_kwargs.get(key)
+        if isinstance(prompt_file, list):
+            worker_id = self.worker_id
+            assert isinstance(worker_id, int)
+            prompt_file = prompt_file[worker_id]
+        assert isinstance(prompt_file, str)
+        prompt_file = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "..", "prompt", prompt_file
+        )
         assert os.path.isfile(prompt_file), prompt_file
         return prompt_file
 
