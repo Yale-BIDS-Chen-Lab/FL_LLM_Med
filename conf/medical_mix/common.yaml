@@ -20,13 +20,6 @@ dataset_kwargs:
     - /home/cyy/NER_data/test/MTSamples.json
     - /home/cyy/NER_data/test/UTP.json
     - /home/cyy/NER_data/test/i2b2.json
-  training_prompt_files:
-    - medical_modifier.txt
-    - medical_modifier.txt
-    - medical_modifier.txt
-    - medical_html.txt
-    - medical_html.txt
-    - medical_html.txt
   prompt_file: medical_mix.txt
   evaluation_prompt_file: medical_mix_evaluation.txt
   tailor_prompt_for_training: true
