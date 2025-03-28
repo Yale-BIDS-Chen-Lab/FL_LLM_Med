@@ -51,13 +51,18 @@ class MedicalREPromptReduction(Transform):
 
 
 class DatapipelineMixin(ExecutorProtocol):
-    def set_prompt(self, dc: TextDatasetCollection, for_evaluation: bool) -> None:
+    def get_prompt_file(self, for_evaluation: bool) -> str:
         prompt_file = self.config.dc_config.dataset_kwargs["prompt_file"]
         if for_evaluation:
             prompt_file = self.config.dc_config.dataset_kwargs["evaluation_prompt_file"]
         prompt_file = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "..", "prompt", prompt_file
         )
+        assert os.path.isfile(prompt_file), prompt_file
+        return prompt_file
+
+    def set_prompt(self, dc: TextDatasetCollection, for_evaluation: bool) -> None:
+        prompt_file = self.get_prompt_file(for_evaluation=for_evaluation)
         with open(prompt_file, encoding="utf8") as f:
             prompt = f.read()
             dc.set_prompt(prompt)
