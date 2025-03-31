@@ -1,6 +1,5 @@
 ---
 model_name: hugging_face_causal_lm_deepseek-ai/DeepSeek-R1-Distill-Llama-8B
-distributed_algorithm: adaptor_avg
 batch_size: 4
 epoch: 1
 learning_rate: 2e-4
