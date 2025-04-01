@@ -90,7 +90,7 @@ def get_vllm_output(
                 if isinstance(v, list):
                     for idx, a in enumerate(v):
                         batch_list[idx][k] = a
-
+            print(batch_list)
             yield from zip(
                 batch_list,
                 llm.generate(batch["inputs"], sampling_params),

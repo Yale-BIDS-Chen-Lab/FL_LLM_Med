@@ -56,8 +56,8 @@ if __name__ == "__main__":
     print("skipped_tags are", skipped_tags)
 
     for sample, generated_text in vllm_output:
-        tags = sample["tags"]
         out_text = generated_text.outputs[0].text
+        tags = sample["tags"]
         tokenizer = sample["tokenizer"]
         tokens = sample["tokens"]
         predicated_tokens = html2bio(html=out_text, canonical_tags=canonical_tags)
@@ -65,11 +65,19 @@ if __name__ == "__main__":
         if len(set(tags)) > 1 and set(predicated_tags) == {"O"} and debug_f is not None:
             joined_tokens = " ".join(tokens)
             debug_f.write("<<<<<<<<<<<<<<\n")
+            joined_tokens = sample["inputs"][i]
             debug_f.write(f"{joined_tokens}\n")
             debug_f.write("==============\n")
             joined_tags = " ".join(tags)
             debug_f.write(f"{joined_tags}\n")
             debug_f.write(">>>>>>>>>>>>>>\n")
+            predicated_out_text: list[str] = []
+            for t in predicated_tokens:
+                if isinstance(t, str):
+                    predicated_out_text.append(t)
+                else:
+                    predicated_out_text += t[0]
+            out_text = " ".join(predicated_out_text)
             debug_f.write(f"{out_text}\n")
 
         prediction.append(predicated_tags)
