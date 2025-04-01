@@ -20,8 +20,8 @@ dependencies = [
   "cyy_huggingface_toolbox@git+https://github.com/cyyever/huggingface_toolbox.git",
   "nervaluate",
   "vllm",
-  "peft",
-  "sft",
+  "peft==0.15.0",
+  "trl==0.15.2",
   "nervaluate",
   "ner_metrics",
   "bs4"
