@@ -1,6 +1,6 @@
 import argparse
-import os
 import json
+import os
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -11,7 +11,7 @@ if __name__ == "__main__":
     assert os.path.isfile(args.file)
     res = None
     print(args.file)
-    with open(args.file, "rt", encoding="utf8") as f:
+    with open(args.file, encoding="utf8") as f:
         res = json.load(f)
         assert isinstance(res, list)
         for a in res:
@@ -19,5 +19,5 @@ if __name__ == "__main__":
             for k in ("input", "output", "html"):
                 if k not in a:
                     a[k] = ""
-    with open(args.file, "wt", encoding="utf8") as f:
+    with open(args.file, "w", encoding="utf8") as f:
         json.dump(res, f)
