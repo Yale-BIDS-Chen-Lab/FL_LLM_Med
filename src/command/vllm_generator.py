@@ -83,14 +83,13 @@ def get_vllm_output(
             # that contain the prompt, generated text, and other information.
             batch_size = batch["batch_size"]
             batch_list: list[dict] = [
-                {"tokenizer": tester.model_evaluator.tokenizer}
+                {}
                 for _ in range(batch_size)
             ]
             for k, v in batch.items():
                 if isinstance(v, list):
                     for idx, a in enumerate(v):
                         batch_list[idx][k] = a
-            print(batch_list)
             yield from zip(
                 batch_list,
                 llm.generate(batch["inputs"], sampling_params),

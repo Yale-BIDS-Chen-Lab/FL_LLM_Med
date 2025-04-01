@@ -58,19 +58,22 @@ if __name__ == "__main__":
     for sample, generated_text in vllm_output:
         out_text = generated_text.outputs[0].text
         tags = sample["tags"]
-        tokenizer = sample["tokenizer"]
         tokens = sample["tokens"]
         predicated_tokens = html2bio(html=out_text, canonical_tags=canonical_tags)
         predicated_tags = match_tokens(tokens, predicated_tokens)
         if len(set(tags)) > 1 and set(predicated_tags) == {"O"} and debug_f is not None:
+            debug_f.write("input <<<<<<<<<<<<<<\n")
             joined_tokens = " ".join(tokens)
-            debug_f.write("<<<<<<<<<<<<<<\n")
-            joined_tokens = sample["inputs"][i]
+            if "inputs" in sample:
+                joined_tokens = sample["inputs"]
             debug_f.write(f"{joined_tokens}\n")
-            debug_f.write("==============\n")
+            debug_f.write("ground_out ==============\n")
             joined_tags = " ".join(tags)
+            if "output" in sample:
+                joined_tags = sample["output"]
             debug_f.write(f"{joined_tags}\n")
-            debug_f.write(">>>>>>>>>>>>>>\n")
+            debug_f.write("predicated_out>>>>>>>>>>>>>>\n")
+            debug_f.write(f"{out_text}\n")
             predicated_out_text: list[str] = []
             for t in predicated_tokens:
                 if isinstance(t, str):
