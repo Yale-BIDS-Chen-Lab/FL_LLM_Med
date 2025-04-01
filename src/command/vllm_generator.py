@@ -23,13 +23,11 @@ from src.server import LLMTextServer
 
 
 def get_vllm_output(
-    session_dir: str | None = None,
-    data_file: str | None = None,
+    session_dir: str,
+    data_file: str,
 ) -> Generator[tuple[dict, RequestOutput]]:
-    if session_dir is not None:
-        assert os.path.isdir(session_dir), session_dir
-    if data_file is not None:
-        assert os.path.isfile(data_file), data_file
+    assert os.path.isdir(session_dir), session_dir
+    assert os.path.isfile(data_file), data_file
     session = Session(session_dir=session_dir)
     config = copy.deepcopy(session.config)
     if "train_files" in config.dc_config.dataset_kwargs:
@@ -44,10 +42,9 @@ def get_vllm_output(
     server = get_server(config=config)
     assert isinstance(server, LLMTextServer)
     tester: Inferencer = server.get_tester(for_evaluation=True)
-    if data_file is not None:
-        tester.mutable_dataset_collection.transform_all_datasets(
-            transformer=lambda _: load_local_files([data_file]),
-        )
+    tester.mutable_dataset_collection.transform_all_datasets(
+        transformer=lambda _: load_local_files([data_file]),
+    )
 
     with TempDir():
         save_dir = os.path.join(session.server_dir, "SFTTrainer")
@@ -82,10 +79,7 @@ def get_vllm_output(
             # Generate texts from the prompts. The output is a list of RequestOutput objects
             # that contain the prompt, generated text, and other information.
             batch_size = batch["batch_size"]
-            batch_list: list[dict] = [
-                {}
-                for _ in range(batch_size)
-            ]
+            batch_list: list[dict] = [{} for _ in range(batch_size)]
             for k, v in batch.items():
                 if isinstance(v, list):
                     for idx, a in enumerate(v):
