@@ -19,6 +19,7 @@ dependencies = [
   "distributed_learning_simulation@git+https://github.com/cyyever/distributed_learning_simulation_lib.git",
   "cyy_huggingface_toolbox@git+https://github.com/cyyever/huggingface_toolbox.git",
   "nervaluate",
+  "transformers==4.50.0",
   "vllm",
   "peft==0.15.0",
   "trl==0.15.2",
