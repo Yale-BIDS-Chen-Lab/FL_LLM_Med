@@ -20,7 +20,7 @@ dependencies = [
   "cyy_huggingface_toolbox@git+https://github.com/cyyever/huggingface_toolbox.git",
   "nervaluate",
   "transformers==4.50.0",
-  "vllm",
+  "vllm==0.8.1",
   "peft==0.15.0",
   "trl==0.15.2",
   "nervaluate",
