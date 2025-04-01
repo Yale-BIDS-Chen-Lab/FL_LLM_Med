@@ -34,6 +34,9 @@ class MedicalREPromptReduction(Transform):
             has_tag = any(tag in line for line in remain_lines)
             if not has_tag:
                 unused_tags.add(tag)
+        for tag in ("treatment", "drug", "problem", "test"):
+            if tag in unused_tags:
+                unused_tags.remove(tag)
         lines = input_text.splitlines()
         input_lines = []
         for line in lines:
@@ -46,6 +49,15 @@ class MedicalREPromptReduction(Transform):
             if keep_line:
                 input_lines.append(line)
         assert input_lines
+        guide_idx = -1
+        for idx, line in enumerate(input_lines):
+            if "Modifier Entity Markup Guide" in line.strip():
+                guide_idx = idx
+                break
+        if guide_idx >= 0 and not any(
+            line.startswith("Use <span class=") for line in input_lines[guide_idx:]
+        ):
+            input_lines.pop(guide_idx)
         data["input"] = "\n".join(input_lines)
         return data
 
