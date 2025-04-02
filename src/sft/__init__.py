@@ -106,7 +106,7 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
                 truncation=True,
                 padding=True,
                 max_length=self.config.dc_config.dataset_kwargs.get(
-                    "input_max_len", 1024
+                    "input_max_len", 2048
                 ),
             ).to(device=executor.device, non_blocking=True)
             return res
