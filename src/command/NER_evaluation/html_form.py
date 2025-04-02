@@ -5,9 +5,9 @@ import bs4
 
 
 def tokenize(txt: str) -> list[str]:
-    # for mark in string.punctuation:
-    #     if mark in txt and mark != "#":
-    #         txt = txt.replace(mark, f" {mark} ")
+    for mark in ":;,.":
+        if mark in txt:
+            txt = txt.replace(mark, f" {mark} ")
     lines = txt.strip().split(" ")
     return [line for line in lines if line]
 
