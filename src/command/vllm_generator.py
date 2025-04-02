@@ -36,9 +36,11 @@ def get_vllm_output(
     if "test_files" in config.dc_config.dataset_kwargs:
         for f in config.dc_config.dataset_kwargs["test_files"]:
             assert os.path.isfile(f), f
+    print(config.dc_config.dataset_kwargs)
+    print(config.model_config.model_kwargs)
+    print(config.trainer_config.hook_config)
     config.hyper_parameter_config.batch_size = 1024
 
-    config.apply_global_config()
     server = get_server(config=config)
     assert isinstance(server, LLMTextServer)
     tester: Inferencer = server.get_tester(for_evaluation=True)
