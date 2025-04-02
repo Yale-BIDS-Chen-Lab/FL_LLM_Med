@@ -17,6 +17,7 @@ from transformers import AutoModelForCausalLM
 from vllm import LLM, RequestOutput, SamplingParams
 
 os.environ["NO_TOKENIZER_TRANSFORMS"] = "true"
+os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
 
 import src.method  # noqa: F401
 from src.server import LLMTextServer
