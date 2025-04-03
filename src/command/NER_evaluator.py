@@ -72,7 +72,7 @@ if __name__ == "__main__":
             if "output" in sample:
                 joined_tags = sample["output"]
             debug_f.write(f"{joined_tags}\n")
-            debug_f.write("predicated_out>>>>>>>>>>>>>>\n")
+            debug_f.write("predicated_out >>>>>>>>>>>>>>\n")
             debug_f.write(f"{out_text}\n")
             predicated_out_text: list[str] = []
             for t in predicated_tokens:
