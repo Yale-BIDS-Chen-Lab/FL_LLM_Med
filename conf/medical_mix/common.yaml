@@ -22,6 +22,6 @@ dataset_kwargs:
     - /home/cyy/NER_data/test/i2b2.json
   prompt_file: medical_mix.txt
   evaluation_prompt_file: medical_mix_evaluation.txt
-  tailor_prompt_for_training: true
+  tailor_prompt_for_training: false
   no_validation: true
 defaults: [../global@_here_, _self_]
