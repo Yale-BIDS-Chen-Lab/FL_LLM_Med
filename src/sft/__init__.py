@@ -56,7 +56,7 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
         eval_accumulation_steps=1,
         bf16_full_eval=True,
         prediction_loss_only=True,
-        max_length=config.dc_config.dataset_kwargs.get("input_max_len", 1024),
+        max_length=config.dc_config.dataset_kwargs.get("input_max_len", 2048),
     )
 
 
@@ -104,9 +104,7 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
                 examples["input"],
                 truncation=True,
                 padding=True,
-                max_length=self.config.dc_config.dataset_kwargs.get(
-                    "input_max_len", 2048
-                ),
+                max_length=self.config.dc_config.dataset_kwargs["input_max_len"],
             ).to(device=executor.device, non_blocking=True)
             return res
 
