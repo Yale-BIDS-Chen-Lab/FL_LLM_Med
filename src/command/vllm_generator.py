@@ -24,8 +24,7 @@ from src.server import LLMTextServer
 
 
 def get_vllm_output(
-    session_dir: str,
-    data_file: str,
+    session_dir: str, data_file: str, zero_shot: bool
 ) -> Generator[tuple[dict, RequestOutput]]:
     assert os.path.isdir(session_dir), session_dir
     assert os.path.isfile(data_file), data_file
@@ -50,14 +49,18 @@ def get_vllm_output(
     )
 
     with TempDir():
-        save_dir = os.path.join(session.server_dir, "SFTTrainer")
         model_name = session.config.model_config.model_name.removeprefix(
             "hugging_face_causal_lm_"
         )
         model = AutoModelForCausalLM.from_pretrained(model_name)
-        finetuned_model = PeftModel.from_pretrained(model=model, model_id=save_dir)
-        merge_model = finetuned_model.merge_and_unload()
-        merge_model.save_pretrained("./finetuned_model")
+        if zero_shot:
+            print("Use pretrained-model")
+            model.save_pretrained("./finetuned_model")
+        else:
+            save_dir = os.path.join(session.server_dir, "SFTTrainer")
+            finetuned_model = PeftModel.from_pretrained(model=model, model_id=save_dir)
+            merge_model = finetuned_model.merge_and_unload()
+            merge_model.save_pretrained("./finetuned_model")
 
         # Create an LLM with built-in default generation config.
         # The generation config is set to None by default to keep

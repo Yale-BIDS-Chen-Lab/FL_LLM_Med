@@ -23,6 +23,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--skipped_tags", help="tags to skip evaluation", type=str, default=None
     )
+    parser.add_argument(
+        "--zero_shot", help="use pretrained model", type=bool, default=False
+    )
     args = parser.parse_args()
 
     prediction: list[list[str]] = []
@@ -31,7 +34,11 @@ if __name__ == "__main__":
     if args.debug_file is not None:
         debug_f = open(args.debug_file, "w", encoding="utf8")
     vllm_output = list(
-        get_vllm_output(session_dir=args.session_dir, data_file=args.test_file)
+        get_vllm_output(
+            session_dir=args.session_dir,
+            data_file=args.test_file,
+            zero_shot=args.zero_shot,
+        )
     )
     canonical_tags: set[str] = set()
     skipped_tags: set[str] = set()
