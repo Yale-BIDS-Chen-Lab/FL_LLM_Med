@@ -2,12 +2,11 @@ from distributed_learning_simulation import (
     AlgorithmRepository,
     FedAVGAlgorithm,
 )
-from .worker import FedSALoRAWorker
 
 from ..method_forward import (
     SFTServer,
-    SFTTrainerWorker,
 )
+from .worker import FedSALoRAWorker
 
 AlgorithmRepository.register_algorithm(
     algorithm_name="FedSA-LoRA",
