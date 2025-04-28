@@ -4,8 +4,6 @@ from distributed_learning_simulation import (
 )
 
 from ..method_forward import (
-    FinetuneAdaptorServer,
-    FinetuneAdaptorWorker,
     SFTServer,
     SFTTrainerWorker,
 )
