@@ -31,12 +31,14 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
             self.trainer._prepare_execution()
         sft_trainer = self.get_sft_trainer(self.trainer)
         sft_trainer.train()
+        sent_data = self._get_sent_data()
         self.clear_sft_trainer()
-        self._aggregation(sent_data=self._get_sent_data())
+        self._aggregation(sent_data=sent_data)
 
     def _get_parameters(self) -> TensorDict:
+        assert self._sft_trainer is not None
         return HuggingFaceModelEvaluatorForFinetune.get_perf_model_state_dict(
-            self.get_sft_trainer(self.trainer).model_wrapped
+            self._sft_trainer.model_wrapped
         )
 
     def pause(self, in_round: bool = False) -> None:
