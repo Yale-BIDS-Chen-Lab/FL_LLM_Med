@@ -1,4 +1,3 @@
-
 from cyy_naive_lib.log import log_info
 from cyy_torch_toolbox import TensorDict, tensor_clone
 
@@ -19,10 +18,15 @@ class FedSALoRAWorker(SFTTrainerWorker):
         return state
 
     def _load_adaptor(self, adaptor_parameter: TensorDict) -> None:
-        if self.old_state is None:
+        if self._sft_trainer is None:
             super()._load_adaptor(adaptor_parameter)
             return
 
+        assert self.old_state is not None
+        adaptor_parameter = {
+            k: v for k, v in adaptor_parameter.items() if "lora_A" in k
+        }
+        assert adaptor_parameter
         for k, v in adaptor_parameter.items():
             assert k in self.old_state
             self.old_state[k] = v
