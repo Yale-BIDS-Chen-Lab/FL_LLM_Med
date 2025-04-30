@@ -26,6 +26,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--zero_shot", help="use pretrained model", type=bool, default=False
     )
+    parser.add_argument(
+        "--worker_index", help="evaluate worker", type=int, default=None
+    )
     args = parser.parse_args()
 
     prediction: list[list[str]] = []
@@ -33,11 +36,13 @@ if __name__ == "__main__":
     debug_f = None
     if args.debug_file is not None:
         debug_f = open(args.debug_file, "w", encoding="utf8")
+    assert not (args.zero_shot and args.worker_index is not None)
     vllm_output = list(
         get_vllm_output(
             session_dir=args.session_dir,
             data_file=args.test_file,
             zero_shot=args.zero_shot,
+            worker_index=args.worker_index,
         )
     )
     canonical_tags: set[str] = set()
