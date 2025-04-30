@@ -16,6 +16,7 @@ class FedSALoRAWorker(SFTTrainerWorker):
             state = {k: v for k, v in self.old_state.items() if "lora_A" in k}
             assert state
             return state
+        log_warning("Send full adaptor")
         assert self.old_state is not None
         return self.old_state
 
