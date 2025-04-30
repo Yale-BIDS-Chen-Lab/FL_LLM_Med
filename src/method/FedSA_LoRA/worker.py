@@ -25,6 +25,8 @@ class FedSALoRAWorker(SFTTrainerWorker):
         message.end_training = True
         log_warning("Send final adaptor")
         self._aggregation(sent_data=message)
+        sft_trainer = self.get_sft_trainer()
+        sft_trainer.save_model()
         super()._after_training()
 
     def _load_adaptor(self, adaptor_parameter: TensorDict) -> None:
