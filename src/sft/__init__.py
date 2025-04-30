@@ -1,7 +1,7 @@
 import gc
 import os
 import uuid
-from typing import Any, Protocol
+from typing import Protocol
 
 import torch
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluator
@@ -63,9 +63,7 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
 class SFTTrainerMinxin(ExecutorProtocol, Protocol):
     _sft_trainer: None | SFTTrainer = None
 
-    def get_sft_trainer(
-        self, executor: Executor | None = None
-    ) -> SFTTrainer:
+    def get_sft_trainer(self, executor: Executor | None = None) -> SFTTrainer:
         os.environ["NO_TOKENIZER_TRANSFORMS"] = "1"
         if self._sft_trainer is not None:
             return self._sft_trainer

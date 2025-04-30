@@ -1,4 +1,4 @@
-from cyy_naive_lib.log import log_debug
+from cyy_naive_lib.log import log_debug, log_warning
 from cyy_torch_toolbox import TensorDict, tensor_clone
 
 from ..method_forward import (
@@ -23,6 +23,7 @@ class FedSALoRAWorker(SFTTrainerWorker):
         self._in_after_training = True
         message = self._get_sent_data()
         message.end_training = True
+        log_warning("Send final adaptor")
         self._aggregation(sent_data=message)
         super()._after_training()
 
