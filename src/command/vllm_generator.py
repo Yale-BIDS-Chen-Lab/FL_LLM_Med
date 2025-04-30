@@ -24,7 +24,7 @@ from src.server import LLMTextServer
 
 
 def get_vllm_output(
-    session_dir: str, data_file: str, zero_shot: bool
+    session_dir: str, data_file: str, zero_shot: bool, worker_index: int | None = None
 ) -> Generator[tuple[dict, RequestOutput]]:
     assert os.path.isdir(session_dir), session_dir
     assert os.path.isfile(data_file), data_file
@@ -40,6 +40,8 @@ def get_vllm_output(
     print(config.model_config.model_kwargs)
     print(config.trainer_config.hook_config)
     config.hyper_parameter_config.batch_size = 1024
+    if worker_index is not None:
+        assert worker_index < config.worker_number
 
     server = get_server(config=config)
     assert isinstance(server, LLMTextServer)
@@ -57,7 +59,12 @@ def get_vllm_output(
             print("Use pretrained-model")
             model.save_pretrained("./finetuned_model")
         else:
-            save_dir = os.path.join(session.server_dir, "SFTTrainer")
+            if worker_index is not None:
+                save_dir = os.path.join(
+                    session.session_dir, f"worker_{worker_index}", "SFTTrainer"
+                )
+            else:
+                save_dir = os.path.join(session.server_dir, "SFTTrainer")
             finetuned_model = PeftModel.from_pretrained(model=model, model_id=save_dir)
             merge_model = finetuned_model.merge_and_unload()
             merge_model.save_pretrained("./finetuned_model")
