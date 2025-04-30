@@ -60,7 +60,8 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
         if self._sample_size is not None:
             return self._sample_size
         self._sample_size = 0
-        for batch in self.get_sft_trainer().get_train_dataloader():
+        assert self._sft_trainer is not None
+        for batch in self._sft_trainer.get_train_dataloader():
             self._sample_size += (batch["labels"][..., 1:] != -100).sum().item()
         assert self._sample_size is not None and self._sample_size > 0
         log_info("sample_size is %s", self._sample_size)
