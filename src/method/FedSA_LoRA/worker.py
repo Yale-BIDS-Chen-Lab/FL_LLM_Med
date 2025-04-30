@@ -1,4 +1,4 @@
-from cyy_naive_lib.log import log_info
+from cyy_naive_lib.log import log_debug
 from cyy_torch_toolbox import TensorDict, tensor_clone
 
 from ..method_forward import (
@@ -34,7 +34,7 @@ class FedSALoRAWorker(SFTTrainerWorker):
         adaptor_parameter = {
             k: v for k, v in adaptor_parameter.items() if "lora_A" in k
         }
-        log_info("Received layers:%s", list(adaptor_parameter.keys()))
+        log_debug("Received layers:%s", list(adaptor_parameter.keys()))
         assert adaptor_parameter
         for k, v in adaptor_parameter.items():
             assert k in self.old_state
