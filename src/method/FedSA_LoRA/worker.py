@@ -10,11 +10,21 @@ class FedSALoRAWorker(SFTTrainerWorker):
     old_state: None | TensorDict = None
 
     def _get_parameters(self) -> TensorDict:
-        self.old_state = tensor_clone(super()._get_parameters())
+        if not self._stopped():
+            self.old_state = tensor_clone(super()._get_parameters())
+            assert self.old_state is not None
+            state = {k: v for k, v in self.old_state.items() if "lora_A" in k}
+            assert state
+            return state
         assert self.old_state is not None
-        state = {k: v for k, v in self.old_state.items() if "lora_A" in k}
-        assert state
-        return state
+        return self.old_state
+
+    def _after_training(self) -> None:
+        self._in_after_training = True
+        message = self._get_sent_data()
+        message.end_training = True
+        self._aggregation(sent_data=message)
+        super()._after_training()
 
     def _load_adaptor(self, adaptor_parameter: TensorDict) -> None:
         if self.old_state is None:
