@@ -1,4 +1,3 @@
-import string
 from collections.abc import Iterable
 
 import bs4
