@@ -4,9 +4,7 @@ import torch
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
 from cyy_naive_lib.log import log_debug, log_warning
 from cyy_torch_toolbox import Inferencer, TensorDict
-from distributed_learning_simulation import ModelParameter
 from peft import PeftModel
-from transformers import AutoModelForCausalLM
 
 from ..sft import SFTTrainerMinxin, load_perf_model_state_dict
 from .common import LLMTextServer
@@ -22,22 +20,28 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
             self.cached_tester = super().get_tester(for_evaluation=for_evaluation)
         return self.cached_tester
 
-    def _get_init_model(self) -> ModelParameter:
+    def _get_init_model(self) -> TensorDict:
         init_global_model_path = self.config.algorithm_kwargs.get(
             "global_model_path", None
         )
-        model = self.get_tester().model_evaluator.model
-        if init_global_model_path is not None:
-            assert isinstance(model, PeftModel)
+        tester = self.get_tester()
+        evaluator = tester.model_evaluator
+        assert isinstance(evaluator, HuggingFaceModelEvaluatorForFinetune)
+        if init_global_model_path is None:
+            return HuggingFaceModelEvaluatorForFinetune.get_perf_model_state_dict(
+                evaluator.model
+            )
 
-            model_name = self.config.model_config.model_name.removeprefix(
-                "hugging_face_causal_lm_"
-            )
-            hf_model = AutoModelForCausalLM.from_pretrained(model_name)
-            model = PeftModel.from_pretrained(
-                model=hf_model, model_id=init_global_model_path
-            )
-        return HuggingFaceModelEvaluatorForFinetune.get_perf_model_state_dict(model)
+        finetuned_model = PeftModel.from_pretrained(
+            model=evaluator.underlying_model, model_id=init_global_model_path
+        )
+        self.load_parameter(
+            tester=tester,
+            parameter=HuggingFaceModelEvaluatorForFinetune.get_perf_model_state_dict(
+                finetuned_model
+            ),
+        )
+        return self.sft_get_perf_model_state_dict()
 
     def load_parameter(self, tester: Inferencer, parameter: TensorDict) -> None:
         assert tester is self.cached_tester

@@ -5,7 +5,6 @@ import sys
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 
-from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
 from cyy_naive_lib.log import log_info
 from cyy_torch_toolbox import TensorDict
 
@@ -36,10 +35,7 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
         self._aggregation(sent_data=sent_data)
 
     def _get_parameters(self) -> TensorDict:
-        assert self._sft_trainer is not None
-        return HuggingFaceModelEvaluatorForFinetune.get_perf_model_state_dict(
-            self._sft_trainer.model_wrapped
-        )
+        return self.sft_get_perf_model_state_dict()
 
     def pause(self, in_round: bool = False) -> None:
         super().pause(in_round=in_round)
