@@ -1,14 +1,23 @@
 import os
 
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
-from cyy_torch_toolbox import Inferencer, TensorDict, TextDatasetCollection
+from cyy_torch_toolbox import (
+    Inferencer,
+    MachineLearningPhase,
+    TensorDict,
+    TextDatasetCollection,
+)
 from distributed_learning_simulation import AggregationServer
 
 from ..datapipeline_mixin import DatapipelineMixin
 
 
 class LLMTextServer(AggregationServer, DatapipelineMixin):
-    def get_tester(self, for_evaluation: bool = False) -> Inferencer:
+    def get_tester(
+        self,
+        phase: MachineLearningPhase = MachineLearningPhase.Test,
+        for_evaluation: bool = False,
+    ) -> Inferencer:
         self.config.model_config.model_kwargs.pop("load_in_4bit", None)
         self.config.model_config.model_kwargs.pop("load_in_8bit", None)
         if "finetune_config" not in self.config.model_config.model_kwargs:
@@ -16,7 +25,7 @@ class LLMTextServer(AggregationServer, DatapipelineMixin):
         self.config.model_config.model_kwargs["finetune_config"]["inference_mode"] = (
             True
         )
-        inferencer = super().get_tester()
+        inferencer = super().get_tester(phase=phase)
         assert isinstance(inferencer.dataset_collection, TextDatasetCollection)
         if for_evaluation:
             assert inferencer.dataset_collection.prompt is None
