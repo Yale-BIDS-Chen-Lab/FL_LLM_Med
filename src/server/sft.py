@@ -6,8 +6,7 @@ from cyy_naive_lib.log import log_debug, log_info, log_warning
 from cyy_torch_toolbox import Inferencer, MachineLearningPhase, TensorDict
 from peft import PeftModel
 
-from algorithm import AggregationByLossAlgorithm
-
+from ..algorithm import AggregationByLossAlgorithm
 from ..sft import SFTTrainerMinxin, load_perf_model_state_dict
 from .common import LLMTextServer
 
