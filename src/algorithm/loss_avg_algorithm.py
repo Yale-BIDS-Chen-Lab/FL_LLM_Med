@@ -15,9 +15,9 @@ class AggregationByLossAlgorithm(FedAVGAlgorithm):
         worker_id: int,
         worker_data: Message | None,
     ) -> bool:
-        res = super().process_worker_data(worker_id=worker_id, worker_data=worker_data)
-        self._all_worker_data[worker_id].aggregation_weight = None
-        return res
+        assert worker_data is not None
+        worker_data.aggregation_weight = None
+        return super().process_worker_data(worker_id=worker_id, worker_data=worker_data)
 
     def _get_weight(
         self, worker_data: ParameterMessage, name: str, parameter: Any
