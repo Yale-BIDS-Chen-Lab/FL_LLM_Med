@@ -24,6 +24,8 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
         return self.cached_validator
 
     def _get_init_model(self) -> TensorDict:
+        if isinstance(self.algorithm, AggregationByLossAlgorithm):
+            self.algorithm.loss_fun = self.get_validation_loss
         init_global_model_path = self.config.algorithm_kwargs.get(
             "global_model_path", None
         )
@@ -44,13 +46,11 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
                 finetuned_model
             ),
         )
-        if isinstance(self.algorithm, AggregationByLossAlgorithm):
-            self.algorithm.loss_fun = self.get_validation_loss
         return self.sft_get_perf_model_state_dict()
 
-    def get_validation_loss(self, parameter):
+    def get_validation_loss(self, worker_data):
         validator = self.get_validator()
-        self.load_parameter(validator, parameter)
+        self.load_parameter(validator, worker_data.parameter)
         loss = self._get_metric(validator)["eval_loss"]
         log_info("validation loss is %s", loss)
         return loss
