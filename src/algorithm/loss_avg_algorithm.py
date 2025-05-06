@@ -1,3 +1,4 @@
+import math
 from collections.abc import Callable
 from typing import Any
 
@@ -23,5 +24,7 @@ class AggregationByLossAlgorithm(FedAVGAlgorithm):
         self, worker_data: ParameterMessage, name: str, parameter: Any
     ) -> Any:
         if worker_data.aggregation_weight is None:
-            worker_data.aggregation_weight = self.loss_fun(worker_data=worker_data)
+            worker_data.aggregation_weight = math.exp(
+                1 - self.loss_fun(worker_data=worker_data)
+            )
         return worker_data.aggregation_weight
