@@ -20,4 +20,9 @@ if __name__ == "__main__":
         config = load_config(config_path=config_path, import_libs=False)
         log_info("Use train files %s", config.dc_config.dataset_kwargs["train_files"])
         log_info("Use test files %s", config.dc_config.dataset_kwargs["test_files"])
+        if "validation_files" in config.dc_config.dataset_kwargs:
+            log_info(
+                "Use validation files %s",
+                config.dc_config.dataset_kwargs["validation_files"],
+            )
         train(config=config, single_task=True)
