@@ -51,7 +51,7 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
     def get_validation_loss(self, parameter):
         validator = self.get_validator()
         self.load_parameter(validator, parameter)
-        loss = self._get_metric(validator)
+        loss = self._get_metric(validator)["eval_loss"]
         log_info("validation loss is %s", loss)
         return loss
 
