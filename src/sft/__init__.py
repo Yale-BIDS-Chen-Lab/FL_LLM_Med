@@ -66,6 +66,11 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
 class SFTTrainerMinxin(ExecutorProtocol, Protocol):
     _sft_trainer: None | SFTTrainer = None
 
+    @property
+    def sft_trainer(self) -> SFTTrainer:
+        assert self._sft_trainer is not None
+        return self._sft_trainer
+
     def get_sft_trainer(self, executor: Executor | None = None) -> SFTTrainer:
         os.environ["NO_TOKENIZER_TRANSFORMS"] = "1"
         if self._sft_trainer is not None:
@@ -85,12 +90,13 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
 
         model = executor.model
         train_dataset = self.get_sft_trainer_dataset(executor)
-        self._sft_trainer = SFTTrainer(
+        sft_trainer = SFTTrainer(
             model,
             train_dataset=train_dataset,
             args=training_args,
         )
-        assert self._sft_trainer.model is self._sft_trainer.model_wrapped
+        assert sft_trainer.model is sft_trainer.model_wrapped
+        self._sft_trainer = sft_trainer
         return self._sft_trainer
 
     def get_sft_trainer_dataset(self, executor: Executor) -> Dataset:

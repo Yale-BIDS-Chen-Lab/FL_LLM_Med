@@ -8,6 +8,7 @@ from peft import PeftModel
 
 from ..sft import SFTTrainerMinxin, load_perf_model_state_dict
 from .common import LLMTextServer
+from algorithm import AggregationByLossAlgorithm
 
 __all__ = ["SFTServer"]
 
@@ -43,7 +44,14 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
                 finetuned_model
             ),
         )
+        if isinstance(self.algorithm, AggregationByLossAlgorithm):
+            self.algorithm.loss_fun = self.get_validation_loss
         return self.sft_get_perf_model_state_dict()
+
+    def get_validation_loss(self, parameter):
+        validator = self.get_validator()
+        self.load_parameter(validator, parameter)
+        return self._get_metric(self, validator)
 
     def load_parameter(self, tester: Inferencer, parameter: TensorDict) -> None:
         sft_trainer = self.get_sft_trainer(tester)
@@ -51,10 +59,8 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
         load_perf_model_state_dict(sft_trainer.model, parameter, device=tester.device)
 
     def _get_metric(self, tester: Inferencer) -> Any:
-        sft_trainer = self.get_sft_trainer()
-        sft_trainer.model.to(device=tester.device)
         with torch.inference_mode():
-            metrics = sft_trainer.evaluate(
+            metrics = self.sft_trainer.evaluate(
                 eval_dataset=self.get_sft_trainer_dataset(executor=tester)
             )
             log_warning("metric is %s", metrics)
