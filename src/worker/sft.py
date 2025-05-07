@@ -22,6 +22,7 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
         self.context.release_device_lock()
         self.trainer.set_device(device)
         self.trainer.mutable_model_config.model_kwargs["device_map"] = {"": device}
+        self.trainer.remove_unrelated_datasets()
         self._model_loading_fun = self._load_adaptor
         super()._before_training()
 
