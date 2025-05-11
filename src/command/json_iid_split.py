@@ -7,7 +7,7 @@ import sys
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 
-from preprocess import IOBRecord, parse_file
+from preprocess import JSONRecord, parse_file
 from preprocess.allocation import allocate
 
 if __name__ == "__main__":
@@ -15,6 +15,9 @@ if __name__ == "__main__":
         prog="JSON IID split",
     )
     parser.add_argument("--data_file", help="json file", type=str, required=True)
+    parser.add_argument(
+        "--split_number", help="number to split", type=int, required=True
+    )
     parser.add_argument(
         "--output_dir",
         help="output dir for json files",
@@ -31,7 +34,7 @@ if __name__ == "__main__":
     for records in allocation.values():
         total_counter: collections.Counter[str] = collections.Counter()
         for r in records:
-            assert isinstance(r, IOBRecord)
+            assert isinstance(r, JSONRecord)
             counter = collections.Counter(
                 tag.removeprefix("B-").removeprefix("I-") for tag in r.token_tags
             )

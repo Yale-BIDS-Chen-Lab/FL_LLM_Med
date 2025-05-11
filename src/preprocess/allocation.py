@@ -2,7 +2,7 @@ import collections
 import heapq
 from dataclasses import dataclass, field
 
-from .iob import IOBRecord
+from .iob import IOBRecord, JSONRecord
 
 
 @dataclass(order=True)
@@ -14,14 +14,14 @@ class WorkerCount:
 @dataclass(order=True)
 class RecordCount:
     count: int
-    record: IOBRecord = field(compare=False)
+    record: IOBRecord | JSONRecord = field(compare=False)
 
 
-def get_min_tag(all_records: list[IOBRecord]) -> str | None:
+def get_min_tag(all_records: list[IOBRecord | JSONRecord]) -> str | None:
     assert all_records
     total_counter: collections.Counter[str] = collections.Counter()
     for r in all_records:
-        assert isinstance(r, IOBRecord)
+        assert isinstance(r, IOBRecord | JSONRecord)
         counter = collections.Counter(
             tag.removeprefix("B-").removeprefix("I-") for tag in r.token_tags
         )
@@ -34,8 +34,11 @@ def get_min_tag(all_records: list[IOBRecord]) -> str | None:
 
 
 def allocate_impl(
-    all_records: list[IOBRecord], checked_tag: str, allocation: dict, split_number: int
-) -> list[IOBRecord]:
+    all_records: list[IOBRecord | JSONRecord],
+    checked_tag: str,
+    allocation: dict,
+    split_number: int,
+) -> list[IOBRecord | JSONRecord]:
     heap: list = []
     for idx in range(split_number):
         heapq.heappush(heap, WorkerCount(count=0, index=idx))
@@ -43,7 +46,7 @@ def allocate_impl(
     used_records: list[RecordCount] = []
     remain_records = []
     for r in all_records:
-        assert isinstance(r, IOBRecord)
+        assert isinstance(r, IOBRecord | JSONRecord)
         counter = collections.Counter(
             tag.removeprefix("B-").removeprefix("I-") for tag in r.token_tags
         )
@@ -62,7 +65,9 @@ def allocate_impl(
     return remain_records
 
 
-def allocate(all_records: list[IOBRecord], allocation: dict, split_number: int) -> None:
+def allocate(
+    all_records: list[IOBRecord | JSONRecord], allocation: dict, split_number: int
+) -> None:
     while True:
         tag = get_min_tag(all_records=all_records)
         if tag is None:
