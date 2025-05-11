@@ -38,7 +38,6 @@ if __name__ == "__main__":
         assert os.path.isdir(data_dir)
         print("check ", data_dir)
         result = parse_dir(data_dir, "bio")
-        result |= parse_dir(args.data_dir, "iob")
         all_records = []
         for records in result.values():
             all_records += records

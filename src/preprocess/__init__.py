@@ -18,10 +18,17 @@ def parse_file(file: str) -> Any:
 def parse_dir(data_dir: str, suffix: str | None = None) -> dict:
     assert os.path.isdir(data_dir)
     res = {}
+    suffixes = []
+    if suffix is not None:
+        suffixes.append(suffix)
+        if suffix == "bio":
+            suffixes.append("iob")
+        if suffix == "iob":
+            suffixes.append("bio")
     files = (
         list_files(data_dir)
-        if suffix is None
-        else list_files_by_suffixes(data_dir, suffixes=[suffix])
+        if not suffixes
+        else list_files_by_suffixes(data_dir, suffixes=suffixes)
     )
     for file in files:
         res[file] = parse_file(file)

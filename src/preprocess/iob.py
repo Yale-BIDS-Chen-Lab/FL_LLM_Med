@@ -1,4 +1,18 @@
+import json
+
 from .parser import Parser
+
+
+class IOBJSONRecord:
+    def __init__(self, json_content: dict) -> None:
+        self.__json_content = json_content
+
+    def to_json(self) -> dict:
+        return self.__json_content
+
+    @property
+    def token_tags(self) -> list[str]:
+        return self.to_json()["tags"]
 
 
 class IOBRecord:
@@ -108,4 +122,12 @@ class IOB(Parser):
             record.add_line(token, token_tag)
         if record.tokens:
             results.append(record)
+        return results
+
+
+class IOBJSON(Parser):
+    def parse(self, lines: list[str]) -> list[IOBJSONRecord]:
+        results: list[IOBJSONRecord] = []
+        for item in json.loads("\n".join(lines)):
+            results.append(IOBJSONRecord(item))
         return results
