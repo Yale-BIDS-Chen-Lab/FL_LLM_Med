@@ -3,11 +3,11 @@ from typing import Any
 
 from cyy_naive_lib.fs.path import list_files, list_files_by_suffixes
 
-from .iob import IOB, IOBRecord
+from .iob import IOBParser, IOBRecord, JSONParser, JSONRecord
 
 
 def parse_file(file: str) -> Any:
-    parsers = {".bio": IOB(), ".iob": IOB()}
+    parsers = {".bio": IOBParser(), ".iob": IOBParser(), ".json": JSONParser()}
     for suffix, parser in parsers.items():
         if file.endswith(suffix):
             with open(file, encoding="utf8") as f:

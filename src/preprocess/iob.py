@@ -3,7 +3,7 @@ import json
 from .parser import Parser
 
 
-class IOBJSONRecord:
+class JSONRecord:
     def __init__(self, json_content: dict) -> None:
         self.__json_content = json_content
 
@@ -105,7 +105,7 @@ class IOBRecord:
         return " ".join(result)
 
 
-class IOB(Parser):
+class IOBParser(Parser):
     def parse(self, lines: list[str]) -> list[IOBRecord]:
         results: list[IOBRecord] = []
         record = IOBRecord()
@@ -125,9 +125,9 @@ class IOB(Parser):
         return results
 
 
-class IOBJSON(Parser):
-    def parse(self, lines: list[str]) -> list[IOBJSONRecord]:
-        results: list[IOBJSONRecord] = []
+class JSONParser(Parser):
+    def parse(self, lines: list[str]) -> list[JSONRecord]:
+        results: list[JSONRecord] = []
         for item in json.loads("\n".join(lines)):
-            results.append(IOBJSONRecord(item))
+            results.append(JSONRecord(item))
         return results
