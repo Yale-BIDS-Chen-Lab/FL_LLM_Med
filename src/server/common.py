@@ -2,6 +2,7 @@ import os
 
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
 from cyy_torch_toolbox import (
+    ClassificationDatasetCollection,
     Inferencer,
     MachineLearningPhase,
     TensorDict,
@@ -26,7 +27,10 @@ class LLMTextServer(AggregationServer, DatapipelineMixin):
             True
         )
         inferencer = super().get_tester(phase=phase)
-        assert isinstance(inferencer.dataset_collection, TextDatasetCollection)
+        assert isinstance(
+            inferencer.dataset_collection,
+            TextDatasetCollection | ClassificationDatasetCollection,
+        )
         if for_evaluation:
             assert inferencer.dataset_collection.prompt is None
         if inferencer.dataset_collection.prompt is None:

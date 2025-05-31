@@ -1,5 +1,9 @@
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
-from cyy_torch_toolbox import TensorDict, TextDatasetCollection
+from cyy_torch_toolbox import (
+    ClassificationDatasetCollection,
+    TensorDict,
+    TextDatasetCollection,
+)
 from distributed_learning_simulation import AggregationWorker
 
 from ..datapipeline_mixin import DatapipelineMixin
@@ -15,7 +19,10 @@ class LLMTextWorker(AggregationWorker, DatapipelineMixin):
 
     @property
     def dataset_collection(self) -> TextDatasetCollection:
-        assert isinstance(self.trainer.dataset_collection, TextDatasetCollection)
+        assert isinstance(
+            self.trainer.dataset_collection,
+            TextDatasetCollection | ClassificationDatasetCollection,
+        )
         return self.trainer.dataset_collection
 
 
