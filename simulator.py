@@ -4,6 +4,7 @@ import sys
 os.environ["TQDM_DISABLE"] = "1"
 os.environ["LEAST_REQUIRED_DEVICE_MEMORY_IN_GB"] = "10"
 
+import cyy_huggingface_toolbox  # noqa: F401
 from cyy_naive_lib.log import log_info, redirect_stdout_to_logger
 from distributed_learning_simulation import (
     load_config,
