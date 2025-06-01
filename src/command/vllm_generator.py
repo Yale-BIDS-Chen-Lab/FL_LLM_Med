@@ -1,4 +1,3 @@
-import copy
 import os
 import sys
 from collections.abc import Generator
@@ -7,82 +6,38 @@ src_path = os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.insert(0, src_path)
 
 from cyy_naive_lib.fs.tempdir import TempDir
-from cyy_torch_toolbox import Inferencer, load_local_files
-from distributed_learning_simulation import (
-    Session,
-    get_server,
-)
-from peft.peft_model import PeftModel
-from transformers import AutoModelForCausalLM
 from vllm import LLM, RequestOutput, SamplingParams
 
 os.environ["NO_TOKENIZER_TRANSFORMS"] = "true"
 os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
 
 import src.method  # noqa: F401
-from src.server import LLMTextServer
+
+from .util import get_tester, get_vllm_model
 
 
 def get_vllm_output(
     session_dir: str, data_file: str, zero_shot: bool, worker_index: int | None = None
 ) -> Generator[tuple[dict, RequestOutput]]:
-    assert os.path.isdir(session_dir), session_dir
-    assert os.path.isfile(data_file), data_file
-    session = Session(session_dir=session_dir)
-    config = copy.deepcopy(session.config)
-    if "train_files" in config.dc_config.dataset_kwargs:
-        for f in config.dc_config.dataset_kwargs["train_files"]:
-            assert os.path.isfile(f), f
-    if "test_files" in config.dc_config.dataset_kwargs:
-        for f in config.dc_config.dataset_kwargs["test_files"]:
-            assert os.path.isfile(f), f
-    print(config.dc_config.dataset_kwargs)
-    print(config.model_config.model_kwargs)
-    print(config.trainer_config.hook_config)
-    config.hyper_parameter_config.batch_size = 1024
-    if worker_index is not None:
-        assert worker_index < config.worker_number
-
-    server = get_server(config=config)
-    assert isinstance(server, LLMTextServer)
-    tester: Inferencer = server.get_tester(for_evaluation=True)
-    tester.mutable_dataset_collection.transform_all_datasets(
-        transformer=lambda _: load_local_files([data_file]),
-    )
+    tester = get_tester(session_dir=session_dir, data_file=data_file)
 
     with TempDir():
-        model_name = session.config.model_config.model_name.removeprefix(
-            "hugging_face_causal_lm_"
-        )
-        model = AutoModelForCausalLM.from_pretrained(model_name)
-        if zero_shot:
-            print("Use pretrained-model")
-            model.save_pretrained("./finetuned_model")
-        else:
-            if worker_index is not None:
-                save_dir = os.path.join(
-                    session.session_dir, f"worker_{worker_index}", "SFTTrainer"
-                )
-            else:
-                save_dir = os.path.join(session.server_dir, "SFTTrainer")
-            finetuned_model = PeftModel.from_pretrained(model=model, model_id=save_dir)
-            merge_model = finetuned_model.merge_and_unload()
-            merge_model.save_pretrained("./finetuned_model")
-
         # Create an LLM with built-in default generation config.
         # The generation config is set to None by default to keep
         # the behavior consistent with the previous version.
         # If you want to use the default generation config from the model,
         # you should set the generation_config to "auto".
+        model_name = get_vllm_model(
+            session_dir=session_dir, zero_shot=zero_shot, worker_index=worker_index
+        )
 
         llm = LLM(
-            model="./finetuned_model",
+            model=model_name,
             generation_config="auto",
             tokenizer=model_name,
             dtype="bfloat16",
             max_model_len=2048,
         )
-        tester.model_evaluator.tokenizer.padding_side = "left"
         llm.set_tokenizer(tester.model_evaluator.tokenizer)
 
         # Load the default sampling parameters from the model.

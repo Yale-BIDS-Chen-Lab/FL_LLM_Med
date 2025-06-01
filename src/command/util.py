@@ -9,7 +9,6 @@ from distributed_learning_simulation import (
 
 from peft.peft_model import PeftModel
 from transformers import AutoModelForCausalLM
-from vllm import LLM, RequestOutput, SamplingParams
 
 
 def get_tester(session_dir: str, data_file: str) -> Inferencer:
