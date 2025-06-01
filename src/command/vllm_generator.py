@@ -6,14 +6,14 @@ src_path = os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.insert(0, src_path)
 
 from cyy_naive_lib.fs.tempdir import TempDir
-from vllm import LLM, RequestOutput, SamplingParams
+from vllm import RequestOutput, SamplingParams
 
 os.environ["NO_TOKENIZER_TRANSFORMS"] = "true"
 os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
 
 import src.method  # noqa: F401
 
-from .util import get_tester, get_vllm_model
+from .util import get_tester, get_vllm, get_vllm_model
 
 
 def get_vllm_output(
@@ -22,23 +22,10 @@ def get_vllm_output(
     tester = get_tester(session_dir=session_dir, data_file=data_file)
 
     with TempDir():
-        # Create an LLM with built-in default generation config.
-        # The generation config is set to None by default to keep
-        # the behavior consistent with the previous version.
-        # If you want to use the default generation config from the model,
-        # you should set the generation_config to "auto".
         model_name = get_vllm_model(
             session_dir=session_dir, zero_shot=zero_shot, worker_index=worker_index
         )
-
-        llm = LLM(
-            model=model_name,
-            generation_config="auto",
-            tokenizer=model_name,
-            dtype="bfloat16",
-            max_model_len=2048,
-        )
-        llm.set_tokenizer(tester.model_evaluator.tokenizer)
+        llm = get_vllm(tester=tester, model_name=model_name)
 
         # Load the default sampling parameters from the model.
         sampling_params = SamplingParams(n=1, max_tokens=2048, temperature=0)

@@ -6,9 +6,9 @@ from distributed_learning_simulation import (
     Session,
     get_server,
 )
-
 from peft.peft_model import PeftModel
 from transformers import AutoModelForCausalLM
+from vllm import LLM
 
 
 def get_tester(session_dir: str, data_file: str) -> Inferencer:
@@ -58,3 +58,14 @@ def get_vllm_model(
         model = finetuned_model.merge_and_unload()
     model.save_pretrained("./finetuned_model")
     return "./finetuned_model"
+
+def get_vllm( model_name: str,tester:Inferencer) -> LLM:
+    llm = LLM(
+        model=model_name,
+        generation_config="auto",
+        tokenizer=model_name,
+        dtype="bfloat16",
+        max_model_len=2048,
+    )
+    llm.set_tokenizer(tester.model_evaluator.tokenizer)
+    return llm
