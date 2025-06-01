@@ -1,7 +1,7 @@
 import copy
-import dill
 import os
 
+import dill
 from cyy_torch_toolbox import Inferencer, load_local_files
 from distributed_learning_simulation import (
     Session,
@@ -12,10 +12,8 @@ from transformers import AutoModelForCausalLM
 from vllm import LLM
 
 
-def get_tester(session_dir: str, data_file: str) -> Inferencer:
-    assert os.path.isdir(session_dir), session_dir
+def get_tester(session: Session, data_file: str) -> Inferencer:
     assert os.path.isfile(data_file), data_file
-    session = Session(session_dir=session_dir)
     config = copy.deepcopy(session.config)
     if "train_files" in config.dc_config.dataset_kwargs:
         for f in config.dc_config.dataset_kwargs["train_files"]:
@@ -39,13 +37,10 @@ def get_tester(session_dir: str, data_file: str) -> Inferencer:
 
 def get_model(
     tester: Inferencer,
-    session_dir: str,
+    session: Session,
     zero_shot: bool,
     worker_index: int | None = None,
 ) -> None:
-    assert os.path.isdir(session_dir), session_dir
-    session = Session(session_dir=session_dir)
-
     if not zero_shot:
         assert worker_index is None
         with open(session.last_model_path, "rb") as f:
@@ -54,11 +49,8 @@ def get_model(
 
 
 def get_vllm_model(
-    session_dir: str, zero_shot: bool, worker_index: int | None = None
+    session: Session, zero_shot: bool, worker_index: int | None = None
 ) -> str:
-    assert os.path.isdir(session_dir), session_dir
-    session = Session(session_dir=session_dir)
-
     model_name = session.config.model_config.model_name.removeprefix(
         "hugging_face_causal_lm_"
     )

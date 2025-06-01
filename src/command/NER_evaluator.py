@@ -1,10 +1,14 @@
 import argparse
 import json
 import logging
+import os
 
 import nervaluate
 from cyy_naive_lib.algorithm.sequence_op import flatten_list
 from cyy_naive_lib.log import set_level
+from distributed_learning_simulation import (
+    Session,
+)
 from NER_evaluation.common import match_tokens, replace_tag
 from NER_evaluation.html_form import html2bio
 from ner_metrics import classification_report
@@ -37,9 +41,11 @@ if __name__ == "__main__":
     if args.debug_file is not None:
         debug_f = open(args.debug_file, "w", encoding="utf8")
     assert not (args.zero_shot and args.worker_index is not None)
+    assert os.path.isdir(args.session_dir), args.session_dir
+    session = Session(session_dir=args.session_dir)
     vllm_output = list(
         get_vllm_output(
-            session_dir=args.session_dir,
+            session=session,
             data_file=args.test_file,
             zero_shot=args.zero_shot,
             worker_index=args.worker_index,

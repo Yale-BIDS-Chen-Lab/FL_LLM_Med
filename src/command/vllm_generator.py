@@ -10,20 +10,22 @@ from vllm import RequestOutput, SamplingParams
 
 os.environ["NO_TOKENIZER_TRANSFORMS"] = "true"
 os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
-
 import src.method  # noqa: F401
 
 from .util import get_tester, get_vllm, get_vllm_model
+from distributed_learning_simulation import (
+    Session,
+)
 
 
 def get_vllm_output(
-    session_dir: str, data_file: str, zero_shot: bool, worker_index: int | None = None
+    session:Session, data_file: str, zero_shot: bool, worker_index: int | None = None
 ) -> Generator[tuple[dict, RequestOutput]]:
-    tester = get_tester(session_dir=session_dir, data_file=data_file)
+    tester = get_tester(session=session, data_file=data_file)
 
     with TempDir():
         model_name = get_vllm_model(
-            session_dir=session_dir, zero_shot=zero_shot, worker_index=worker_index
+            session=session, zero_shot=zero_shot, worker_index=worker_index
         )
         llm = get_vllm(tester=tester, model_name=model_name)
 
