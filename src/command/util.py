@@ -42,20 +42,15 @@ def get_model(
     session_dir: str,
     zero_shot: bool,
     worker_index: int | None = None,
-) -> str:
+) -> None:
     assert os.path.isdir(session_dir), session_dir
     session = Session(session_dir=session_dir)
 
     if not zero_shot:
         assert worker_index is None
-        with open(session.last_model_path,"rb") as f:
-            dill.load
-
+        with open(session.last_model_path, "rb") as f:
+            parameters = dill.load(f)
             tester.model_util.load_parameters(parameters)
-        finetuned_model = PeftModel.from_pretrained(model=model, model_id=save_dir)
-        model = finetuned_model.merge_and_unload()
-    model.save_pretrained("./finetuned_model")
-    return "./finetuned_model"
 
 
 def get_vllm_model(
