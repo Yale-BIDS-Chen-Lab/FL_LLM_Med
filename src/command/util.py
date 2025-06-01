@@ -1,4 +1,5 @@
 import copy
+import dill
 import os
 
 from cyy_torch_toolbox import Inferencer, load_local_files
@@ -36,6 +37,27 @@ def get_tester(session_dir: str, data_file: str) -> Inferencer:
     return tester
 
 
+def get_model(
+    tester: Inferencer,
+    session_dir: str,
+    zero_shot: bool,
+    worker_index: int | None = None,
+) -> str:
+    assert os.path.isdir(session_dir), session_dir
+    session = Session(session_dir=session_dir)
+
+    if not zero_shot:
+        assert worker_index is None
+        with open(session.last_model_path,"rb") as f:
+            dill.loa
+
+            tester.model_util.load_parameters(parameters)
+        finetuned_model = PeftModel.from_pretrained(model=model, model_id=save_dir)
+        model = finetuned_model.merge_and_unload()
+    model.save_pretrained("./finetuned_model")
+    return "./finetuned_model"
+
+
 def get_vllm_model(
     session_dir: str, zero_shot: bool, worker_index: int | None = None
 ) -> str:
@@ -59,7 +81,8 @@ def get_vllm_model(
     model.save_pretrained("./finetuned_model")
     return "./finetuned_model"
 
-def get_vllm( model_name: str,tester:Inferencer) -> LLM:
+
+def get_vllm(model_name: str, tester: Inferencer) -> LLM:
     llm = LLM(
         model=model_name,
         generation_config="auto",
