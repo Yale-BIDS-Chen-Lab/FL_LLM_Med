@@ -49,7 +49,7 @@ def get_model(
     if not zero_shot:
         assert worker_index is None
         with open(session.last_model_path,"rb") as f:
-            dill.loa
+            dill.load
 
             tester.model_util.load_parameters(parameters)
         finetuned_model = PeftModel.from_pretrained(model=model, model_id=save_dir)
