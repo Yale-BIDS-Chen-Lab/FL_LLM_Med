@@ -1,8 +1,10 @@
 import argparse
+import copy
 import json
 import logging
 import os
 
+import cyy_huggingface_toolbox  # noqa: F401
 import nervaluate
 from cyy_naive_lib.algorithm.sequence_op import flatten_list
 from cyy_naive_lib.log import set_level
@@ -12,10 +14,10 @@ from distributed_learning_simulation import (
 from NER_evaluation.common import match_tokens, replace_tag
 from NER_evaluation.html_form import html2bio
 from ner_metrics import classification_report
-from vllm_generator import get_vllm_output
+from util import get_model, get_tester
 
 if __name__ == "__main__":
-    set_level(logging.INFO)
+    set_level(logging.DEBUG)
     parser = argparse.ArgumentParser(
         prog="Analyze NER result",
     )
@@ -42,26 +44,16 @@ if __name__ == "__main__":
         debug_f = open(args.debug_file, "w", encoding="utf8")
     assert not (args.zero_shot and args.worker_index is not None)
     assert os.path.isdir(args.session_dir), args.session_dir
-    session = Session(session_dir=args.session_dir)
-    vllm_output = list(
-        get_vllm_output(
-            session=session,
-            data_file=args.test_file,
-            zero_shot=args.zero_shot,
-            worker_index=args.worker_index,
-        )
-    )
     canonical_tags: set[str] = set()
     skipped_tags: set[str] = set()
     if args.skipped_tags is not None:
         skipped_tags = set(args.skipped_tags.split(" "))
 
-    for sample, _ in vllm_output:
-        if skipped_tags:
-            for i, tag in enumerate(sample["tags"]):
-                if tag.removeprefix("I-").removeprefix("B-") in skipped_tags:
-                    sample["tags"][i] = "O"
-        canonical_tags.update(sample["tags"])
+    session = Session(session_dir=args.session_dir)
+    tester = get_tester(session=session, data_file=args.test_file)
+    labels = set(copy.deepcopy(tester.dataset_collection.get_labels()))
+    canonical_tags = copy.deepcopy(labels)
+    labels = sorted(labels)
     canonical_tags.remove("O")
     canonical_tags = {
         tag.removeprefix("I-").removeprefix("B-") for tag in canonical_tags
@@ -69,42 +61,79 @@ if __name__ == "__main__":
     if skipped_tags:
         canonical_tags = canonical_tags - skipped_tags
     assert canonical_tags
-
     print("canonical_tags are", canonical_tags)
     print("skipped_tags are", skipped_tags)
+    if session.config.model_config.model_name.startswith("hugging_face_causal_lm_"):
+        from vllm_generator import get_vllm_output
 
-    for sample, generated_text in vllm_output:
-        out_text = generated_text.outputs[0].text
-        tags = sample["tags"]
-        tokens = sample["tokens"]
-        predicated_tokens = html2bio(html=out_text, canonical_tags=canonical_tags)
-        predicated_tags = match_tokens(tokens, predicated_tokens)
-        if len(set(tags)) > 1 and set(predicated_tags) == {"O"} and debug_f is not None:
-            debug_f.write("input <<<<<<<<<<<<<<\n")
-            joined_tokens = " ".join(tokens)
-            if "inputs" in sample:
-                joined_tokens = sample["inputs"]
-            debug_f.write(f"{joined_tokens}\n")
-            debug_f.write("ground_out ==============\n")
-            joined_tags = " ".join(tags)
-            if "output" in sample:
-                joined_tags = sample["output"]
-            debug_f.write(f"{joined_tags}\n")
-            debug_f.write("predicated_out >>>>>>>>>>>>>>\n")
-            debug_f.write(f"{out_text}\n")
-            predicated_out_text: list[str] = []
-            for t in predicated_tokens:
-                if isinstance(t, str):
-                    predicated_out_text.append(t)
-                else:
-                    predicated_out_text += t[0]
-            out_text = " ".join(predicated_out_text)
-            debug_f.write(f"{out_text}\n")
+        vllm_output = list(
+            get_vllm_output(
+                tester=tester,
+                session=session,
+                zero_shot=args.zero_shot,
+                worker_index=args.worker_index,
+            )
+        )
+        for sample, generated_text in vllm_output:
+            out_text = generated_text.outputs[0].text
+            tags = sample["tags"]
+            tokens = sample["tokens"]
+            predicated_tokens = html2bio(html=out_text, canonical_tags=canonical_tags)
+            predicated_tags = match_tokens(tokens, predicated_tokens)
+            if (
+                len(set(tags)) > 1
+                and set(predicated_tags) == {"O"}
+                and debug_f is not None
+            ):
+                debug_f.write("input <<<<<<<<<<<<<<\n")
+                joined_tokens = " ".join(tokens)
+                if "inputs" in sample:
+                    joined_tokens = sample["inputs"]
+                debug_f.write(f"{joined_tokens}\n")
+                debug_f.write("ground_out ==============\n")
+                joined_tags = " ".join(tags)
+                if "output" in sample:
+                    joined_tags = sample["output"]
+                debug_f.write(f"{joined_tags}\n")
+                debug_f.write("predicated_out >>>>>>>>>>>>>>\n")
+                debug_f.write(f"{out_text}\n")
+                predicated_out_text: list[str] = []
+                for t in predicated_tokens:
+                    if isinstance(t, str):
+                        predicated_out_text.append(t)
+                    else:
+                        predicated_out_text += t[0]
+                out_text = " ".join(predicated_out_text)
+                debug_f.write(f"{out_text}\n")
 
-        prediction.append(predicated_tags)
-        ground_tags.append(tags)
-    if debug_f is not None:
-        debug_f.close()
+            prediction.append(predicated_tags)
+            ground_tags.append(tags)
+        if debug_f is not None:
+            debug_f.close()
+    else:
+        get_model(
+            tester=tester,
+            session=session,
+            zero_shot=args.zero_shot,
+            worker_index=args.worker_index,
+        )
+
+        def process_batch(batch_res):
+            # print(batch_res)
+            for tags, logits in zip(
+                batch_res["targets"], batch_res["logits"], strict=False
+            ):
+                mask = tags != -100
+                tags = tags[mask].tolist()
+                logits=logits[mask].argmax(dim=-1).tolist()
+                # logits = [l.argmax().item() for l in logits[mask]]
+                tags = [labels[tag] for tag in tags]
+                predicated_tags= [labels[tag] for tag in logits]
+
+                ground_tags.append(tags)
+                prediction.append(predicated_tags)
+
+        tester.process_sample_output(process_batch)
 
     results = nervaluate.Evaluator(
         ground_tags, prediction, tags=list(canonical_tags), loader="list"

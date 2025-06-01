@@ -9,7 +9,6 @@ from distributed_learning_simulation import (
 )
 from peft.peft_model import PeftModel
 from transformers import AutoModelForCausalLM
-from vllm import LLM
 
 
 def get_tester(session: Session, data_file: str) -> Inferencer:
@@ -24,10 +23,16 @@ def get_tester(session: Session, data_file: str) -> Inferencer:
     print(config.dc_config.dataset_kwargs)
     print(config.model_config.model_kwargs)
     print(config.trainer_config.hook_config)
-    config.hyper_parameter_config.batch_size = 1024
+    if config.model_config.model_name.startswith("hugging_face_causal_lm_"):
+        config.hyper_parameter_config.batch_size = 1024
 
     server = get_server(config=config)
-    tester: Inferencer = server.get_tester(for_evaluation=True)
+    tester: Inferencer = server.get_tester()
+    try:
+        tester = server.get_tester(for_evaluation=True)
+    except BaseException:
+        pass
+
     tester.mutable_dataset_collection.transform_all_datasets(
         transformer=lambda _: load_local_files([data_file]),
     )
@@ -67,15 +72,3 @@ def get_vllm_model(
         model = finetuned_model.merge_and_unload()
     model.save_pretrained("./finetuned_model")
     return "./finetuned_model"
-
-
-def get_vllm(model_name: str, tester: Inferencer) -> LLM:
-    llm = LLM(
-        model=model_name,
-        generation_config="auto",
-        tokenizer=model_name,
-        dtype="bfloat16",
-        max_model_len=2048,
-    )
-    llm.set_tokenizer(tester.model_evaluator.tokenizer)
-    return llm
