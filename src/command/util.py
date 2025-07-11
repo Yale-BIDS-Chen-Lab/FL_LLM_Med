@@ -1,3 +1,4 @@
+import contextlib
 import copy
 import os
 
@@ -11,7 +12,7 @@ from peft.peft_model import PeftModel
 from transformers import AutoModelForCausalLM
 
 
-def get_tester(session: Session, data_file: str) -> Inferencer:
+def get_tester(session: Session, data_file: str) -> tuple[Inferencer, set]:
     assert os.path.isfile(data_file), data_file
     config = copy.deepcopy(session.config)
     if "train_files" in config.dc_config.dataset_kwargs:
@@ -28,16 +29,25 @@ def get_tester(session: Session, data_file: str) -> Inferencer:
 
     server = get_server(config=config)
     tester: Inferencer = server.get_tester()
-    try:
+    with contextlib.suppress(BaseException):
         tester = server.get_tester(for_evaluation=True)
-    except BaseException:
-        pass
 
+    old_labels = set(
+        copy.deepcopy(tester.dataset_collection.get_labels(use_cache=False))
+    )
+    print("labels is ", len(old_labels))
     tester.mutable_dataset_collection.transform_all_datasets(
         transformer=lambda _: load_local_files([data_file]),
     )
+    new_labels = set(
+        copy.deepcopy(tester.dataset_collection.get_labels(use_cache=False))
+    )
+    assert new_labels.issubset(old_labels)
     tester.model_evaluator.tokenizer.padding_side = "left"
-    return tester
+    assert tester.model_evaluator.model.labels
+    tester.model_evaluator.model.labels = old_labels
+
+    return tester, old_labels
 
 
 def get_model(

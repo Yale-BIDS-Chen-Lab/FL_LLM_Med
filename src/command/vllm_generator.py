@@ -14,7 +14,7 @@ import src.method  # noqa: F401
 from distributed_learning_simulation import (
     Session,
 )
-from util import get_vllm, get_vllm_model
+from util import get_vllm_model
 from vllm import LLM
 
 

@@ -50,8 +50,8 @@ if __name__ == "__main__":
         skipped_tags = set(args.skipped_tags.split(" "))
 
     session = Session(session_dir=args.session_dir)
-    tester = get_tester(session=session, data_file=args.test_file)
-    labels = set(copy.deepcopy(tester.dataset_collection.get_labels()))
+    tester, labels = get_tester(session=session, data_file=args.test_file)
+    labels = copy.deepcopy(labels)
     canonical_tags = copy.deepcopy(labels)
     labels = sorted(labels)
     canonical_tags.remove("O")
@@ -125,10 +125,10 @@ if __name__ == "__main__":
             ):
                 mask = tags != -100
                 tags = tags[mask].tolist()
-                logits=logits[mask].argmax(dim=-1).tolist()
+                logits = logits[mask].argmax(dim=-1).tolist()
                 # logits = [l.argmax().item() for l in logits[mask]]
                 tags = [labels[tag] for tag in tags]
-                predicated_tags= [labels[tag] for tag in logits]
+                predicated_tags = [labels[tag] for tag in logits]
 
                 ground_tags.append(tags)
                 prediction.append(predicated_tags)

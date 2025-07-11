@@ -3,7 +3,7 @@ from typing import Any
 
 from cyy_naive_lib.fs.path import list_files, list_files_by_suffixes
 
-from .iob import IOBParser, IOBRecord, JSONParser, JSONRecord
+from .iob import IOBParser, IOBRecord, JSONParser
 
 
 def parse_file(file: str) -> Any:
