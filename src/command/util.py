@@ -39,13 +39,6 @@ def get_tester(session: Session, data_file: str) -> tuple[Inferencer, set]:
     tester.mutable_dataset_collection.transform_all_datasets(
         transformer=lambda _: load_local_files([data_file]),
     )
-    tester.mutable_dataset_collection.transform_all_original_datasets(
-        transformer=lambda _: load_local_files([data_file]),
-    )
-    new_labels = set(
-        copy.deepcopy(tester.dataset_collection.get_labels(use_cache=False))
-    )
-    assert new_labels.issubset(old_labels)
     tester.model_evaluator.tokenizer.padding_side = "left"
     assert tester.model_evaluator.model.labels
     tester.model_evaluator.model.labels = old_labels
