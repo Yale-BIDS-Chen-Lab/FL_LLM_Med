@@ -18,9 +18,9 @@ from util import get_vllm_model
 from vllm import LLM
 
 
-def get_vllm(model_name: str, tester: Inferencer) -> LLM:
+def get_vllm(model_path: str, model_name: str, tester: Inferencer) -> LLM:
     llm = LLM(
-        model=model_name,
+        model=model_path,
         generation_config="auto",
         tokenizer=model_name,
         dtype="bfloat16",
@@ -37,10 +37,10 @@ def get_vllm_output(
     worker_index: int | None = None,
 ) -> Generator[tuple[dict, RequestOutput]]:
     with TempDir():
-        model_name = get_vllm_model(
+        model_path, model_name = get_vllm_model(
             session=session, zero_shot=zero_shot, worker_index=worker_index
         )
-        llm = get_vllm(tester=tester, model_name=model_name)
+        llm = get_vllm(model_path=model_path, model_name=model_name, tester=tester)
 
         # Load the default sampling parameters from the model.
         sampling_params = SamplingParams(n=1, max_tokens=2048, temperature=0)

@@ -40,7 +40,7 @@ def get_tester(session: Session, data_file: str) -> tuple[Inferencer, set]:
         transformer=lambda _: load_local_files([data_file]),
     )
     tester.model_evaluator.tokenizer.padding_side = "left"
-    if hasattr(tester.model_evaluator.model,"labels"):
+    if hasattr(tester.model_evaluator.model, "labels"):
         tester.model_evaluator.model.labels = old_labels
 
     return tester, old_labels
@@ -61,7 +61,7 @@ def get_model(
 
 def get_vllm_model(
     session: Session, zero_shot: bool, worker_index: int | None = None
-) -> str:
+) -> tuple[str, str]:
     model_name = session.config.model_config.model_name.removeprefix(
         "hugging_face_causal_lm_"
     )
@@ -77,4 +77,4 @@ def get_vllm_model(
         finetuned_model = PeftModel.from_pretrained(model=model, model_id=save_dir)
         model = finetuned_model.merge_and_unload()
     model.save_pretrained("./finetuned_model")
-    return "./finetuned_model"
+    return "./finetuned_model", model_name
