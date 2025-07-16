@@ -126,9 +126,10 @@ if __name__ == "__main__":
                 mask = tags != -100
                 tags = tags[mask].tolist()
                 logits = logits[mask].argmax(dim=-1).tolist()
-                # logits = [l.argmax().item() for l in logits[mask]]
                 tags = [labels[tag] for tag in tags]
                 predicated_tags = [labels[tag] for tag in logits]
+                # print(tags)
+                # print(predicated_tags)
 
                 ground_tags.append(tags)
                 prediction.append(predicated_tags)
