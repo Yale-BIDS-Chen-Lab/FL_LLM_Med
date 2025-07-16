@@ -40,8 +40,8 @@ def get_tester(session: Session, data_file: str) -> tuple[Inferencer, set]:
         transformer=lambda _: load_local_files([data_file]),
     )
     tester.model_evaluator.tokenizer.padding_side = "left"
-    assert tester.model_evaluator.model.labels
-    tester.model_evaluator.model.labels = old_labels
+    if hasattr(tester.model_evaluator.model,"labels"):
+        tester.model_evaluator.model.labels = old_labels
 
     return tester, old_labels
 
