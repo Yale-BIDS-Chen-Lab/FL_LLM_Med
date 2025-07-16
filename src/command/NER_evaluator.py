@@ -3,6 +3,7 @@ import copy
 import json
 import logging
 import os
+import sys
 
 import cyy_huggingface_toolbox  # noqa: F401
 import nervaluate
@@ -15,6 +16,10 @@ from NER_evaluation.common import match_tokens, replace_tag
 from NER_evaluation.html_form import html2bio
 from ner_metrics import classification_report
 from util import get_model, get_tester
+
+project_path = os.path.join(os.path.dirname(__file__),"..","..")
+sys.path.insert(0, project_path)
+import src.method  # noqa: F401
 
 if __name__ == "__main__":
     set_level(logging.DEBUG)
