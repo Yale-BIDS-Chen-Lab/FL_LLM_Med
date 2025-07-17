@@ -1,14 +1,12 @@
 import argparse
 import copy
 import json
-import logging
 import os
 import sys
 
 import cyy_huggingface_toolbox  # noqa: F401
 import nervaluate
 from cyy_naive_lib.algorithm.sequence_op import flatten_list
-from cyy_naive_lib.log import set_level
 from distributed_learning_simulation import (
     Session,
 )
@@ -17,12 +15,12 @@ from NER_evaluation.html_form import html2bio
 from ner_metrics import classification_report
 from util import get_model, get_tester
 
-project_path = os.path.join(os.path.dirname(__file__),"..","..")
+project_path = os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.insert(0, project_path)
 import src.method  # noqa: F401
 
 if __name__ == "__main__":
-    set_level(logging.DEBUG)
+    # set_level(logging.DEBUG)
     parser = argparse.ArgumentParser(
         prog="Analyze NER result",
     )
@@ -124,17 +122,14 @@ if __name__ == "__main__":
         )
 
         def process_batch(batch_res):
-            # print(batch_res)
-            for tags, logits in zip(
-                batch_res["targets"], batch_res["logits"], strict=False
-            ):
+            targets = batch_res["targets"].reshape(batch_res["batch_size"], -1)
+            for tags, logits in zip(targets, batch_res["logits"], strict=False):
+                assert tags.shape[0] == logits.shape[0]
                 mask = tags != -100
                 tags = tags[mask].tolist()
                 logits = logits[mask].argmax(dim=-1).tolist()
                 tags = [labels[tag] for tag in tags]
                 predicated_tags = [labels[tag] for tag in logits]
-                # print(tags)
-                # print(predicated_tags)
 
                 ground_tags.append(tags)
                 prediction.append(predicated_tags)
