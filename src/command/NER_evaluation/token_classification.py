@@ -2,13 +2,15 @@ def process_batch(
     ground_tags, prediction, skipped_tags, labels: list[str], batch_res
 ) -> None:
     targets = batch_res["targets"].reshape(batch_res["batch_size"], -1)
-    for _batch_idx, (sample_targets, logits, word_ids) in enumerate(
-        zip(targets, batch_res["logits"], batch_res["word_ids"], strict=False)
+    for _batch_idx, (sample_targets, sample_prediction, word_ids) in enumerate(
+        zip(
+            targets.tolist(),
+            batch_res["logits"].argmax(dim=-1).tolist(),
+            batch_res["word_ids"].tolist(),
+            strict=False,
+        )
     ):
-        assert sample_targets.shape[0] == logits.shape[0]
-        word_ids = word_ids.tolist()
-        assert len(word_ids) == sample_targets.shape[0]
-        sample_prediction = logits.argmax(dim=-1).tolist()
+        assert len(word_ids) == len(sample_targets)
         assert len(word_ids) == len(sample_prediction)
 
         previous_word_id: None | int = None

@@ -6,7 +6,7 @@ lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 
 from preprocess import parse_dir, parse_file
-from preprocess.distribution import token_distribution, tag_distribution
+from preprocess.distribution import tag_distribution
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
