@@ -1,18 +1,19 @@
 import argparse
 import copy
-import json
+import functools
+import logging
 import os
 import sys
 
 import cyy_huggingface_toolbox  # noqa: F401
-import nervaluate
-from cyy_naive_lib.algorithm.sequence_op import flatten_list
+from cyy_naive_lib.log import set_level
 from distributed_learning_simulation import (
     Session,
 )
-from NER_evaluation.common import match_tokens, replace_tag
+from NER_evaluation.common import match_tokens
 from NER_evaluation.html_form import html2bio
-from ner_metrics import classification_report
+from NER_evaluation.metric import print_metrics
+from NER_evaluation.token_classification import process_batch
 from util import get_model, get_tester
 
 project_path = os.path.join(os.path.dirname(__file__), "..", "..")
@@ -20,7 +21,7 @@ sys.path.insert(0, project_path)
 import src.method  # noqa: F401
 
 if __name__ == "__main__":
-    # set_level(logging.DEBUG)
+    set_level(logging.INFO)
     parser = argparse.ArgumentParser(
         prog="Analyze NER result",
     )
@@ -120,42 +121,11 @@ if __name__ == "__main__":
             zero_shot=args.zero_shot,
             worker_index=args.worker_index,
         )
-
-        def process_batch(batch_res):
-            targets = batch_res["targets"].reshape(batch_res["batch_size"], -1)
-            for tags, logits in zip(targets, batch_res["logits"], strict=False):
-                assert tags.shape[0] == logits.shape[0]
-                mask = tags != -100
-                tags = tags[mask].tolist()
-                logits = logits[mask].argmax(dim=-1).tolist()
-                tags = [labels[tag] for tag in tags]
-                for skipped_tag in skipped_tags:
-                    tags = ["O" if skipped_tag in tag else tag for tag in tags]
-                predicated_tags = [labels[tag] for tag in logits]
-
-                ground_tags.append(tags)
-                prediction.append(predicated_tags)
-
-        tester.process_sample_output(process_batch)
-
-    results = nervaluate.Evaluator(
-        ground_tags, prediction, tags=list(canonical_tags), loader="list"
-    ).evaluate()
-    print("new metric results ", results[0])
-    print("new metric results_per_tag ", results[1])
-
-    for mode in ("lenient", "strict"):
-        result = classification_report(
-            tags_true=flatten_list(ground_tags),
-            tags_pred=flatten_list(prediction),
-            mode=mode,
+        tester.process_sample_output(
+            functools.partial(process_batch, ground_tags, prediction)
         )
-        print(mode, " metric ", json.dumps(result, sort_keys=True))
-
-    for mode in ("lenient", "strict"):
-        result = classification_report(
-            tags_true=flatten_list(replace_tag(ground_tags, canonical_tags)),
-            tags_pred=flatten_list(replace_tag(prediction, canonical_tags)),
-            mode=mode,
-        )
-        print(mode, " metric ", json.dumps(result, sort_keys=True))
+    print_metrics(
+        ground_tags=ground_tags,
+        prediction=prediction,
+        canonical_tags=canonical_tags,
+    )

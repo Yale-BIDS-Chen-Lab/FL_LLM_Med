@@ -16,16 +16,18 @@ class JSONRecord:
 
 
 class IOBRecord:
+    background_tag = "O"
+
     def __init__(self) -> None:
         self.__tokens: list[str | tuple[list[str], str]] = []
         self.__token_tags: list[str] = []
-        self.__last_tag: str = "O"
+        self.__last_tag: str = self.background_tag
 
     def add_line(self, token: str, token_tag: str) -> None:
         assert " " not in token
         self.__tokens.append(token)
         self.__token_tags.append(token_tag)
-        if token_tag == "O":
+        if token_tag == self.background_tag:
             self.__last_tag = token_tag
         elif token_tag.startswith("B-"):
             old_last_tag = self.__last_tag
@@ -68,7 +70,7 @@ class IOBRecord:
         result: list[tuple[str, str]] = []
         for t in self.__tokens:
             if isinstance(t, str):
-                result.append((t, "O"))
+                result.append((t, self.background_tag))
             else:
                 tag = t[1]
                 for token in t[0]:
