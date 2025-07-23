@@ -122,7 +122,9 @@ if __name__ == "__main__":
             worker_index=args.worker_index,
         )
         tester.process_sample_output(
-            functools.partial(process_batch, ground_tags, prediction)
+            functools.partial(
+                process_batch, ground_tags, prediction, skipped_tags, labels
+            )
         )
     print_metrics(
         ground_tags=ground_tags,
