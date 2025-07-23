@@ -2,13 +2,11 @@ def process_batch(
     ground_tags, prediction, skipped_tags, labels: list[str], batch_res
 ) -> None:
     targets = batch_res["targets"].reshape(batch_res["batch_size"], -1)
-    for _batch_idx, (sample_targets, sample_prediction, word_ids) in enumerate(
-        zip(
-            targets.tolist(),
-            batch_res["logits"].argmax(dim=-1).tolist(),
-            batch_res["word_ids"].tolist(),
-            strict=False,
-        )
+    for sample_targets, sample_prediction, word_ids in zip(
+        targets.tolist(),
+        batch_res["logits"].argmax(dim=-1).tolist(),
+        batch_res["word_ids"].tolist(),
+        strict=False,
     ):
         assert len(word_ids) == len(sample_targets)
         assert len(word_ids) == len(sample_prediction)
@@ -25,7 +23,6 @@ def process_batch(
                 tags.append(labels[sample_targets[idx]])
                 predicated_tags.append(labels[sample_prediction[idx]])
             previous_word_id = word_id
-
         for skipped_tag in skipped_tags:
             tags = ["O" if skipped_tag in tag else tag for tag in tags]
             predicated_tags = [
