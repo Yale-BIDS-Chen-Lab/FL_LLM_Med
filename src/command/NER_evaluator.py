@@ -129,6 +129,8 @@ if __name__ == "__main__":
                 tags = tags[mask].tolist()
                 logits = logits[mask].argmax(dim=-1).tolist()
                 tags = [labels[tag] for tag in tags]
+                for skipped_tag in skipped_tags:
+                    tags = ["O" if skipped_tag in tag else tag for tag in tags]
                 predicated_tags = [labels[tag] for tag in logits]
 
                 ground_tags.append(tags)
