@@ -1,3 +1,4 @@
+from collections import Counter
 from .iob import IOBRecord
 
 
@@ -12,9 +13,12 @@ def token_distribution(all_records: list[IOBRecord]) -> dict[str, set[str]]:
 
     print(token_and_tags)
     return token_and_tags
-    # tag_and_tokens: dict[str, set[str]] = {}
-    # for token, tags in token_and_tags.items():
-    #     for tag in tags:
-    #         if tag not in tag_and_tokens:
-    #             tag_and_tokens[tag] = set()
-    #         tag_and_tokens[tag].add(token)
+
+
+def tag_distribution(all_records: list[IOBRecord]) -> Counter:
+    counter: Counter = Counter()
+    for record in all_records:
+        counter.update(
+            [tag.removeprefix("I-").removeprefix("B-") for tag in record.token_tags]
+        )
+    return counter
