@@ -8,8 +8,6 @@ from distributed_learning_simulation import (
     Session,
     get_server,
 )
-from peft.peft_model import PeftModel
-from transformers import AutoModelForCausalLM
 
 
 def get_tester(session: Session, data_file: str) -> tuple[Inferencer, set]:
@@ -59,22 +57,3 @@ def get_model(
             tester.model_util.load_parameters(parameters)
 
 
-def get_vllm_model(
-    session: Session, zero_shot: bool, worker_index: int | None = None
-) -> tuple[str, str]:
-    model_name = session.config.model_config.model_name.removeprefix(
-        "hugging_face_causal_lm_"
-    )
-    model = AutoModelForCausalLM.from_pretrained(model_name)
-    if not zero_shot:
-        if worker_index is not None:
-            assert worker_index < session.config.worker_number
-            save_dir = os.path.join(
-                session.session_dir, f"worker_{worker_index}", "SFTTrainer"
-            )
-        else:
-            save_dir = os.path.join(session.server_dir, "SFTTrainer")
-        finetuned_model = PeftModel.from_pretrained(model=model, model_id=save_dir)
-        model = finetuned_model.merge_and_unload()
-    model.save_pretrained("./finetuned_model")
-    return "./finetuned_model", model_name

@@ -5,6 +5,7 @@ from collections.abc import Generator
 src_path = os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.insert(0, src_path)
 
+from cyy_huggingface_toolbox.model import get_vllm
 from cyy_naive_lib.fs.tempdir import TempDir
 from cyy_torch_toolbox import Inferencer
 from vllm import RequestOutput, SamplingParams
@@ -14,20 +15,7 @@ import src.method  # noqa: F401
 from distributed_learning_simulation import (
     Session,
 )
-from util import get_vllm_model
 from vllm import LLM
-
-
-def get_vllm(model_path: str, model_name: str, tester: Inferencer) -> LLM:
-    llm = LLM(
-        model=model_path,
-        generation_config="auto",
-        tokenizer=model_name,
-        dtype="bfloat16",
-        max_model_len=2048,
-    )
-    llm.set_tokenizer(tester.model_evaluator.tokenizer)
-    return llm
 
 
 def get_vllm_output(
@@ -37,10 +25,20 @@ def get_vllm_output(
     worker_index: int | None = None,
 ) -> Generator[tuple[dict, RequestOutput]]:
     with TempDir():
-        model_path, model_name = get_vllm_model(
-            session=session, zero_shot=zero_shot, worker_index=worker_index
+        model_name = session.config.model_config.model_name.removeprefix(
+            "hugging_face_causal_lm_"
         )
-        llm = get_vllm(model_path=model_path, model_name=model_name, tester=tester)
+        save_dir=None
+        if not zero_shot:
+            if worker_index is not None:
+                assert worker_index < session.config.worker_number
+                save_dir = os.path.join(
+                    session.session_dir, f"worker_{worker_index}", "SFTTrainer"
+                )
+            else:
+                save_dir = os.path.join(session.server_dir, "SFTTrainer")
+        llm:LLM = get_vllm(model_name,save_dir)
+        llm.set_tokenizer(tester.model_evaluator.tokenizer)
 
         # Load the default sampling parameters from the model.
         sampling_params = SamplingParams(n=1, max_tokens=2048, temperature=0)
