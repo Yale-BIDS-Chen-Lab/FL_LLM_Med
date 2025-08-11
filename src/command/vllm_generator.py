@@ -28,7 +28,7 @@ def get_vllm_output(
         model_name = session.config.model_config.model_name.removeprefix(
             "hugging_face_causal_lm_"
         )
-        save_dir=None
+        save_dir = None
         if not zero_shot:
             if worker_index is not None:
                 assert worker_index < session.config.worker_number
@@ -37,7 +37,7 @@ def get_vllm_output(
                 )
             else:
                 save_dir = os.path.join(session.server_dir, "SFTTrainer")
-        llm:LLM = get_vllm(model_name,save_dir)
+        llm: LLM = get_vllm(model_name, save_dir)
         llm.set_tokenizer(tester.model_evaluator.tokenizer)
 
         # Load the default sampling parameters from the model.
