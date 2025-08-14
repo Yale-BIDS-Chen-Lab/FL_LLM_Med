@@ -66,7 +66,7 @@ class IOBRecord:
             "html": self.html,
         }
 
-    def get_tag_distribution(self) -> dict[str, Counter]:
+    def get_phrase_distribution(self) -> dict[str, Counter]:
         result: dict[str, Counter] = {}
         for t in self.__tokens:
             tag = self.background_tag

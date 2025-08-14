@@ -1,4 +1,5 @@
 import argparse
+from collections import Counter
 import os
 import sys
 
@@ -6,7 +7,7 @@ lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 
 from preprocess import parse_dir, parse_file
-from preprocess.distribution import tag_distribution
+from preprocess.iob import IOBRecord
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -16,7 +17,7 @@ if __name__ == "__main__":
     parser.add_argument("--sub_dirs", help="raw data sub-dir", type=str, default=None)
     parser.add_argument("--file", help="raw data dir", type=str, default=None)
     args = parser.parse_args()
-    all_records = []
+    all_records: list[IOBRecord] = []
     if args.file is not None:
         print("check ", args.file)
         all_records += parse_file(args.file)
@@ -35,5 +36,16 @@ if __name__ == "__main__":
         for records in result.values():
             all_records += records
     assert all_records
-    print("tag counts", tag_distribution( all_records))
-    # token_distribution(all_records=all_records)
+    total_distribution: None | dict[str, Counter] = None
+    for record in all_records:
+        record_result = record.get_phrase_distribution()
+        if total_distribution is None:
+            total_distribution = record_result
+        else:
+            for k, v in record_result.items():
+                if k not in total_distribution:
+                    total_distribution[k] = v
+                else:
+                    total_distribution[k] = total_distribution[k] + v
+
+    print("phrase distribution", total_distribution)
