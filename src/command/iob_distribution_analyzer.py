@@ -1,13 +1,14 @@
 import argparse
-from collections import Counter
+import json
 import os
 import sys
+from collections import Counter
 
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 
 from preprocess import parse_dir, parse_file
-from preprocess.iob import IOBRecord
+from preprocess.iob import IOBRecord, JSONRecord
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -16,8 +17,9 @@ if __name__ == "__main__":
     parser.add_argument("--data_dir", help="raw data dir", type=str, default=None)
     parser.add_argument("--sub_dirs", help="raw data sub-dir", type=str, default=None)
     parser.add_argument("--file", help="raw data dir", type=str, default=None)
+    parser.add_argument("--count", help="count phrases", type=bool, default=True)
     args = parser.parse_args()
-    all_records: list[IOBRecord] = []
+    all_records: list[IOBRecord | JSONRecord] = []
     if args.file is not None:
         print("check ", args.file)
         all_records += parse_file(args.file)
@@ -38,7 +40,11 @@ if __name__ == "__main__":
     assert all_records
     total_distribution: None | dict[str, Counter] = None
     for record in all_records:
-        record_result = record.get_phrase_distribution()
+        if isinstance(record, JSONRecord):
+            record = IOBRecord(
+                tokens=record.to_json()["tokens"], tags=record.to_json()["tags"]
+            )
+        record_result = record.get_tag_distribution()
         if total_distribution is None:
             total_distribution = record_result
         else:
@@ -47,5 +53,9 @@ if __name__ == "__main__":
                     total_distribution[k] = v
                 else:
                     total_distribution[k] = total_distribution[k] + v
-
-    print("phrase distribution", total_distribution)
+    assert total_distribution is not None
+    if args.count:
+        total_counter = {k: v.total() for k, v in total_distribution.items()}
+        print("tag counts", json.dumps(total_counter, indent=4))
+    else:
+        print("phrase distribution", total_distribution)

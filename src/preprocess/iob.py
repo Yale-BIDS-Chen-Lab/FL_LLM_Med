@@ -19,10 +19,18 @@ class JSONRecord:
 class IOBRecord:
     background_tag = "O"
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        tokens: list[str] | None = None,
+        tags: list[str] | None = None,
+    ) -> None:
         self.__tokens: list[str | tuple[list[str], str]] = []
         self.__token_tags: list[str] = []
         self.__last_tag: str = self.background_tag
+        if tokens:
+            assert tags is not None
+            for token, token_tag in zip(tokens, tags, strict=True):
+                self.add_line(token, token_tag)
 
     def add_line(self, token: str, token_tag: str) -> None:
         assert " " not in token
@@ -66,7 +74,7 @@ class IOBRecord:
             "html": self.html,
         }
 
-    def get_phrase_distribution(self) -> dict[str, Counter]:
+    def get_tag_distribution(self) -> dict[str, Counter]:
         result: dict[str, Counter] = {}
         for t in self.__tokens:
             tag = self.background_tag
