@@ -1,4 +1,5 @@
 import json
+from collections import Counter
 
 from .parser import Parser
 
@@ -64,6 +65,22 @@ class IOBRecord:
             "tags": self.token_tags,
             "html": self.html,
         }
+
+    def get_tag_distribution(self) -> dict[str, Counter]:
+        result: dict[str, Counter] = {}
+        for t in self.__tokens:
+            tag = self.background_tag
+            phrase = ""
+            if isinstance(t, str):
+                phrase = t
+            else:
+                tag = t[1]
+                phrase = " ".join(t[0])
+            assert phrase
+            if tag not in result:
+                result[tag] = Counter()
+            result[tag].update([phrase])
+        return result
 
     @property
     def annotated_tokens(self) -> list[tuple[str, str]]:
