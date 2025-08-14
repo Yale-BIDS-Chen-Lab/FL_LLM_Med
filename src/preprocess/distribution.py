@@ -15,10 +15,13 @@ def token_distribution(all_records: list[IOBRecord]) -> dict[str, set[str]]:
     return token_and_tags
 
 
-def tag_distribution(all_records: list[IOBRecord]) -> Counter:
-    counter: Counter = Counter()
+def phrase_distribution(all_records: list[IOBRecord]) -> dict[str, set[str]]:
+    phrase_and_tags: dict[str, set[str]] = {}
     for record in all_records:
-        counter.update(
-            [tag.removeprefix("I-").removeprefix("B-") for tag in record.token_tags]
-        )
-    return counter
+        for phrase, tag in record.annotated_phrases:
+            if phrase not in phrase_and_tags:
+                phrase_and_tags[phrase] = set()
+            phrase_and_tags[phrase].add(tag.removeprefix("I-").removeprefix("B-"))
+
+    print(phrase_and_tags)
+    return phrase_and_tags
