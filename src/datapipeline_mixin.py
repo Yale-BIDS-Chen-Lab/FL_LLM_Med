@@ -2,7 +2,8 @@ import os
 from dataclasses import dataclass
 from typing import Any
 
-from cyy_torch_toolbox import TextDatasetCollection, Transform
+from cyy_preprocessing_pipeline import Transform
+from cyy_torch_toolbox import TextDatasetCollection
 from distributed_learning_simulation import ExecutorProtocol
 
 
