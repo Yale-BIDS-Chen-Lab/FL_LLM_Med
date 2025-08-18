@@ -5,7 +5,7 @@ from collections.abc import Generator
 src_path = os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.insert(0, src_path)
 
-from cyy_huggingface_toolbox.model import get_vllm
+from cyy_huggingface_toolbox.inference import get_llm_engine
 from cyy_naive_lib.fs.tempdir import TempDir
 from cyy_torch_toolbox import Inferencer
 from vllm import RequestOutput, SamplingParams
@@ -37,7 +37,7 @@ def get_vllm_output(
                 )
             else:
                 save_dir = os.path.join(session.server_dir, "SFTTrainer")
-        llm: LLM = get_vllm(model_name, save_dir)
+        llm: LLM = get_llm_engine(model_name, save_dir)
         llm.set_tokenizer(tester.model_evaluator.tokenizer)
 
         # Load the default sampling parameters from the model.
