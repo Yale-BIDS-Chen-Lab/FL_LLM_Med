@@ -1,6 +1,7 @@
 import os
 import sys
 
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 os.environ["TQDM_DISABLE"] = "1"
 os.environ["LEAST_REQUIRED_DEVICE_MEMORY_IN_GB"] = "10"
 
