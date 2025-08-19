@@ -55,5 +55,3 @@ def get_model(
         with open(session.last_model_path, "rb") as f:
             parameters = dill.load(f)
             tester.model_util.load_parameters(parameters)
-
-

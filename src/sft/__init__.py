@@ -120,10 +120,13 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
 
     def sft_get_perf_model_state_dict(self) -> TensorDict:
         assert self._sft_trainer is not None
-        return HuggingFaceModelEvaluatorForFinetune.get_perf_model_state_dict(
+        data = HuggingFaceModelEvaluatorForFinetune.get_perf_model_state_dict(
             self._sft_trainer.model_wrapped
         )
+        return tensor_to(data, device=torch.device("cpu"))
 
     def clear_sft_trainer(self) -> None:
         self._sft_trainer = None
+        torch.cuda.empty_cache()
         gc.collect()
+        torch.cuda.empty_cache()

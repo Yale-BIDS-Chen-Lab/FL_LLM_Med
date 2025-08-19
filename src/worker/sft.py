@@ -1,6 +1,7 @@
-import gc
 import os
 import sys
+
+import torch
 
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
@@ -41,8 +42,8 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
     def pause(self, in_round: bool = False) -> None:
         super().pause(in_round=in_round)
         if not in_round:
-            self._sft_trainer = None
-            gc.collect()
+            self.clear_sft_trainer()
+            log_info("used cuda memory: %s", torch.cuda.memory_allocated())
 
     def _load_adaptor(self, adaptor_parameter: TensorDict) -> None:
         load_perf_model_state_dict(
