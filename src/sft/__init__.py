@@ -120,6 +120,7 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
 
     def sft_get_perf_model_state_dict(self) -> TensorDict:
         assert self._sft_trainer is not None
+        torch.cuda.synchronize()
         data = HuggingFaceModelEvaluatorForFinetune.get_perf_model_state_dict(
             self._sft_trainer.model_wrapped
         )
