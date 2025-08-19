@@ -126,6 +126,7 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
         return tensor_to(data, device=torch.device("cpu"))
 
     def clear_sft_trainer(self) -> None:
+        torch.cuda.synchronize()
         log_info("before clear used cuda memory: %s", torch.cuda.memory_allocated())
         if self._sft_trainer is not None:
             self._sft_trainer.model.to("cpu")
