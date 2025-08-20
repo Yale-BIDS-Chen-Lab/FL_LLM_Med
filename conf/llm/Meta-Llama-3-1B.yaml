@@ -17,3 +17,4 @@ model_kwargs:
     - down_proj
   load_in_4bit: true
   use_gradient_checkpointing: true
+  prepare_model_for_kbit_training: false
