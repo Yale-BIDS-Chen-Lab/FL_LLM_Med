@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 
+os.environ["NO_TOKENIZER_TRANSFORMS"] = "1"
 import cyy_huggingface_toolbox  # noqa: F401
 from cyy_naive_lib.log import set_level
 from distributed_learning_simulation import (
