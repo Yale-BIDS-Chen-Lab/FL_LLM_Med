@@ -23,7 +23,7 @@ dependencies = [
   "transformers",
   "vllm",
   "peft",
-  "trl",
+  "trl==0.17.0",
   "nervaluate",
   "ner_metrics",
   "bs4"
