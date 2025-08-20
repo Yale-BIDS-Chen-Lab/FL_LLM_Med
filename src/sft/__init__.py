@@ -44,8 +44,9 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
         per_device_train_batch_size=executor.hyper_parameter.batch_size,
         num_train_epochs=executor.hyper_parameter.epoch,
         learning_rate=learning_rate,
-        logging_steps=0.1,
+        logging_steps=10,
         bf16=True,
+        completion_only_loss=False,
         output_dir=output_dir,
         lr_scheduler_type="cosine",
         gradient_checkpointing=config.model_config.model_kwargs.get(
@@ -88,12 +89,13 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
         if self.hold_log_lock:
             log_info("SFTConfig is %s", training_args)
 
-        model = executor.model
+        model = executor.running_model_evaluator.underlying_model
         train_dataset = self.get_sft_trainer_dataset(executor)
         sft_trainer = SFTTrainer(
             model,
             train_dataset=train_dataset,
             args=training_args,
+            peft_config=executor.running_model_evaluator.peft_config,
         )
         assert sft_trainer.model is sft_trainer.model_wrapped
         self._sft_trainer = sft_trainer
