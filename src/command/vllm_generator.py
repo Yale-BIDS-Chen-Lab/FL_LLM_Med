@@ -37,7 +37,7 @@ def get_vllm_output(
                 )
             else:
                 save_dir = os.path.join(session.server_dir, "SFTTrainer")
-        llm: LLM = get_llm_engine(model_name, save_dir)
+        llm: LLM = get_llm_engine(model_name, save_dir, max_model_len=2048)
         llm.set_tokenizer(tester.model_evaluator.tokenizer)
 
         # Load the default sampling parameters from the model.
