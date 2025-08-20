@@ -54,7 +54,12 @@ if __name__ == "__main__":
         skipped_tags = set(args.skipped_tags.split(" "))
 
     session = Session(session_dir=args.session_dir)
-    tester, labels = get_tester(session=session, data_file=args.test_file)
+    use_llm = session.config.model_config.model_name.startswith(
+        "hugging_face_causal_lm_"
+    )
+    tester, labels = get_tester(
+        session=session, data_file=args.test_file, replace_file_in_session=use_llm
+    )
     labels = copy.deepcopy(labels)
     canonical_tags = copy.deepcopy(labels)
     labels = sorted(labels)
@@ -67,7 +72,7 @@ if __name__ == "__main__":
     assert canonical_tags
     print("canonical_tags are", canonical_tags)
     print("skipped_tags are", skipped_tags)
-    if session.config.model_config.model_name.startswith("hugging_face_causal_lm_"):
+    if use_llm:
         from vllm_generator import get_vllm_output
 
         vllm_output = list(
