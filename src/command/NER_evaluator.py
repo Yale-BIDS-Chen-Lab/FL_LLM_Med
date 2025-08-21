@@ -15,7 +15,7 @@ from NER_evaluation.common import match_tokens
 from NER_evaluation.html_form import html2bio
 from NER_evaluation.metric import print_metrics
 from NER_evaluation.token_classification import process_batch
-from util import get_model, get_tester
+from .util import get_model, get_tester
 
 project_path = os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.insert(0, project_path)
@@ -125,7 +125,6 @@ if __name__ == "__main__":
             tester=tester,
             session=session,
             zero_shot=args.zero_shot,
-            worker_index=args.worker_index,
         )
         tester.process_sample_output(
             functools.partial(
