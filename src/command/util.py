@@ -35,7 +35,7 @@ def get_tester(
 
     server = get_server(config=config)
     tester: Inferencer = server.get_tester()
-    with contextlib.suppress(BaseException):
+    if for_language_modeling:
         tester = server.get_tester(for_evaluation=True)
 
     tester.model_evaluator.tokenizer.padding_side = "left"
