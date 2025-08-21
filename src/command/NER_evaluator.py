@@ -59,7 +59,7 @@ if __name__ == "__main__":
         "hugging_face_causal_lm_"
     )
     tester, labels = get_tester(
-        session=session, data_file=args.test_file, replace_file_in_session=use_llm
+        session=session, data_file=args.test_file, for_language_modeling=use_llm
     )
     labels = copy.deepcopy(labels)
     canonical_tags = copy.deepcopy(labels)

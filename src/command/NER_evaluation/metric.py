@@ -8,10 +8,10 @@ from NER_evaluation.common import replace_tag
 
 
 def print_metrics(ground_tags, prediction, canonical_tags):
-    results = nervaluate.Evaluator(
-        ground_tags, prediction, tags=list(canonical_tags), loader="list"
-    ).evaluate()
-    print("new metric results ", results)
+    # results = nervaluate.Evaluator(
+    #     ground_tags, prediction, tags=list(canonical_tags), loader="list"
+    # ).evaluate()
+    # print("new metric results ", results)
 
     for mode in ("lenient", "strict"):
         result = classification_report(
