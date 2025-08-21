@@ -33,7 +33,7 @@ def load_perf_model_state_dict(
 
 def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTConfig:
     # torch.backends.cudnn.benchmark = True
-    # learning_rate = 2.0e-5
+    learning_rate = 2.0e-4
     if isinstance(executor, Trainer):
         assert isinstance(executor.hyper_parameter.learning_rate, float)
         learning_rate = executor.hyper_parameter.learning_rate
