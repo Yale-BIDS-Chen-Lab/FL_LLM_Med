@@ -1,7 +1,6 @@
 import copy
 import os
 
-import dill
 from cyy_torch_toolbox import Inferencer, load_local_files
 from distributed_learning_simulation import (
     Session,
@@ -51,14 +50,3 @@ def get_tester(
             tester.model_evaluator.model.labels = old_labels
 
     return tester, old_labels
-
-
-def get_model(
-    tester: Inferencer,
-    session: Session,
-    zero_shot: bool,
-) -> None:
-    if not zero_shot:
-        with open(session.last_model_path, "rb") as f:
-            parameters = dill.load(f)
-            tester.model_util.load_parameters(parameters)

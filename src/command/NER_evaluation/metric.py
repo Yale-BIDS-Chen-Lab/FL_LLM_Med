@@ -1,6 +1,5 @@
 import json
 
-import nervaluate
 from cyy_naive_lib.algorithm.sequence_op import flatten_list
 from ner_metrics import classification_report
 

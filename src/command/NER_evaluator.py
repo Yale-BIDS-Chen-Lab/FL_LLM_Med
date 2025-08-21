@@ -8,14 +8,13 @@ import sys
 os.environ["NO_TOKENIZER_TRANSFORMS"] = "1"
 import cyy_huggingface_toolbox  # noqa: F401
 from cyy_naive_lib.log import set_level
-from distributed_learning_simulation import (
-    Session,
-)
-from NER_evaluation.common import match_tokens
+from distributed_learning_simulation import Session
+from cyy_preprocessing_pipeline.match import approximately_match_tokens
 from NER_evaluation.html_form import html2bio
 from NER_evaluation.metric import print_metrics
 from NER_evaluation.token_classification import process_batch
-from .util import get_model, get_tester
+
+from .util import get_tester
 
 project_path = os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.insert(0, project_path)
@@ -89,7 +88,8 @@ if __name__ == "__main__":
             tags = sample["tags"]
             tokens = sample["tokens"]
             predicated_tokens = html2bio(html=out_text, canonical_tags=canonical_tags)
-            predicated_tags = match_tokens(tokens, predicated_tokens)
+            predicated_tags = approximately_match_tokens(tokens, predicated_tokens)
+            predicated_tags = [t if t is not None else "O" for t in predicated_tags]
             if (
                 len(set(tags)) > 1
                 and set(predicated_tags) == {"O"}
@@ -121,11 +121,9 @@ if __name__ == "__main__":
         if debug_f is not None:
             debug_f.close()
     else:
-        get_model(
-            tester=tester,
-            session=session,
-            zero_shot=args.zero_shot,
-        )
+        if not args.zero_shot:
+            assert args.worker_index is None
+            tester.model_util.load_parameters(session.get_last_model_parameters())
         tester.process_sample_output(
             functools.partial(
                 process_batch, ground_tags, prediction, skipped_tags, labels
