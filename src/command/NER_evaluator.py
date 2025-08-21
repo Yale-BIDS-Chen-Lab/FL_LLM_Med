@@ -9,12 +9,12 @@ os.environ["NO_TOKENIZER_TRANSFORMS"] = "1"
 import cyy_huggingface_toolbox  # noqa: F401
 from cyy_naive_lib.log import set_level
 from distributed_learning_simulation import Session
-from cyy_preprocessing_pipeline.match import approximately_match_tokens
+from cyy_preprocessing_pipeline.parsing import approximately_match_tokens
 from NER_evaluation.html_form import html2bio
 from NER_evaluation.metric import print_metrics
 from NER_evaluation.token_classification import process_batch
 
-from .util import get_tester
+from util import get_tester
 
 project_path = os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.insert(0, project_path)
