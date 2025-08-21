@@ -34,9 +34,10 @@ def get_tester(
         config.hyper_parameter_config.batch_size = 1024
 
     server = get_server(config=config)
-    tester: Inferencer = server.get_tester()
     if for_language_modeling:
         tester = server.get_tester(for_evaluation=True)
+    else:
+        tester: Inferencer = server.get_tester()
 
     tester.model_evaluator.tokenizer.padding_side = "left"
     old_labels = set(

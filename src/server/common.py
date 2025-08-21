@@ -31,8 +31,6 @@ class LLMTextServer(AggregationServer, DatapipelineMixin):
             inferencer.dataset_collection,
             TextDatasetCollection | ClassificationDatasetCollection,
         )
-        if for_evaluation:
-            assert inferencer.dataset_collection.prompt is None
         if inferencer.dataset_collection.prompt is None:
             self.set_prompt(
                 dc=inferencer.dataset_collection, for_evaluation=for_evaluation
