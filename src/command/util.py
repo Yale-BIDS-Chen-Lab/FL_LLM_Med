@@ -1,4 +1,3 @@
-import contextlib
 import copy
 import os
 
@@ -58,10 +57,8 @@ def get_model(
     tester: Inferencer,
     session: Session,
     zero_shot: bool,
-    worker_index: int | None = None,
 ) -> None:
     if not zero_shot:
-        assert worker_index is None
         with open(session.last_model_path, "rb") as f:
             parameters = dill.load(f)
             tester.model_util.load_parameters(parameters)
