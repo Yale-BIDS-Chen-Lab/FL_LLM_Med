@@ -90,9 +90,14 @@ if __name__ == "__main__":
             predicated_tokens = html2bio(html=out_text, canonical_tags=canonical_tags)
             predicated_tags = approximately_match_tokens(tokens, predicated_tokens)
             predicated_tags = [t if t is not None else "O" for t in predicated_tags]
+            assert len(predicated_tags) == len(tags)
+            same_count = 0
+            for a, b in zip(predicated_tags, tags, strict=True):
+                if a == b:
+                    same_count += 1
             if (
                 len(set(tags)) > 1
-                and set(predicated_tags) == {"O"}
+                and same_count / len(tags) < 0.5
                 and debug_f is not None
             ):
                 debug_f.write("input <<<<<<<<<<<<<<\n")
