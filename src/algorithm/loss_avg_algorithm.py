@@ -10,7 +10,7 @@ class AggregationByLossAlgorithm(FedAVGAlgorithm):
     def __init__(self) -> None:
         super().__init__()
         self.loss_fun: Callable | None = None
-        assert self.config.use_validation
+        # assert self.config.use_validation
 
     def process_worker_data(
         self,
