@@ -122,19 +122,22 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
 
     def sft_get_perf_model_state_dict(self) -> TensorDict:
         assert self._sft_trainer is not None
-        torch.cuda.synchronize()
+        if torch.cuda.is_available():
+            torch.cuda.synchronize()
         data = HuggingFaceModelEvaluatorForFinetune.get_perf_model_state_dict(
             self._sft_trainer.model_wrapped
         )
         return tensor_to(data, device=torch.device("cpu"))
 
     def clear_sft_trainer(self) -> None:
-        torch.cuda.synchronize()
-        log_info("before clear used cuda memory: %s", torch.cuda.memory_allocated())
+        if torch.cuda.is_available():
+            torch.cuda.synchronize()
+            log_info("before clear used cuda memory: %s", torch.cuda.memory_allocated())
         if self._sft_trainer is not None:
             self._sft_trainer.model.to("cpu")
         self._sft_trainer = None
-        torch.cuda.empty_cache()
-        gc.collect()
-        torch.cuda.empty_cache()
-        log_info("after clear used cuda memory: %s", torch.cuda.memory_allocated())
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            gc.collect()
+            torch.cuda.empty_cache()
+            log_info("after clear used cuda memory: %s", torch.cuda.memory_allocated())
