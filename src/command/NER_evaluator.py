@@ -86,6 +86,7 @@ if __name__ == "__main__":
         for sample, generated_text in vllm_output:
             out_text = generated_text.outputs[0].text
             tags = sample["tags"]
+            assert tags
             tokens = sample["tokens"]
             predicated_tokens = html2bio(html=out_text, canonical_tags=canonical_tags)
             predicated_tags = approximately_match_tokens(tokens, predicated_tokens)
@@ -106,12 +107,12 @@ if __name__ == "__main__":
                     joined_tokens = sample["inputs"]
                 debug_f.write(f"{joined_tokens}\n")
                 debug_f.write("ground_out ==============\n")
+                assert tags
                 joined_tags = " ".join(tags)
-                if "output" in sample:
-                    joined_tags = sample["output"]
                 debug_f.write(f"{joined_tags}\n")
                 debug_f.write("predicated_out >>>>>>>>>>>>>>\n")
                 debug_f.write(f"{out_text}\n")
+                debug_f.write("parsed_predicated_out >>>>>>>>>>>>>>\n")
                 predicated_out_text: list[str] = []
                 for t in predicated_tokens:
                     if isinstance(t, str):
