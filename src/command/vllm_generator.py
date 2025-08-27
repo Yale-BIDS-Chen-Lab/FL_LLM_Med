@@ -31,13 +31,15 @@ def get_vllm_output(
         if worker_index is not None:
             assert worker_index < session.config.worker_number
             save_dir = os.path.join(
-                session.session_dir, f"worker_{worker_index}", "SFTTrainer"
+                session.worker_dir(worker_index=worker_index), "SFTTrainer"
             )
         else:
             save_dir = os.path.join(session.server_dir, "SFTTrainer")
-    llm: LLM = get_llm_engine(model_name, save_dir, max_model_len=2048)
-    # tester.model_evaluator.tokenizer.padding_side = "left"
-    # llm.set_tokenizer(tester.model_evaluator.tokenizer)
+    llm: LLM = get_llm_engine(
+        pretrained_model_name_or_path=model_name,
+        finetuned_model_dir=save_dir,
+        max_model_len=2048,
+    )
 
     # Load the default sampling parameters from the model.
     sampling_params = SamplingParams(n=1, max_tokens=2048, temperature=0)
