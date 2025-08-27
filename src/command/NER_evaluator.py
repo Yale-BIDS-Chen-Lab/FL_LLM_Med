@@ -4,6 +4,7 @@ import functools
 import logging
 import os
 import sys
+from cyy_naive_lib import TempDir
 
 os.environ["NO_TOKENIZER_TRANSFORMS"] = "1"
 import cyy_huggingface_toolbox  # noqa: F401
@@ -20,6 +21,20 @@ project_path = os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.insert(0, project_path)
 import src.method  # noqa: F401
 
+
+def get_finetune_dir(zero_shot: bool, worker_index: int | None = None) -> str | None:
+    finetuned_model_dir = None
+    if not zero_shot:
+        if worker_index is not None:
+            assert worker_index < session.config.worker_number
+            finetuned_model_dir = os.path.join(
+                session.worker_dir(worker_index=worker_index), "SFTTrainer"
+            )
+        else:
+            finetuned_model_dir = os.path.join(session.server_dir, "SFTTrainer")
+    return finetuned_model_dir
+
+
 if __name__ == "__main__":
     set_level(logging.INFO)
     parser = argparse.ArgumentParser(
@@ -28,7 +43,7 @@ if __name__ == "__main__":
     parser.add_argument("--session_dir", help="session dir", type=str, required=True)
     parser.add_argument("--test_file", help="test file", type=str, default=None)
     parser.add_argument(
-        "--debug_file", help="contains debug info", type=str, default=None
+        "--debug_file", help="contain debug info", type=str, default=None
     )
     parser.add_argument(
         "--skipped_tags", help="tags to skip evaluation", type=str, default=None
@@ -39,7 +54,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--worker_index", help="evaluate worker", type=int, default=None
     )
+    parser.add_argument(
+        "--sample_size", help="randomly sample from test_file", type=int, default=None
+    )
     args = parser.parse_args()
+    if args.sample_size is not None:
+
+
 
     prediction: list[list[str]] = []
     ground_tags: list[list[str]] = []
@@ -75,12 +96,13 @@ if __name__ == "__main__":
     if use_llm:
         from vllm_generator import get_vllm_output
 
+        finetuned_model_dir = get_finetune_dir(
+            zero_shot=args.zero_shot, worker_index=args.worker_index
+        )
+
         vllm_output = list(
             get_vllm_output(
-                tester=tester,
-                session=session,
-                zero_shot=args.zero_shot,
-                worker_index=args.worker_index,
+                tester=tester, session=session, finetuned_model_dir=finetuned_model_dir
             )
         )
         for sample, generated_text in vllm_output:

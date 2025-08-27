@@ -8,7 +8,7 @@ from cyy_huggingface_toolbox import (
     HuggingFaceModelEvaluator,
     HuggingFaceModelEvaluatorForFinetune,
 )
-from cyy_naive_lib.log import log_debug, log_info
+from cyy_naive_lib.log import log_debug, log_info, log_error
 from cyy_torch_toolbox import Config, Executor, TensorDict, Trainer, tensor_to
 from datasets import Dataset
 from distributed_learning_simulation import ExecutorProtocol
@@ -23,6 +23,10 @@ def load_perf_model_state_dict(
     model, state_dict: TensorDict, device: torch.device
 ) -> None:
     state_dict = tensor_to(state_dict, device=device)
+    total_state_size = 0
+    for k in state_dict.values():
+        total_state_size += k.nbytes
+    log_info("total_state_size is %s", total_state_size)
     _, unexpected_keys = set_peft_model_state_dict(
         model=model,
         peft_model_state_dict=state_dict,

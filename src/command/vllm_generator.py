@@ -18,26 +18,14 @@ from vllm import LLM
 
 
 def get_vllm_output(
-    tester: Inferencer,
-    session: Session,
-    zero_shot: bool,
-    worker_index: int | None = None,
+    tester: Inferencer, session: Session, finetuned_model_dir: str | None = None
 ) -> Generator[tuple[dict, RequestOutput]]:
     model_name = session.config.model_config.model_name.removeprefix(
         "hugging_face_causal_lm_"
     )
-    save_dir = None
-    if not zero_shot:
-        if worker_index is not None:
-            assert worker_index < session.config.worker_number
-            save_dir = os.path.join(
-                session.worker_dir(worker_index=worker_index), "SFTTrainer"
-            )
-        else:
-            save_dir = os.path.join(session.server_dir, "SFTTrainer")
     llm: LLM = get_llm_engine(
         pretrained_model_name_or_path=model_name,
-        finetuned_model_dir=save_dir,
+        finetuned_model_dir=finetuned_model_dir,
         max_model_len=2048,
     )
 
