@@ -4,17 +4,18 @@ import functools
 import logging
 import os
 import sys
-from cyy_naive_lib import TempDir
+
+import numpy as np
 
 os.environ["NO_TOKENIZER_TRANSFORMS"] = "1"
 import cyy_huggingface_toolbox  # noqa: F401
 from cyy_naive_lib.log import set_level
-from distributed_learning_simulation import Session
 from cyy_preprocessing_pipeline.parsing import approximately_match_tokens
+from cyy_torch_toolbox import MachineLearningPhase
+from distributed_learning_simulation import Session
 from NER_evaluation.html_form import html2bio
 from NER_evaluation.metric import print_metrics
 from NER_evaluation.token_classification import process_batch
-
 from util import get_tester
 
 project_path = os.path.join(os.path.dirname(__file__), "..", "..")
@@ -58,9 +59,6 @@ if __name__ == "__main__":
         "--sample_size", help="randomly sample from test_file", type=int, default=None
     )
     args = parser.parse_args()
-    if args.sample_size is not None:
-
-
 
     prediction: list[list[str]] = []
     ground_tags: list[list[str]] = []
@@ -81,6 +79,18 @@ if __name__ == "__main__":
     tester, labels = get_tester(
         session=session, data_file=args.test_file, for_language_modeling=use_llm
     )
+
+    if args.sample_size is not None:
+        test_len = len(
+            tester.dataset_collection.get_dataset_util(phase=MachineLearningPhase.Test)
+        )
+        assert args.sample_size < test_len
+        rng = np.random.default_rng()
+        indices = rng.choice(
+            list(range(test_len)), size=args.sample_size, replace=False
+        ).tolist()
+        tester.mutable_dataset_collection.set_subset(phase=MachineLearningPhase.Test,indices=set(indices))
+
     labels = copy.deepcopy(labels)
     canonical_tags = copy.deepcopy(labels)
     labels = sorted(labels)
