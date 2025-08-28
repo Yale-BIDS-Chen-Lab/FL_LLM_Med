@@ -166,20 +166,20 @@ if __name__ == "__main__":
                         debug_f.write(f"{sample['html']}\n")
                     else:
                         debug_f.write(f"{sample['output']}\n")
-                    debug_f.write("ground_out ==============\n")
-                    assert tags
-                    joined_tags = " ".join(tags)
-                    debug_f.write(f"{joined_tags}\n")
+                    # debug_f.write("ground_out ==============\n")
+                    # assert tags
+                    # joined_tags = " ".join(tags)
+                    # debug_f.write(f"{joined_tags}\n")
                     debug_f.write("predicated_out >>>>>>>>>>>>>>\n")
                     debug_f.write(f"{out_text}\n")
-                    debug_f.write("parsed_predicated_out >>>>>>>>>>>>>>\n")
-                    predicated_out_text: list[str] = []
-                    for t in predicated_tokens:
-                        if isinstance(t, str):
-                            predicated_out_text.append(t)
-                        else:
-                            predicated_out_text += t[0]
-                    out_text = " ".join(predicated_out_text)
+                    # debug_f.write("parsed_predicated_out >>>>>>>>>>>>>>\n")
+                    # predicated_out_text: list[str] = []
+                    # for t in predicated_tokens:
+                    #     if isinstance(t, str):
+                    #         predicated_out_text.append(t)
+                    #     else:
+                    #         predicated_out_text += t[0]
+                    # out_text = " ".join(predicated_out_text)
                     debug_f.write(f"{out_text}\n")
 
                 prediction.append(predicated_tags)
