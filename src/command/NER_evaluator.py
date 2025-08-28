@@ -161,6 +161,11 @@ if __name__ == "__main__":
                     if "inputs" in sample:
                         joined_tokens = sample["inputs"]
                     debug_f.write(f"{joined_tokens}\n")
+                    debug_f.write("ground_out html ==============\n")
+                    if "html" in sample:
+                        debug_f.write(f"{sample['html']}\n")
+                    else:
+                        debug_f.write(f"{sample['output']}\n")
                     debug_f.write("ground_out ==============\n")
                     assert tags
                     joined_tags = " ".join(tags)
