@@ -10,11 +10,12 @@ import numpy as np
 os.environ["NO_TOKENIZER_TRANSFORMS"] = "1"
 import cyy_huggingface_toolbox  # noqa: F401
 from cyy_naive_lib.log import set_level
+from cyy_naive_lib import save_json
 from cyy_preprocessing_pipeline.parsing import approximately_match_tokens
 from cyy_torch_toolbox import MachineLearningPhase
 from distributed_learning_simulation import Session
 from NER_evaluation.html_form import html2bio
-from NER_evaluation.metric import print_metrics
+from NER_evaluation.metric import get_metrics
 from NER_evaluation.token_classification import process_batch
 from util import get_tester
 
@@ -58,6 +59,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--sample_size", help="randomly sample from test_file", type=int, default=None
     )
+    parser.add_argument(
+        "--sample_times", help="times to sample from test_file", type=int, default=None
+    )
+    parser.add_argument(
+        "--output_dir", help="dir to save results", type=str, default=None
+    )
     args = parser.parse_args()
 
     prediction: list[list[str]] = []
@@ -76,21 +83,13 @@ if __name__ == "__main__":
     use_llm = session.config.model_config.model_name.startswith(
         "hugging_face_causal_lm_"
     )
+    if args.sample_times is not None:
+        assert args.sample_size is not None
+        assert args.debug_file is None
+
     tester, labels = get_tester(
         session=session, data_file=args.test_file, for_language_modeling=use_llm
     )
-
-    if args.sample_size is not None:
-        test_len = len(
-            tester.dataset_collection.get_dataset_util(phase=MachineLearningPhase.Test)
-        )
-        assert args.sample_size < test_len
-        rng = np.random.default_rng()
-        indices = rng.choice(
-            list(range(test_len)), size=args.sample_size, replace=False
-        ).tolist()
-        tester.mutable_dataset_collection.set_subset(phase=MachineLearningPhase.Test,indices=set(indices))
-
     labels = copy.deepcopy(labels)
     canonical_tags = copy.deepcopy(labels)
     labels = sorted(labels)
@@ -103,72 +102,101 @@ if __name__ == "__main__":
     assert canonical_tags
     print("canonical_tags are", canonical_tags)
     print("skipped_tags are", skipped_tags)
-    if use_llm:
-        from vllm_generator import get_vllm_output
-
-        finetuned_model_dir = get_finetune_dir(
-            zero_shot=args.zero_shot, worker_index=args.worker_index
-        )
-
-        vllm_output = list(
-            get_vllm_output(
-                tester=tester, session=session, finetuned_model_dir=finetuned_model_dir
+    sample_times = 1 if args.sample_times is None else args.sample_times
+    vllm_engine = None
+    for sample_idx in range(sample_times):
+        if args.sample_size is not None:
+            test_len = len(
+                tester.dataset_collection.get_dataset_util(
+                    phase=MachineLearningPhase.Test
+                )
             )
-        )
-        for sample, generated_text in vllm_output:
-            out_text = generated_text.outputs[0].text
-            tags = sample["tags"]
-            assert tags
-            tokens = sample["tokens"]
-            predicated_tokens = html2bio(html=out_text, canonical_tags=canonical_tags)
-            predicated_tags = approximately_match_tokens(tokens, predicated_tokens)
-            predicated_tags = [t if t is not None else "O" for t in predicated_tags]
-            assert len(predicated_tags) == len(tags)
-            same_count = 0
-            for a, b in zip(predicated_tags, tags, strict=True):
-                if a == b:
-                    same_count += 1
-            if (
-                len(set(tags)) > 1
-                and same_count / len(tags) < 0.5
-                and debug_f is not None
-            ):
-                debug_f.write("input <<<<<<<<<<<<<<\n")
-                joined_tokens = " ".join(tokens)
-                if "inputs" in sample:
-                    joined_tokens = sample["inputs"]
-                debug_f.write(f"{joined_tokens}\n")
-                debug_f.write("ground_out ==============\n")
+            assert args.sample_size < test_len
+            rng = np.random.default_rng()
+            indices = rng.choice(
+                list(range(test_len)), size=args.sample_size, replace=False
+            ).tolist()
+            tester.mutable_dataset_collection.set_subset(
+                phase=MachineLearningPhase.Test, indices=set(indices)
+            )
+
+        if use_llm:
+            from vllm_generator import get_vllm_output, get_vllm_engine
+
+            if vllm_engine is None:
+                finetuned_model_dir = get_finetune_dir(
+                    zero_shot=args.zero_shot, worker_index=args.worker_index
+                )
+                vllm_engine = get_vllm_engine(
+                    session=session, finetuned_model_dir=finetuned_model_dir
+                )
+
+            finetuned_model_dir = get_finetune_dir(
+                zero_shot=args.zero_shot, worker_index=args.worker_index
+            )
+
+            vllm_output = list(get_vllm_output(tester=tester, engine=vllm_engine))
+            for sample, generated_text in vllm_output:
+                out_text = generated_text.outputs[0].text
+                tags = sample["tags"]
                 assert tags
-                joined_tags = " ".join(tags)
-                debug_f.write(f"{joined_tags}\n")
-                debug_f.write("predicated_out >>>>>>>>>>>>>>\n")
-                debug_f.write(f"{out_text}\n")
-                debug_f.write("parsed_predicated_out >>>>>>>>>>>>>>\n")
-                predicated_out_text: list[str] = []
-                for t in predicated_tokens:
-                    if isinstance(t, str):
-                        predicated_out_text.append(t)
-                    else:
-                        predicated_out_text += t[0]
-                out_text = " ".join(predicated_out_text)
-                debug_f.write(f"{out_text}\n")
+                tokens = sample["tokens"]
+                predicated_tokens = html2bio(
+                    html=out_text, canonical_tags=canonical_tags
+                )
+                predicated_tags = approximately_match_tokens(tokens, predicated_tokens)
+                predicated_tags = [t if t is not None else "O" for t in predicated_tags]
+                assert len(predicated_tags) == len(tags)
+                same_count = 0
+                for a, b in zip(predicated_tags, tags, strict=True):
+                    if a == b:
+                        same_count += 1
+                if (
+                    len(set(tags)) > 1
+                    and same_count / len(tags) < 0.5
+                    and debug_f is not None
+                ):
+                    debug_f.write("input <<<<<<<<<<<<<<\n")
+                    joined_tokens = " ".join(tokens)
+                    if "inputs" in sample:
+                        joined_tokens = sample["inputs"]
+                    debug_f.write(f"{joined_tokens}\n")
+                    debug_f.write("ground_out ==============\n")
+                    assert tags
+                    joined_tags = " ".join(tags)
+                    debug_f.write(f"{joined_tags}\n")
+                    debug_f.write("predicated_out >>>>>>>>>>>>>>\n")
+                    debug_f.write(f"{out_text}\n")
+                    debug_f.write("parsed_predicated_out >>>>>>>>>>>>>>\n")
+                    predicated_out_text: list[str] = []
+                    for t in predicated_tokens:
+                        if isinstance(t, str):
+                            predicated_out_text.append(t)
+                        else:
+                            predicated_out_text += t[0]
+                    out_text = " ".join(predicated_out_text)
+                    debug_f.write(f"{out_text}\n")
 
-            prediction.append(predicated_tags)
-            ground_tags.append(tags)
-        if debug_f is not None:
-            debug_f.close()
-    else:
-        if not args.zero_shot:
-            assert args.worker_index is None
-            tester.model_util.load_parameters(session.get_last_model_parameters())
-        tester.process_sample_output(
-            functools.partial(
-                process_batch, ground_tags, prediction, skipped_tags, labels
+                prediction.append(predicated_tags)
+                ground_tags.append(tags)
+            if debug_f is not None:
+                debug_f.close()
+        else:
+            if not args.zero_shot:
+                assert args.worker_index is None
+                tester.model_util.load_parameters(session.get_last_model_parameters())
+            tester.process_sample_output(
+                functools.partial(
+                    process_batch, ground_tags, prediction, skipped_tags, labels
+                )
             )
+        metrics = get_metrics(
+            ground_tags=ground_tags,
+            prediction=prediction,
+            canonical_tags=canonical_tags,
         )
-    print_metrics(
-        ground_tags=ground_tags,
-        prediction=prediction,
-        canonical_tags=canonical_tags,
-    )
+        if args.output_dir:
+            assert os.path.isdir(args.output_dir), args.output_dir
+            save_json(
+                metrics, os.path.join(args.output_dir, f"metrics_{sample_idx}.json")
+            )

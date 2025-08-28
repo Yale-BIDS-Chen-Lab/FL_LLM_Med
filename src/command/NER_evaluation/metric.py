@@ -6,24 +6,27 @@ from ner_metrics import classification_report
 from NER_evaluation.common import replace_tag
 
 
-def print_metrics(ground_tags, prediction, canonical_tags):
+def get_metrics(ground_tags, prediction, canonical_tags) -> dict:
     # results = nervaluate.Evaluator(
     #     ground_tags, prediction, tags=list(canonical_tags), loader="list"
     # ).evaluate()
     # print("new metric results ", results)
 
+    # for mode in ("lenient", "strict"):
+    #     result = classification_report(
+    #         tags_true=flatten_list(ground_tags),
+    #         tags_pred=flatten_list(prediction),
+    #         mode=mode,
+    #     )
+    #     print(mode, " metric ", json.dumps(result, sort_keys=True))
+    #
+    result = {}
     for mode in ("lenient", "strict"):
-        result = classification_report(
-            tags_true=flatten_list(ground_tags),
-            tags_pred=flatten_list(prediction),
-            mode=mode,
-        )
-        print(mode, " metric ", json.dumps(result, sort_keys=True))
-
-    for mode in ("lenient", "strict"):
-        result = classification_report(
+        report = classification_report(
             tags_true=flatten_list(replace_tag(ground_tags, canonical_tags)),
             tags_pred=flatten_list(replace_tag(prediction, canonical_tags)),
             mode=mode,
         )
-        print(mode, " metric ", json.dumps(result, sort_keys=True))
+        result[mode] = report
+    print(" metric ", json.dumps(result, sort_keys=True))
+    return result
