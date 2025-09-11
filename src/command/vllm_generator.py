@@ -46,6 +46,6 @@ def get_vllm_output(
                     batch_list[idx][k] = a
         yield from zip(
             batch_list,
-            llm_engine.generate(batch["inputs"], sampling_params),
+            engine.generate(batch["inputs"], sampling_params),
             strict=False,
         )
