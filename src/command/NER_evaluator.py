@@ -10,7 +10,7 @@ import numpy as np
 os.environ["NO_TOKENIZER_TRANSFORMS"] = "1"
 import cyy_huggingface_toolbox  # noqa: F401
 from cyy_naive_lib import save_json
-from cyy_naive_lib.log import set_level
+from cyy_naive_lib.log import set_level, log_warning
 from cyy_preprocessing_pipeline.parsing import approximately_match_tokens
 from cyy_torch_toolbox import MachineLearningPhase
 from distributed_learning_simulation import Session
@@ -43,6 +43,9 @@ if __name__ == "__main__":
         prog="Analyze NER result",
     )
     parser.add_argument("--session_dir", help="session dir", type=str, required=True)
+    parser.add_argument(
+        "--pretrained_model_dir", help="session dir", type=str, default=None
+    )
     parser.add_argument("--test_file", help="test file", type=str, default=None)
     parser.add_argument(
         "--debug_file", help="contain debug info", type=str, default=None
@@ -83,6 +86,20 @@ if __name__ == "__main__":
     use_llm = session.config.model_config.model_name.startswith(
         "hugging_face_causal_lm_"
     )
+    if args.pretrained_model_dir is not None:
+        assert use_llm, session.config.model_config.model_name
+        assert os.path.exists(args.pretrained_model_dir), args.pretrained_model_dir
+        log_warning(
+            "The fine-tuned LLM is %s, the specified LLM is %s, ensure that they are the same",
+            session.config.model_config.model_name.removeprefix(
+                "hugging_face_causal_lm_"
+            ),
+            args.pretrained_model_dir,
+        )
+        pretrained_model_dir = os.path.abspath(args.pretrained_model_dir)
+        session.config.model_config.model_name = (
+            f"hugging_face_causal_lm_{args.pretrained_model_dir}"
+        )
     if args.sample_times is not None:
         assert args.sample_size is not None
         assert args.debug_file is None

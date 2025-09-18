@@ -28,7 +28,7 @@ def get_tester(
     print(config.dc_config.dataset_kwargs)
     print(config.model_config.model_kwargs)
     print(config.trainer_config.hook_config)
-    if config.model_config.model_name.startswith("hugging_face_causal_lm_"):
+    if for_language_modeling:
         config.hyper_parameter_config.batch_size = 1024
 
     server = get_server(config=config)
