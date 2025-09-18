@@ -1,9 +1,8 @@
 import json
 
 from cyy_naive_lib.algorithm.sequence_op import flatten_list
-from ner_metrics import classification_report
-
 from NER_evaluation.common import replace_tag
+from ner_metrics import classification_report
 
 
 def get_metrics(ground_tags, prediction, canonical_tags) -> dict:
@@ -12,14 +11,14 @@ def get_metrics(ground_tags, prediction, canonical_tags) -> dict:
     # ).evaluate()
     # print("new metric results ", results)
 
-    # for mode in ("lenient", "strict"):
-    #     result = classification_report(
-    #         tags_true=flatten_list(ground_tags),
-    #         tags_pred=flatten_list(prediction),
-    #         mode=mode,
-    #     )
-    #     print(mode, " metric ", json.dumps(result, sort_keys=True))
-    #
+    for mode in ("lenient", "strict"):
+        result = classification_report(
+            tags_true=flatten_list(ground_tags),
+            tags_pred=flatten_list(prediction),
+            mode=mode,
+        )
+        print(mode, " metric ", json.dumps(result, sort_keys=True))
+
     result = {}
     for mode in ("lenient", "strict"):
         report = classification_report(
