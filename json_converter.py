@@ -1,6 +1,7 @@
 import json
+from cyy_naive_lib.fs.path import list_files_by_suffixes
 
-from cyy_naive_lib import load_json
+from cyy_naive_lib import load_json, save_json
 
 
 def convert_json_to_ner(input_json):
@@ -107,14 +108,15 @@ def convert_json_to_ner(input_json):
     #     # print(line)
     #     pass
     res = []
-    with open(
-        input_json.removesuffix(".json") + "_NER.json", "w", encoding="utf8"
-    ) as f:
-        for sentence, tags, tokens in zip(
-            sentences, sentence_tags, sentence_tokens, strict=False
-        ):
-            res.append({"tokens": tokens, "tags": tags, "html": sentence})
-        json.dump(res, f)
+    for sentence, tags, tokens in zip(
+        sentences, sentence_tags, sentence_tokens, strict=False
+    ):
+        res.append({"tokens": tokens, "tags": tags, "html": sentence})
+    return res
 
 
-convert_json_to_ner("/home/cyy/10708968_887748326.json")
+total_result = []
+for json_file in list_files_by_suffixes(dir_to_search="xxx", suffixes=".json"):
+    total_result += convert_json_to_ner(json_file)
+assert total_result
+save_json(total_result, "all_NER.json")
