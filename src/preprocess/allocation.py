@@ -2,7 +2,7 @@ import collections
 import heapq
 from dataclasses import dataclass, field
 
-from .iob import IOBRecord, JSONRecord
+from cyy_preprocessing_pipeline.dataset import IOBRecord, JSONRecord
 
 
 @dataclass(order=True)
