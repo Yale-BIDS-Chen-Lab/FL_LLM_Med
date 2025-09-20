@@ -10,7 +10,7 @@ import numpy as np
 os.environ["NO_TOKENIZER_TRANSFORMS"] = "1"
 import cyy_huggingface_toolbox  # noqa: F401
 from cyy_naive_lib import save_json
-from cyy_naive_lib.log import set_level, log_warning
+from cyy_naive_lib.log import log_warning, set_level
 from cyy_preprocessing_pipeline.parsing import approximately_match_tokens
 from cyy_torch_toolbox import MachineLearningPhase
 from distributed_learning_simulation import Session

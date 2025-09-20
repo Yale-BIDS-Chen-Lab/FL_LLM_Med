@@ -16,7 +16,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--data_dir", help="raw data dir", type=str, default=None)
     parser.add_argument("--sub_dirs", help="raw data sub-dir", type=str, default=None)
-    parser.add_argument("--file", help="raw data dir", type=str, default=None)
+    parser.add_argument("--file", help="json file", type=str, default=None)
     parser.add_argument("--count", help="count phrases", type=bool, default=True)
     args = parser.parse_args()
     all_records: list[IOBRecord | JSONRecord] = []
