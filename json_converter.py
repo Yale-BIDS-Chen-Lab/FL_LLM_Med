@@ -104,13 +104,14 @@ def convert_json_to_ner(input_json):
                 + sentence[end:]
             )
             sentences[sentence_idx] = sentence
-    # for line in sentences:
-    #     # print(line)
-    #     pass
     res = []
     for sentence, tags, tokens in zip(
         sentences, sentence_tags, sentence_tokens, strict=False
     ):
+        assert isinstance(tags, list)
+        tags_set = set(tags)
+        if len(tags_set) == 1 and "O" in tags_set:
+            continue
         res.append({"tokens": tokens, "tags": tags, "html": sentence})
     return res
 
