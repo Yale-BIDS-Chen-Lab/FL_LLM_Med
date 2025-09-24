@@ -1,25 +1,23 @@
-import json
-from cyy_naive_lib.fs.path import list_files_by_suffixes
-
 from cyy_naive_lib import load_json, save_json
+from cyy_naive_lib.fs.path import list_files_by_suffixes
 
 
 def convert_json_to_ner(input_json):
     res = load_json(input_json)
     content: str = res["content"]
     ner_annotations = {}
-    for token_info in res["indexes"].values():
-        assert isinstance(token_info, dict)
-        if "Entity" in token_info:
-            entity = token_info["Entity"]
-            assert isinstance(entity, list)
-            for e in entity:
-                begin = e["begin"]
-                end = e["end"]
-                semantic = e["semantic"].lower()
-                if semantic in ("problem", "treatment", "test", "drug"):
-                    assert begin not in ner_annotations
-                    ner_annotations[begin] = {"ner": (begin, end, semantic)}
+    # for token_info in res["indexes"].values():
+    #     assert isinstance(token_info, dict)
+    #     if "Entity" in token_info:
+    #         entity = token_info["Entity"]
+    #         assert isinstance(entity, list)
+    #         for e in entity:
+    #             begin = e["begin"]
+    #             end = e["end"]
+    #             semantic = e["semantic"].lower()
+    #             if semantic in ("problem", "treatment", "test", "drug"):
+    #                 assert begin not in ner_annotations
+    #                 ner_annotations[begin] = {"ner": (begin, end, semantic)}
     sentences = []
     sentences_begin = []
     sentences_end = []
@@ -27,6 +25,8 @@ def convert_json_to_ner(input_json):
     sentence_tags = []
     last_tag: str | None = None
     last_tag_end: int | None = None
+    last_token_end: int | None = None
+    last_token_begin: int | None = None
     for key, token_info in res["indexes"].items():
         assert isinstance(token_info, dict)
         if "Sentence" in token_info:
@@ -47,12 +47,32 @@ def convert_json_to_ner(input_json):
             assert len(token_info["Token"]) == 1
             token_begin = token_info["Token"][0]["begin"]
             token_end = token_info["Token"][0]["end"]
+            assert (
+                last_token_end is None
+                or token_begin == last_token_end
+                or token_begin > last_token_end
+            ), (
+                token_begin,
+                last_token_end,
+            )
+            assert token_begin == 0 or last_token_begin is not None, (
+                token_begin,
+                last_token_begin,
+            )
             assert token_begin >= sentences_begin[-1] and token_end <= sentences_end[-1]
+            if last_token_end is not None and token_begin > last_token_end:
+                sentence_tokens[-1].append(content[last_token_end:token_begin])
+                sentence_tags[-1].append("O")
+                if sentence_tokens[-1][-1].strip():
+                    print("add missing token", sentence_tokens[-1][-1])
+
             sentence_tokens[-1].append(content[token_begin:token_end])
             if last_tag_end is not None and token_end <= last_tag_end + 1:
                 sentence_tags[-1].append(f"I-{last_tag}")
             else:
                 sentence_tags[-1].append("O")
+            last_token_end = token_end
+            last_token_begin = token_begin
         if "Entity" in token_info:
             entity = token_info["Entity"]
             assert isinstance(entity, list)
@@ -79,6 +99,7 @@ def convert_json_to_ner(input_json):
     sentence_idx = len(sentences) - 1
     last_sentence_begin = -1
     last_sentence_end = -1
+    last_ner_begin = None
     for k in sorted(list(ner_annotations.keys()), reverse=True):
         annotation = ner_annotations[k]
 
@@ -93,9 +114,12 @@ def convert_json_to_ner(input_json):
                 else:
                     break
             assert begin >= last_sentence_begin and end <= last_sentence_end + 1
+            assert last_ner_begin is None or end <= last_ner_begin
+            last_ner_begin = begin
             begin -= last_sentence_begin
             end -= last_sentence_begin
             sentence = sentences[sentence_idx]
+            print(sentence[begin:end])
             sentence = (
                 sentence[:begin]
                 + f'<span class="{semantic}">'
@@ -117,7 +141,7 @@ def convert_json_to_ner(input_json):
 
 
 total_result = []
-for json_file in list_files_by_suffixes(dir_to_search="xxx", suffixes=".json"):
+for json_file in list_files_by_suffixes(dir_to_search="./notes", suffixes=".json"):
     total_result += convert_json_to_ner(json_file)
 assert total_result
 save_json(total_result, "all_NER.json")
