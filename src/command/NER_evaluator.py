@@ -152,7 +152,9 @@ if __name__ == "__main__":
                 )
 
             finetuned_model_dir = get_finetune_dir(
-                zero_shot=args.zero_shot, worker_index=args.worker_index
+                zero_shot=args.zero_shot,
+                session=session,
+                worker_index=args.worker_index,
             )
 
             vllm_output = list(get_vllm_output(tester=tester, engine=vllm_engine))
