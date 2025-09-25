@@ -71,7 +71,7 @@ if __name__ == "__main__":
         "--output_dir", help="dir to save results", type=str, default=None
     )
     parser.add_argument(
-        "--sampel_output_dir", help="dir to save sample results", type=str, default=None
+        "--sample_output_dir", help="dir to save sample results", type=str, default=None
     )
     args = parser.parse_args()
 
