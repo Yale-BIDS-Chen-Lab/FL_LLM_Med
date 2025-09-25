@@ -70,7 +70,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="CSV parser",
     )
-    parser.add_argument("--csv_files", help="CSV filess", type=str, required=True)
+    parser.add_argument("--csv_files", help="CSV files", type=str, required=True)
     parser.add_argument(
         "--output_file",
         help="output filename",
