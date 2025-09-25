@@ -3,13 +3,14 @@ import json
 from cyy_naive_lib.algorithm.sequence_op import flatten_list
 from NER_evaluation.common import replace_tag
 from ner_metrics import classification_report
+import nervaluate
 
 
 def get_metrics(ground_tags, prediction, canonical_tags) -> dict:
-    # results = nervaluate.Evaluator(
-    #     ground_tags, prediction, tags=list(canonical_tags), loader="list"
-    # ).evaluate()
-    # print("new metric results ", results)
+    results = nervaluate.Evaluator(
+        ground_tags, prediction, tags=list(canonical_tags), loader="list"
+    )
+    print("new metric results ", results.summary_report())
 
     for mode in ("lenient", "strict"):
         result = classification_report(
