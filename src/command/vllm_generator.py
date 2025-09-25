@@ -33,7 +33,7 @@ def get_vllm_output(
     tester: Inferencer, engine: LLM
 ) -> Generator[tuple[dict, RequestOutput]]:
     # Load the default sampling parameters from the model.
-    sampling_params = SamplingParams(n=1, max_tokens=2048, temperature=0)
+    sampling_params = SamplingParams(n=1, max_tokens=2048, temperature=0, min_tokens=10)
 
     for batch in tester.dataloader:
         # Generate texts from the prompts. The output is a list of RequestOutput objects

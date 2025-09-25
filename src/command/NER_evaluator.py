@@ -59,6 +59,9 @@ if __name__ == "__main__":
         "--zero_shot", help="use pretrained model", type=bool, default=False
     )
     parser.add_argument(
+        "--parse_gt_html", help="parsing gt html into tags", type=bool, default=False
+    )
+    parser.add_argument(
         "--worker_index", help="evaluate worker", type=int, default=None
     )
     parser.add_argument(
@@ -163,11 +166,30 @@ if __name__ == "__main__":
                 tags = sample["tags"]
                 assert tags
                 tokens = sample["tokens"]
+                if args.parse_gt_html:
+                    assert "html" in sample
+                    parsed_gt_tokens = html2bio(
+                        html=sample["html"], canonical_tags=canonical_tags
+                    )
+                    tags = []
+                    tokens = []
+                    for t in parsed_gt_tokens:
+                        if isinstance(t, str):
+                            tokens.append(t)
+                            tags.append("O")
+                        else:
+                            tokens += t[0]
+                            tags += t[1]
+
                 predicated_tokens = html2bio(
                     html=out_text, canonical_tags=canonical_tags
                 )
-                predicated_tags = approximately_match_tokens(tokens, predicated_tokens)
-                predicated_tags = [t if t is not None else "O" for t in predicated_tags]
+                tmp_predicated_tags = approximately_match_tokens(
+                    tokens, predicated_tokens
+                )
+                predicated_tags = [
+                    t if t is not None else "O" for t in tmp_predicated_tags
+                ]
                 assert len(predicated_tags) == len(tags)
                 prediction.append(predicated_tags)
                 ground_tags.append(tags)
