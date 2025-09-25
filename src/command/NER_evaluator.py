@@ -24,7 +24,9 @@ sys.path.insert(0, project_path)
 import src.method  # noqa: F401
 
 
-def get_finetune_dir(zero_shot: bool, worker_index: int | None = None) -> str | None:
+def get_finetune_dir(
+    zero_shot: bool, session: Session, worker_index: int | None = None
+) -> str | None:
     finetuned_model_dir = None
     if not zero_shot:
         if worker_index is not None:
@@ -137,11 +139,13 @@ if __name__ == "__main__":
             )
 
         if use_llm:
-            from vllm_generator import get_vllm_engine, get_vllm_output
+            from vllm_generator import get_llm_engine, get_vllm_output
 
             if vllm_engine is None:
                 finetuned_model_dir = get_finetune_dir(
-                    zero_shot=args.zero_shot, worker_index=args.worker_index
+                    zero_shot=args.zero_shot,
+                    session=session,
+                    worker_index=args.worker_index,
                 )
                 vllm_engine = get_vllm_engine(
                     session=session, finetuned_model_dir=finetuned_model_dir

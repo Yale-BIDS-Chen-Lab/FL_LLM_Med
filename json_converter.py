@@ -90,6 +90,10 @@ def convert_json_to_ner(input_json):
                     ner_annotations[begin] = {"ner": (begin, end, semantic)}
                     last_tag_end = end
                     last_tag = semantic
+                    assert (
+                        not sentence_tags[-1]
+                        or sentence_tags[-1][-1] != f"B-{last_tag}"
+                    )
                     sentence_tags[-1][-1] = f"B-{last_tag}"
 
     assert sentences
