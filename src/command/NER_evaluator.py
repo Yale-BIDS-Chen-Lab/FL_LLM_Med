@@ -68,13 +68,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output_dir", help="dir to save results", type=str, default=None
     )
+    parser.add_argument(
+        "--sampel_output_dir", help="dir to save sample results", type=str, default=None
+    )
     args = parser.parse_args()
 
     prediction: list[list[str]] = []
     ground_tags: list[list[str]] = []
-    debug_f = None
-    if args.debug_file is not None:
-        debug_f = open(args.debug_file, "w", encoding="utf8")
     assert not (args.zero_shot and args.worker_index is not None)
     assert os.path.isdir(args.session_dir), args.session_dir
     canonical_tags: set[str] = set()
@@ -102,7 +102,6 @@ if __name__ == "__main__":
         )
     if args.sample_times is not None:
         assert args.sample_size is not None
-        assert args.debug_file is None
 
     tester, labels = get_tester(
         session=session, data_file=args.test_file, for_language_modeling=use_llm
@@ -153,7 +152,7 @@ if __name__ == "__main__":
             )
 
             vllm_output = list(get_vllm_output(tester=tester, engine=vllm_engine))
-            for sample, generated_text in vllm_output:
+            for idx, (sample, generated_text) in enumerate(vllm_output):
                 out_text = generated_text.outputs[0].text
                 tags = sample["tags"]
                 assert tags
@@ -164,45 +163,51 @@ if __name__ == "__main__":
                 predicated_tags = approximately_match_tokens(tokens, predicated_tokens)
                 predicated_tags = [t if t is not None else "O" for t in predicated_tags]
                 assert len(predicated_tags) == len(tags)
-                same_count = 0
-                for a, b in zip(predicated_tags, tags, strict=True):
-                    if a == b:
-                        same_count += 1
-                if (
-                    len(set(tags)) > 1
-                    and same_count / len(tags) < 0.5
-                    and debug_f is not None
-                ):
-                    debug_f.write("input <<<<<<<<<<<<<<\n")
-                    joined_tokens = " ".join(tokens)
-                    if "inputs" in sample:
-                        joined_tokens = sample["inputs"]
-                    debug_f.write(f"{joined_tokens}\n")
-                    debug_f.write("ground_out html ==============\n")
-                    if "html" in sample:
-                        debug_f.write(f"{sample['html']}\n")
-                    else:
-                        debug_f.write(f"{sample['output']}\n")
-                    # debug_f.write("ground_out ==============\n")
-                    # assert tags
-                    # joined_tags = " ".join(tags)
-                    # debug_f.write(f"{joined_tags}\n")
-                    debug_f.write("predicated_out >>>>>>>>>>>>>>\n")
-                    debug_f.write(f"{out_text}\n")
-                    # debug_f.write("parsed_predicated_out >>>>>>>>>>>>>>\n")
-                    # predicated_out_text: list[str] = []
-                    # for t in predicated_tokens:
-                    #     if isinstance(t, str):
-                    #         predicated_out_text.append(t)
-                    #     else:
-                    #         predicated_out_text += t[0]
-                    # out_text = " ".join(predicated_out_text)
-                    debug_f.write(f"{out_text}\n")
-
                 prediction.append(predicated_tags)
                 ground_tags.append(tags)
-            if debug_f is not None:
-                debug_f.close()
+
+                if args.sample_output_dir is not None:
+                    assert args.sample_times is None
+                    metrics = get_metrics(
+                        ground_tags=[predicated_tags],
+                        prediction=[tags],
+                        canonical_tags=canonical_tags,
+                    )
+                    lenient_f1 = metrics["lenient"]["unified_class"]["f1-score"]
+                    strict_f1 = metrics["strict"]["unified_class"]["f1-score"]
+
+                    with open(
+                        os.path.join(
+                            args.sample_output_dir,
+                            f"{idx}_{lenient_f1}_{strict_f1}.txt",
+                        ),
+                        "w",
+                        encoding="utf8",
+                    ) as debug_f:
+                        debug_f.write("input <<<<<<<<<<<<<<\n")
+                        joined_tokens = " ".join(tokens)
+                        if "inputs" in sample:
+                            joined_tokens = sample["inputs"]
+                        debug_f.write(f"{joined_tokens}\n")
+                        debug_f.write("ground_out html ==============\n")
+                        if "html" in sample:
+                            debug_f.write(f"{sample['html']}\n")
+                        else:
+                            debug_f.write(f"{sample['output']}\n")
+                        debug_f.write("predicated_out >>>>>>>>>>>>>>\n")
+                        debug_f.write(f"{out_text}\n")
+                        # debug_f.write("ground_out ==============\n")
+                        # assert tags
+                        # joined_tags = " ".join(tags)
+                        # debug_f.write(f"{joined_tags}\n")
+                        # debug_f.write("parsed_predicated_out >>>>>>>>>>>>>>\n")
+                        # predicated_out_text: list[str] = []
+                        # for t in predicated_tokens:
+                        #     if isinstance(t, str):
+                        #         predicated_out_text.append(t)
+                        #     else:
+                        #         predicated_out_text += t[0]
+                        # out_text = " ".join(predicated_out_text)
         else:
             if not args.zero_shot:
                 assert args.worker_index is None
