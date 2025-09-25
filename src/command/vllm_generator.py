@@ -17,7 +17,7 @@ from distributed_learning_simulation import (
 from vllm import LLM
 
 
-def get_vllm_engine(session: Session, finetuned_model_dir: str | None = None) -> LLM:
+def get_llm_engine(session: Session, finetuned_model_dir: str | None = None) -> LLM:
     model_name = session.config.model_config.model_name.removeprefix(
         "hugging_face_causal_lm_"
     )
