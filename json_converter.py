@@ -67,10 +67,7 @@ def convert_json_to_ner(input_json):
                     print("add missing token", sentence_tokens[-1][-1])
 
             sentence_tokens[-1].append(content[token_begin:token_end])
-            if last_tag_end is not None and token_end <= last_tag_end + 1:
-                sentence_tags[-1].append(f"I-{last_tag}")
-            else:
-                sentence_tags[-1].append("O")
+            sentence_tags[-1].append("O")
             last_token_end = token_end
             last_token_begin = token_begin
         if "Entity" in token_info:
