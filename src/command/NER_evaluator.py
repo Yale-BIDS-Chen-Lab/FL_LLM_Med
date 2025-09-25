@@ -147,7 +147,7 @@ if __name__ == "__main__":
                     session=session,
                     worker_index=args.worker_index,
                 )
-                vllm_engine = get_vllm_engine(
+                vllm_engine = get_llm_engine(
                     session=session, finetuned_model_dir=finetuned_model_dir
                 )
 
