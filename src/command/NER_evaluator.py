@@ -175,13 +175,14 @@ if __name__ == "__main__":
                 if args.sample_output_dir is not None:
                     assert args.sample_times is None
                     metrics = get_metrics(
-                        ground_tags=[predicated_tags],
-                        prediction=[tags],
+                        ground_tags=[tags],
+                        prediction=[predicated_tags],
                         canonical_tags=canonical_tags,
                     )
                     lenient_f1 = metrics["lenient"]["unified_class"]["f1-score"]
                     strict_f1 = metrics["strict"]["unified_class"]["f1-score"]
 
+                    os.makedirs(args.sample_output_dir, exist_ok=True)
                     with open(
                         os.path.join(
                             args.sample_output_dir,
