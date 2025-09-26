@@ -10,11 +10,12 @@ from cyy_torch_toolbox import Inferencer
 from vllm import RequestOutput, SamplingParams
 
 os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
-import src.method  # noqa: F401
 from distributed_learning_simulation import (
     Session,
 )
 from vllm import LLM
+
+import src.method  # noqa: F401
 
 
 def get_llm_engine(session: Session, finetuned_model_dir: str | None = None) -> LLM:
@@ -36,8 +37,6 @@ def get_vllm_output(
     sampling_params = SamplingParams(n=1, max_tokens=2048, temperature=0, min_tokens=10)
 
     for batch in tester.dataloader:
-        # Generate texts from the prompts. The output is a list of RequestOutput objects
-        # that contain the prompt, generated text, and other information.
         batch_size = batch["batch_size"]
         batch_list: list[dict] = [{} for _ in range(batch_size)]
         for k, v in batch.items():

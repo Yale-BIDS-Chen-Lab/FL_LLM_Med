@@ -1,9 +1,9 @@
 import json
 
+import nervaluate
 from cyy_naive_lib.algorithm.sequence_op import flatten_list
 from NER_evaluation.common import replace_tag
 from ner_metrics import classification_report
-import nervaluate
 
 
 def get_metrics(ground_tags, prediction, canonical_tags) -> dict:

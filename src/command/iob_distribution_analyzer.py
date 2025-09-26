@@ -7,8 +7,9 @@ from collections import Counter
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 
-from preprocess import parse_dir, parse_file
 from preprocess.iob import IOBRecord, JSONRecord
+
+from preprocess import parse_dir, parse_file
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
