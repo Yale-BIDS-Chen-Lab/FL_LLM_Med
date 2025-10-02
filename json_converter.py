@@ -66,7 +66,10 @@ def convert_json_to_ner(input_json, semantic_set: set):
                 end = e["end"]
                 semantic = e["semantic"].lower()
                 if semantic in semantic_set:
-                    assert "Token" in token_info, key
+                    if "Token" not in token_info:
+                        print("skip annotation", token_info)
+                        continue
+
                     # assert begin == token_begin, key
                     if begin != token_begin:
                         print("skip annotation", key)
@@ -106,7 +109,6 @@ def convert_json_to_ner(input_json, semantic_set: set):
             begin -= last_sentence_begin
             end -= last_sentence_begin
             sentence = sentences[sentence_idx]
-            print(sentence[begin:end])
             sentence = (
                 sentence[:begin]
                 + f'<span class="{semantic}">'
@@ -127,10 +129,37 @@ def convert_json_to_ner(input_json, semantic_set: set):
     return res
 
 
+# total_result = []
+# for json_file in list_files_by_suffixes(dir_to_search="./notes", suffixes=".json"):
+#     total_result += convert_json_to_ner(
+#         json_file, semantic_set={"problem", "treatment", "test", "drug"}
+#     )
+# assert total_result
+# save_json(total_result, "all_NER.json")
+
+
 total_result = []
-for json_file in list_files_by_suffixes(dir_to_search="./notes", suffixes=".json"):
+for json_file in list_files_by_suffixes(dir_to_search="./all", suffixes=".json"):
     total_result += convert_json_to_ner(
-        json_file, semantic_set={"problem", "treatment", "test", "drug"}
+        json_file,
+        semantic_set={
+            "bodyloc",
+            "condition",
+            "course",
+            "dosage",
+            "duration",
+            "form",
+            "frequency",
+            "labvalue",
+            "negation",
+            "reference_range",
+            "route",
+            "severity",
+            "strength",
+            "subject",
+            "temporal",
+            "uncertain",
+        },
     )
 assert total_result
-save_json(total_result, "all_NER.json")
+save_json(total_result, "all_RE.json")
