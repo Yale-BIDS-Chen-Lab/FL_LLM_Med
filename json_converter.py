@@ -2,7 +2,7 @@ from cyy_naive_lib import load_json, save_json
 from cyy_naive_lib.fs.path import list_files_by_suffixes
 
 
-def convert_json_to_ner(input_json):
+def convert_json_to_ner(input_json, semantic_set: set):
     res = load_json(input_json)
     content: str = res["content"]
     ner_annotations = {}
@@ -65,7 +65,7 @@ def convert_json_to_ner(input_json):
                 begin = e["begin"]
                 end = e["end"]
                 semantic = e["semantic"].lower()
-                if semantic in ("problem", "treatment", "test", "drug"):
+                if semantic in semantic_set:
                     assert "Token" in token_info, key
                     # assert begin == token_begin, key
                     if begin != token_begin:
@@ -129,6 +129,8 @@ def convert_json_to_ner(input_json):
 
 total_result = []
 for json_file in list_files_by_suffixes(dir_to_search="./notes", suffixes=".json"):
-    total_result += convert_json_to_ner(json_file)
+    total_result += convert_json_to_ner(
+        json_file, semantic_set={"problem", "treatment", "test", "drug"}
+    )
 assert total_result
 save_json(total_result, "all_NER.json")
