@@ -6,25 +6,12 @@ def convert_json_to_ner(input_json):
     res = load_json(input_json)
     content: str = res["content"]
     ner_annotations = {}
-    # for token_info in res["indexes"].values():
-    #     assert isinstance(token_info, dict)
-    #     if "Entity" in token_info:
-    #         entity = token_info["Entity"]
-    #         assert isinstance(entity, list)
-    #         for e in entity:
-    #             begin = e["begin"]
-    #             end = e["end"]
-    #             semantic = e["semantic"].lower()
-    #             if semantic in ("problem", "treatment", "test", "drug"):
-    #                 assert begin not in ner_annotations
-    #                 ner_annotations[begin] = {"ner": (begin, end, semantic)}
     sentences = []
     sentences_begin = []
     sentences_end = []
     sentence_tokens = []
     sentence_tags = []
     last_tag: str | None = None
-    last_tag_end: int | None = None
     last_token_end: int | None = None
     last_token_begin: int | None = None
     for key, token_info in res["indexes"].items():
@@ -85,7 +72,6 @@ def convert_json_to_ner(input_json):
                         print("skip annotation", key)
                         continue
                     ner_annotations[begin] = {"ner": (begin, end, semantic)}
-                    last_tag_end = end
                     last_tag = semantic
                     assert (
                         not sentence_tags[-1]
