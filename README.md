@@ -35,6 +35,8 @@ Based on Fed-MedLoRA, we further propose **Fed-MedLoRA+**, which dynamically est
 
 **Zero-shot** and **Single site** are used as baseline. **Centralized learning** is upper bound. For our experiments, we calculated the results of **Fed-MedLoRA** and **Fed-MedLoRA+**.
 
+Zero-shot means we didn't fine-tune the models. Single site is without federated learning support. Centralized training pools data from all sites to train a single model. 
+
 ### Models
 
 **[Bio_ClinicalBERT](https://huggingface.co/emilyalsentzer/Bio_ClinicalBERT)**, 
@@ -49,19 +51,19 @@ and use [train_mix.sh](https://github.com/cyyever/distributed_LLM_learning_simul
 Both of these corresponding configuration files are located in a subfolder of [conf](https://github.com/cyyever/distributed_LLM_learning_simulator/tree/main/conf). 
 Modify the contents of common.yaml to change the configuration parameters. 
 
-#### Parameters
+#### Parameters in common.yaml
 
 Take train_mix.sh as an example, introduce these parameters in [common.yaml](https://github.com/cyyever/distributed_LLM_learning_simulator/blob/main/conf/medical_mix/common.yaml).
 
 - **dataset_name**:
 
-- **dataset_sampling**: file_split or random_split.
+- **dataset_sampling**: file_split or random_split. "file_split" means that one dataset is only distributed to one client. "random_split" means the sentences in one dataset distributed to diffenent clients are random.
 
-- **distributed_algorithm**: adaptor_avg or fed_avg.
+- **distributed_algorithm**: adaptor_avg or fed_avg. "fed_avg" is for Bio_ClinicalBERT model. "adaptor_avg" is for others.
 
-- **train_files** and **test_files** in **dataset_kwargs**: The test_files are the corresponding the train_files, such as RE_MIMIC3_**train**.json and RE_MIMIC3_**test**.json. If the file name begin with 'RE_', it means that this file is for **RE**(relation extraction) training. Otherwise, it's for **NER**(named entity recognition) training.
+- **train_files** and **test_files** in "dataset_kwargs": The test_files are the corresponding the train_files, such as RE_MIMIC3_**train**.json and RE_MIMIC3_**test**.json. If the file name begin with "RE_", it means that this file is for **RE**(relation extraction) training. Otherwise, it's for **NER**(named entity recognition) training.
 
-- **no_validation**: true or false.
+- **no_validation** in "dataset_kwargs": true or false. If it's 'false', we should add a new parameter(validation_files) into "dataset_kwargs", which is used in "Fed-MedLoRA+" algorithm.
 
 ### Evaluations
 
