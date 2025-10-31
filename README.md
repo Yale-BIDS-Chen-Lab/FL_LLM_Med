@@ -4,7 +4,7 @@ This is a simulator of Federated Learning for LLM fine-tuning on a single host. 
 
 ## Install Environment
 
-This is a Python project. The third party dependencies are listed in **pyproject.toml **.
+This is a Python project. The third party dependencies are listed in [pyproject.toml](https://github.com/cyyever/distributed_LLM_learning_simulator/blob/main/pyproject.toml).
 
 Use PIP to set up the environment:
 
