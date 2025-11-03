@@ -1,0 +1,22 @@
+---
+dataset_name: hugging_face_yale_re
+dataset_sampling: random_split
+distributed_algorithm: adaptor_avg
+dataset_kwargs:
+  input_max_len: 800
+  train_data_dir: /home/cyy/RE_data
+  train_files:
+    - RE_MIMIC3_train.json
+    - RE_MTSample_train.json
+    - RE_UTP_train.json
+  test_data_dir: /home/cyy/RE_data
+  test_files:
+    - RE_i2b2_test.json
+    - RE_MIMIC3_test.json
+    - RE_MTSample_test.json
+    - RE_UTP_test.json
+  no_validation: true
+  prompt_file: medical_modifier.txt
+  tailor_prompt_for_training: false
+  evaluation_prompt_file: medical_modifier_evaluation.txt
+defaults: [../global@_here_, _self_]

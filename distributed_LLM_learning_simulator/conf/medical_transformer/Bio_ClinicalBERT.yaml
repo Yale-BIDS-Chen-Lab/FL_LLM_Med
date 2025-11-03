@@ -1,0 +1,10 @@
+---
+model_name: hugging_face_token_classification_emilyalsentzer/Bio_ClinicalBERT
+batch_size: 64
+epoch: 1
+learning_rate: 2e-4
+model_kwargs:
+  pretrained: true
+  frozen_modules:
+    names: [bert.embeddings]
+defaults: [common, _self_]
