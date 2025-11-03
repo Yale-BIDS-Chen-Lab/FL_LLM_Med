@@ -1,4 +1,4 @@
-# distributed_LLM_learning_simulator
+# FL_LLM_Med
 
 This is a simulator of Federated Learning for LLM fine-tuning on a single host. It implements our works.
 
@@ -70,6 +70,7 @@ Take train_mix.sh as an example, introduce these parameters in [common.yaml](htt
 In this study, we calculate the **strict and lenient F1 scores** of different settings on **[NER](https://github.com/cyyever/distributed_LLM_learning_simulator/blob/main/evaluate.sh)** and 
 **[RE](https://github.com/cyyever/distributed_LLM_learning_simulator/blob/main/re_evaluate.sh)** tasks. 
 Inference and evaluation are calculated at the same time.
+
 
 
 
