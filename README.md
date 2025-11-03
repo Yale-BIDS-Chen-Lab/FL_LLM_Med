@@ -46,14 +46,14 @@ are open models, used in our experiments.
 
 ### Training
 
-For model training, we use [train_bert.sh]([https://github.com/cyyever/distributed_LLM_learning_simulator/blob/main/train_bert.sh](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/train_bert.sh) to train **Bio_ClinicalBERT** model, 
-and use [train_mix.sh]([https://github.com/cyyever/distributed_LLM_learning_simulator/blob/main/train_mix.sh](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/train_mix.sh) to train other models (**LLaMA3-8B** and **DeepSeek-R1-Distill-Llama-8B**). 
-Both of these corresponding configuration files are located in a subfolder of [conf]([https://github.com/cyyever/distributed_LLM_learning_simulator/tree/main/conf](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/tree/main/conf). 
+For model training, we use [train_bert.sh](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/train_bert.sh) to train **Bio_ClinicalBERT** model, 
+and use [train_mix.sh](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/train_mix.sh) to train other models (**LLaMA3-8B** and **DeepSeek-R1-Distill-Llama-8B**). 
+Both of these corresponding configuration files are located in a subfolder of [conf](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/tree/main/conf). 
 Modify the contents of common.yaml to change the configuration parameters. 
 
 #### Parameters in common.yaml
 
-Take train_mix.sh as an example, introduce these parameters in [common.yaml]([https://github.com/cyyever/distributed_LLM_learning_simulator/blob/main/conf/medical_mix/common.yaml](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/conf/medical_mix/common.yaml).
+Take train_mix.sh as an example, introduce these parameters in [common.yaml](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/conf/medical_mix/common.yaml).
 
 - **dataset_name**:
 
@@ -67,9 +67,10 @@ Take train_mix.sh as an example, introduce these parameters in [common.yaml]([ht
 
 ### Evaluations
 
-In this study, we calculate the **strict and lenient F1 scores** of different settings on **[NER]([https://github.com/cyyever/distributed_LLM_learning_simulator/blob/main/evaluate.sh](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/evaluate.sh)** and 
-**[RE]([https://github.com/cyyever/distributed_LLM_learning_simulator/blob/main/re_evaluate.sh](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/re_evaluate.sh)** tasks. 
+In this study, we calculate the **strict and lenient F1 scores** of different settings on **[NER](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/evaluate.sh)** and 
+**[RE](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/re_evaluate.sh)** tasks. 
 Inference and evaluation are calculated at the same time.
+
 
 
 
