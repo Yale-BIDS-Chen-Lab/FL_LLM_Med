@@ -1,0 +1,2 @@
+---
+defaults: [common,../llm/DeepSeek-R1-Distill-Llama-8B@_here_, _self_]

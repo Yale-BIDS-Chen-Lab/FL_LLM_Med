@@ -1,0 +1,2 @@
+---
+defaults: [common,../llm/Meta-Llama-3-8B.yaml@_here_, _self_]
