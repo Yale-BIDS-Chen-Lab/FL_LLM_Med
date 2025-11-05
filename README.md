@@ -42,6 +42,31 @@ Named entity recognition (NER) and relation extraction (RE).
 - [FedSA-LoRA](https://arxiv.org/abs/2410.01463)
 
 ## Model fine-tuning
+### Hyper-parameter configuration in common.yaml
+
+Take the [common.yaml](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/conf/medical_mix/common.yaml) file of train_mix.sh as an example. 
+
+- **dataset_name**:
+
+- **dataset_sampling**: file_split or random_split. "file_split" means that one dataset is only distributed to one client. "random_split" means the sentences in one dataset distributed to diffenent clients are random.
+
+- **distributed_algorithm**: adaptor_avg or fed_avg. "fed_avg" is for Bio_ClinicalBERT model. "adaptor_avg" is for others.
+
+- **train_files** and **test_files** in "dataset_kwargs": The test_files are the corresponding the train_files, such as RE_MIMIC3_**train**.json and RE_MIMIC3_**test**.json. If the file name begin with "RE_", it means that this file is for **RE**(relation extraction) training. Otherwise, it's for **NER**(named entity recognition) training.
+
+- **no_validation** in "dataset_kwargs": true or false. If it's 'false', we should add a new parameter(validation_files) into "dataset_kwargs", which is used in "Fed-MedLoRA+" algorithm.
+
+- Training NER only
+  - Run train.sh for LLaMA3, DeepSeek-R1-Distill and QWen3 models.
+
+  Take training LLaMA3-8B model for an example, the train.sh is:
+
+```
+python3 ./simulator.py --config-name medical_ner/Meta-Llama-3-8B.yaml  ++medical_ner.round=2 ++medical_ner.epoch=2 ++medical_ner.worker_number=3
+```
+
+- Training RE only: 
+- Training NER and RE simultaneously: 
 
 For model training, we use [train_bert.sh](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/train_bert.sh) to train **Bio_ClinicalBERT** model, 
 and use [train_mix.sh](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/train_mix.sh) to train other models (**LLaMA3-8B** and **DeepSeek-R1-Distill-Llama-8B**). 
@@ -67,6 +92,7 @@ Take train_mix.sh as an example, introduce these parameters in [common.yaml](htt
 In this study, we calculate the **strict and lenient F1 scores** of different settings on **[NER](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/evaluate.sh)** and 
 **[RE](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/re_evaluate.sh)** tasks. 
 Inference and evaluation are calculated at the same time.
+
 
 
 
