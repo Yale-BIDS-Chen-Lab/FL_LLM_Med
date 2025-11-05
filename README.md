@@ -30,7 +30,8 @@ We use five sites cohorts, which consist of 42,198 entities and 41,570 relations
 ### Clinical information extraction (IE) tasks
 Named entity recognition (NER) and relation extraction (RE). 
 ### Models
-- LLMs: LLaMA3-[8B](https://huggingface.co/meta-llama/Llama-3.1-8B) LLaMA3-1B, DeepSeek-R1-Distill
+- LLMs: [LLaMA3-8B](https://huggingface.co/meta-llama/Llama-3.1-8B), [LLaMA3-1B](https://huggingface.co/meta-llama/Llama-3.2-1B), [DeepSeek-R1-Distill](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-8B), QW
+- BERT models: [Bio_ClinicalBERT](https://huggingface.co/emilyalsentzer/Bio_ClinicalBERT)
 ### Baselines
 
 
@@ -77,6 +78,7 @@ Take train_mix.sh as an example, introduce these parameters in [common.yaml](htt
 In this study, we calculate the **strict and lenient F1 scores** of different settings on **[NER](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/evaluate.sh)** and 
 **[RE](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/re_evaluate.sh)** tasks. 
 Inference and evaluation are calculated at the same time.
+
 
 
 
