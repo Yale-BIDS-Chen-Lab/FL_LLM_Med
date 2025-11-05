@@ -1,6 +1,6 @@
 # FL_LLM_Med
 
-This is a simulator of Federated Learning for LLM fine-tuning on a single host. It implements our works.
+This repository provides the related codes and models for federated instruction tuning for privacy-preserving clinical large language models (LLMs). 
 
 ## Install Environment
 
@@ -70,6 +70,7 @@ Take train_mix.sh as an example, introduce these parameters in [common.yaml](htt
 In this study, we calculate the **strict and lenient F1 scores** of different settings on **[NER](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/evaluate.sh)** and 
 **[RE](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/re_evaluate.sh)** tasks. 
 Inference and evaluation are calculated at the same time.
+
 
 
 
