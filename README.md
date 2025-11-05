@@ -2,7 +2,7 @@
 
 This repository provides the related codes and models for federated instruction tuning for privacy-preserving clinical large language models (LLMs). 
 
-## Install Environment
+## Install environment
 
 This is a Python project. The third party dependencies are listed in [pyproject.toml]([https://github.com/cyyever/distributed_LLM_learning_simulator/blob/main/pyproject.toml](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/pyproject.toml)).
 
@@ -26,33 +26,22 @@ We use five sites cohorts, which consist of 42,198 entities and 41,570 relations
 - Case study on newly annotated clinical notes
   - [YNHH](https://www.ynhhs.org/) (Yale New Haven Health system) 
 
-## Model Finetune
+## Experiment configurations 
+We compare our methods Fed-MedLoRA and Fed-MedLoRA+ across the following settings. 
 ### Clinical information extraction (IE) tasks
 Named entity recognition (NER) and relation extraction (RE). 
 ### Models
-- LLMs: [LLaMA3-8B](https://huggingface.co/meta-llama/Llama-3.1-8B), [LLaMA3-1B](https://huggingface.co/meta-llama/Llama-3.2-1B), [DeepSeek-R1-Distill](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-8B), QW
+- LLMs: [LLaMA3-8B](https://huggingface.co/meta-llama/Llama-3.1-8B), [LLaMA3-1B](https://huggingface.co/meta-llama/Llama-3.2-1B), [DeepSeek-R1-Distill](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-8B), [QWen3-4B](https://huggingface.co/Qwen/Qwen3-4B)
 - BERT models: [Bio_ClinicalBERT](https://huggingface.co/emilyalsentzer/Bio_ClinicalBERT)
-### Baselines
+### LLM Baselines
+- Zero-shot
+- Single-site fine-tuning
+### Upper bound reference 
+- Centralized fine-tuning
+### Federated learning baselines 
+- [FedSA-LoRA](https://arxiv.org/abs/2410.01463)
 
-
-### Algorithm
-
-Based on Fed-MedLoRA, we further propose **Fed-MedLoRA+**, which dynamically estimates each site's contribution and performs adaptive, data-aware aggregation to mitigate the effects of cross-site data heterogeneity. 
-
-### Setting
-
-**Zero-shot** and **Single site** are used as baseline. **Centralized learning** is upper bound. For our experiments, we calculated the results of **Fed-MedLoRA** and **Fed-MedLoRA+**.
-
-Zero-shot means we didn't fine-tune the models. Single site is without federated learning support. Centralized training pools data from all sites to train a single model. 
-
-### Models
-
-**[Bio_ClinicalBERT](https://huggingface.co/emilyalsentzer/Bio_ClinicalBERT)**, 
-**[LLaMA3-8B](https://huggingface.co/meta-llama/Llama-3.1-8B)**, and 
-**[DeepSeek-R1-Distill-Llama-8B](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-8B)** 
-are open models, used in our experiments.
-
-### Training
+## Model fine-tuning
 
 For model training, we use [train_bert.sh](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/train_bert.sh) to train **Bio_ClinicalBERT** model, 
 and use [train_mix.sh](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/train_mix.sh) to train other models (**LLaMA3-8B** and **DeepSeek-R1-Distill-Llama-8B**). 
@@ -78,6 +67,7 @@ Take train_mix.sh as an example, introduce these parameters in [common.yaml](htt
 In this study, we calculate the **strict and lenient F1 scores** of different settings on **[NER](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/evaluate.sh)** and 
 **[RE](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/re_evaluate.sh)** tasks. 
 Inference and evaluation are calculated at the same time.
+
 
 
 
