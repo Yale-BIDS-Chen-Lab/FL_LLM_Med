@@ -12,12 +12,13 @@ Use PIP to set up the environment:
 python3 -m pip install . --upgrade --force-reinstall --user
 ```
 
-## Original and our case study datasets
+## Datasets
 
-We take some of the open and private datasets as training and testing benchmark:
-- **[MIMIC-III](https://physionet.org/content/mimiciii/1.4/)**
-- **[MTSamples](https://mtsamples.com/)**
-- **UTP**
+We use five sites cohorts, which consist of 42,198 entities and 41,570 relations covering four main entity categories and 16 relation types. 
+In-domain training/ testing benchmark: 
+- [MIMIC-III (Medical Information Mart for Intensive Care)](https://physionet.org/content/mimiciii/1.4/)
+- [MTSamples (Transcribed Medical Transcription Sample Reports and Examples)](https://mtsamples.com/)
+- UTP (UT Physicians notes)
   
 The independent validation set is below:
 - **[I2B2](https://www.i2b2.org/NLP/DataSets/)**
@@ -70,6 +71,7 @@ Take train_mix.sh as an example, introduce these parameters in [common.yaml](htt
 In this study, we calculate the **strict and lenient F1 scores** of different settings on **[NER](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/evaluate.sh)** and 
 **[RE](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/re_evaluate.sh)** tasks. 
 Inference and evaluation are calculated at the same time.
+
 
 
 
