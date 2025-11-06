@@ -54,39 +54,23 @@ Take the [common.yaml](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/mai
 - **evaluation_prompt_file**: medical_html_evaluation.txt
 - **no_validation** in 'dataset_kwargs': true or false. If it is true, then the running algorithm is Fed-MedLoRA. If it is false, then we we need to add a new hyper-parameter 'validation_files' into 'dataset_kwargs' to run the Fed-MedLoRA+ algorithm. 
 
-### Fine-tuning NER 
+### Fine-tuning LLMs and BERT models  
   - To fine-tune LLMs, e.g., LLaMA3 and DeepSeek-R1-Distill, run train_ner.sh for the NER task, train_re.sh for the RE task, and train_mix.sh for both the NER and RE tasks. 
 
     For example, the train_ner.sh for fine-tuning LLaMA3-8B with 2 communication rounds, 2 epochs across 3 sites is: 
     ```
     python3 ./simulator.py --config-name medical_ner/Meta-Llama-3-8B.yaml  ++medical_ner.round=2 ++medical_ner.epoch=2 ++medical_ner.worker_number=3
     ```
+    If ++medical_ner.worker_number=1 and there is only one training dataset, it is single-site fine-tuning, otherwise, it is centralized fine-tuning. 
+    
   - To fine-tune BERT models, run train_bert.sh with NER or RE datasets for NER or RE tasks, respectively. 
-
-For model training, we use [train_bert.sh](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/train_bert.sh) to train **Bio_ClinicalBERT** model, 
-and use [train_mix.sh](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/train_mix.sh) to train other models (**LLaMA3-8B** and **DeepSeek-R1-Distill-Llama-8B**). 
-Both of these corresponding configuration files are located in a subfolder of [conf](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/tree/main/conf). 
-Modify the contents of common.yaml to change the configuration parameters. 
-
-#### Parameters in common.yaml
-
-Take train_ner.sh as an example, introduce these parameters in [common.yaml](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/conf/medical_mix/common.yaml).
-
-- **dataset_name**:
-
-- **dataset_sampling**: file_split or random_split. "file_split" means that one dataset is only distributed to one client. "random_split" means the sentences in one dataset distributed to diffenent clients are random.
-
-- **distributed_algorithm**: adaptor_avg or fed_avg. "fed_avg" is for Bio_ClinicalBERT model. "adaptor_avg" is for others.
-
-- **train_files** and **test_files** in "dataset_kwargs": The test_files are the corresponding the train_files, such as RE_MIMIC3_**train**.json and RE_MIMIC3_**test**.json. If the file name begin with "RE_", it means that this file is for **RE**(relation extraction) training. Otherwise, it's for **NER**(named entity recognition) training.
-
-- **no_validation** in "dataset_kwargs": true or false. If it's 'false', we should add a new parameter(validation_files) into "dataset_kwargs", which is used in "Fed-MedLoRA+" algorithm.
 
 ### Evaluations
 
 In this study, we calculate the **strict and lenient F1 scores** of different settings on **[NER](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/evaluate.sh)** and 
 **[RE](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/re_evaluate.sh)** tasks. 
 Inference and evaluation are calculated at the same time.
+
 
 
 
