@@ -46,15 +46,40 @@ Named entity recognition (NER) and relation extraction (RE).
 
 Take the [common.yaml](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/conf/medical_mix/common.yaml) file of train_mix.sh as an example. 
 
-- **dataset_name**:
-
-- **dataset_sampling**: file_split or random_split. "file_split" means that one dataset is only distributed to one client. "random_split" means the sentences in one dataset distributed to diffenent clients are random.
-
-- **distributed_algorithm**: adaptor_avg or fed_avg. "fed_avg" is for Bio_ClinicalBERT model. "adaptor_avg" is for others.
-
-- **train_files** and **test_files** in "dataset_kwargs": The test_files are the corresponding the train_files, such as RE_MIMIC3_**train**.json and RE_MIMIC3_**test**.json. If the file name begin with "RE_", it means that this file is for **RE**(relation extraction) training. Otherwise, it's for **NER**(named entity recognition) training.
+- **dataset_name**: hugging_face_yale_mix
+- **dataset_sampling**: file_split or random_split. Here, 'file_split' denotes that each site owns one dataset. For example, site A has MIMIC-III, site B has MTSamples and site C has UTP. 'random_split' denotes that all datasets are merged together and evenly distributed to different sites. 
+- **distributed_algorithm**: adaptor_avg or fed_avg where 'adaptor_avg' is the aggregation method for LLMs and 'fed_avg' is for BERT models. 
+- **train_files** and **test_files** in 'dataset_kwargs': These two 
+- The test_files are the corresponding the train_files, such as RE_MIMIC3_**train**.json and RE_MIMIC3_**test**.json. If the file name begin with "RE_", it means that this file is for **RE**(relation extraction) training. Otherwise, it's for **NER**(named entity recognition) training.
 
 - **no_validation** in "dataset_kwargs": true or false. If it's 'false', we should add a new parameter(validation_files) into "dataset_kwargs", which is used in "Fed-MedLoRA+" algorithm.
+
+dataset_name: hugging_face_yale_mix
+dataset_sampling: file_split
+distributed_algorithm: adaptor_avg
+dataset_kwargs:
+  input_max_len: 800
+  train_files:
+    - /home/cyy/RE_data/RE_MIMIC3_train.json
+    - /home/cyy/RE_data/RE_MTSample_train.json
+    - /home/cyy/RE_data/RE_UTP_train.json
+    - /home/cyy/NER_data/train/MIMIC3.json
+    - /home/cyy/NER_data/train/MTSamples.json
+    - /home/cyy/NER_data/train/UTP.json
+  test_files:
+    - /home/cyy/RE_data/RE_i2b2_test.json
+    - /home/cyy/RE_data/RE_MIMIC3_test.json
+    - /home/cyy/RE_data/RE_MTSample_test.json
+    - /home/cyy/RE_data/RE_UTP_test.json
+    - /home/cyy/NER_data/test/MIMIC3.json
+    - /home/cyy/NER_data/test/MTSamples.json
+    - /home/cyy/NER_data/test/UTP.json
+    - /home/cyy/NER_data/test/i2b2.json
+  prompt_file: medical_mix.txt
+  evaluation_prompt_file: medical_mix_evaluation.txt
+  tailor_prompt_for_training: false
+  no_validation: true
+
 
 - Training NER only
   - Run train.sh for LLaMA3, DeepSeek-R1-Distill and QWen3 models.
@@ -92,6 +117,7 @@ Take train_mix.sh as an example, introduce these parameters in [common.yaml](htt
 In this study, we calculate the **strict and lenient F1 scores** of different settings on **[NER](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/evaluate.sh)** and 
 **[RE](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/re_evaluate.sh)** tasks. 
 Inference and evaluation are calculated at the same time.
+
 
 
 
