@@ -47,7 +47,7 @@ Named entity recognition (NER) and relation extraction (RE).
 Take the [common.yaml](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/conf/medical_ner/common.yaml) file of train_ner.sh as an example. 
 
 - **dataset_name**: hugging_face_yale_ner
-- **dataset_sampling**: file_split or random_split. Here, 'file_split' denotes that each site owns one dataset. For example, site A has MIMIC-III, site B has MTSamples and site C has UTP. 'random_split' denotes that all datasets are merged together and evenly distributed to different sites. 
+- **dataset_sampling**: file_split or random_split. Here, 'file_split' denotes that each site owns one dataset (refer to [allocation.py](src/preprocess/allocation.py)). For example, site A has MIMIC-III, site B has MTSamples and site C has UTP. 'random_split' denotes that all datasets are merged together and evenly distributed to different sites (refer to [iob_iid_split.py](src/command/iob_iid_split.py)). 
 - **distributed_algorithm**: adaptor_avg or fed_avg where 'adaptor_avg' is the aggregation method for LLMs and 'fed_avg' is for BERT models. 
 - **train_files** and **test_files** in 'dataset_kwargs': These two directories provide specific directories for training sets and testing sets.
 - **prompt_file**: medical_html.txt
@@ -70,6 +70,7 @@ Take the [common.yaml](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/mai
 In this study, we calculate the **strict and lenient F1 scores** of different settings on **[NER](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/evaluate.sh)** and 
 **[RE](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/re_evaluate.sh)** tasks. 
 Inference and evaluation are calculated at the same time.
+
 
 
 
