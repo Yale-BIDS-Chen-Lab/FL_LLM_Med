@@ -55,13 +55,13 @@ Take the [common.yaml](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/mai
 - **no_validation** in 'dataset_kwargs': true or false. If it is true, then the running algorithm is Fed-MedLoRA. If it is false, then we we need to add a new hyper-parameter 'validation_files' into 'dataset_kwargs' to run the Fed-MedLoRA+ algorithm. 
 
 ### Fine-tuning NER 
-  - Run train_ner.sh for fine-tuning LLMs, e.g., LLaMA3 and DeepSeek-R1-Distill on NER tasks. For example, the train_ner.sh for fine-tuning LLaMA3-8B with communication 2 rounds, 2 epochs across 3 sites is: 
-```
-python3 ./simulator.py --config-name medical_ner/Meta-Llama-3-8B.yaml  ++medical_ner.round=2 ++medical_ner.epoch=2 ++medical_ner.worker_number=3
-```
+  - To fine-tune LLMs, e.g., LLaMA3 and DeepSeek-R1-Distill, run train_ner.sh for the NER task, train_re.sh for the RE task, and train_mix.sh for both the NER and RE tasks. 
 
-- Training RE only: 
-- Training NER and RE simultaneously: 
+    For example, the train_ner.sh for fine-tuning LLaMA3-8B with 2 communication rounds, 2 epochs across 3 sites is: 
+    ```
+    python3 ./simulator.py --config-name medical_ner/Meta-Llama-3-8B.yaml  ++medical_ner.round=2 ++medical_ner.epoch=2 ++medical_ner.worker_number=3
+    ```
+  - To fine-tune BERT models, run train_bert.sh with NER or RE datasets for NER or RE tasks, respectively. 
 
 For model training, we use [train_bert.sh](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/train_bert.sh) to train **Bio_ClinicalBERT** model, 
 and use [train_mix.sh](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/train_mix.sh) to train other models (**LLaMA3-8B** and **DeepSeek-R1-Distill-Llama-8B**). 
@@ -87,6 +87,7 @@ Take train_ner.sh as an example, introduce these parameters in [common.yaml](htt
 In this study, we calculate the **strict and lenient F1 scores** of different settings on **[NER](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/evaluate.sh)** and 
 **[RE](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/re_evaluate.sh)** tasks. 
 Inference and evaluation are calculated at the same time.
+
 
 
 
