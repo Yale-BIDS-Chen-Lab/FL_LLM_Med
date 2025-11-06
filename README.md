@@ -61,15 +61,16 @@ Take the [common.yaml](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/mai
     ```
     python3 ./simulator.py --config-name medical_ner/Meta-Llama-3-8B.yaml  ++medical_ner.round=2 ++medical_ner.epoch=2 ++medical_ner.worker_number=3
     ```
-    If ++medical_ner.worker_number=1 and there is only one training dataset, it is single-site fine-tuning, otherwise, it is centralized fine-tuning. 
+    If ++medical_ner.worker_number=1 and there is only one training dataset, then it is single-site fine-tuning; otherwise, it is centralized fine-tuning. The fine-tuned LoRA modules will be saved in the session directory. 
     
-  - To fine-tune BERT models, run train_bert.sh with NER or RE datasets for NER or RE tasks, respectively. 
+  - To fine-tune BERT models, run train_bert.sh with NER or RE datasets for NER or RE tasks, respectively. The fine-tuned BERT models will be saved in the session directory. 
 
 ### Evaluations
 
 In this study, we calculate the **strict and lenient F1 scores** of different settings on **[NER](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/evaluate.sh)** and 
 **[RE](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/re_evaluate.sh)** tasks. 
 Inference and evaluation are calculated at the same time.
+
 
 
 
