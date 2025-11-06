@@ -67,10 +67,12 @@ Take the [common.yaml](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/mai
 
 ### Evaluations
 
-We report precision, recall and F1 score for NER and RE. We use two evaluation schemes: 1) strict match: prediction must exactly match gold entity span; 2) lenient match: partial span  overlap is considered correct. 
+We report precision, recall and F1 score for NER and RE. We use two evaluation schemes: 1) strict match: prediction must exactly match gold entity span; 2) lenient match: partial span  overlap is considered correct.
 
-Evaluation metrics. We reported precision, recall, and F1-score, the standard metrics for NER and RE 14,15. Following prior work 10,14, we used two evaluation schemes. (1) Strict match: for NER, a true positive requires exact span and entity type match; for RE, this further requires the correct entity pair and relation type. (2) Lenient match: for NER, a true positive requires overlapping spans and correct entity type; for RE, relations are considered correct when constituent entities overlap with gold spans and the relation type matches. 
+- To evaluate NER performance, run [evaluate.sh](evaluate.sh) by specifying fine-tuned models ('session_dir'), test set directory ('test_dir') and test files ('test_dir'). 
+- To evaluate RE performance, run [re_evaluate.sh](re_evaluate.sh) by specifying some parameters. 
 
+All these evaluations will be donw by using [vllm_generator.py](src/command/vllm_generator.py) for model inference. 
 
 
 
