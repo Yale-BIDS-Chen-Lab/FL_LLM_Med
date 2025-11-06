@@ -72,7 +72,8 @@ We report precision, recall and F1 score for NER and RE. We use two evaluation s
 - To evaluate NER performance, run [evaluate.sh](evaluate.sh) by specifying fine-tuned models ('session_dir'), test set directory ('test_dir') and test files ('test_dir'). 
 - To evaluate RE performance, run [re_evaluate.sh](re_evaluate.sh) by specifying some parameters. 
 
-All these evaluations will be donw by using [vllm_generator.py](src/command/vllm_generator.py) for model inference. 
+All these evaluations will be done by using [vllm_generator.py](src/command/vllm_generator.py) for model inference. 
+
 
 
 
