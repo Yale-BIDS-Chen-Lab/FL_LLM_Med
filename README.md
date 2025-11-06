@@ -44,7 +44,7 @@ Named entity recognition (NER) and relation extraction (RE).
 ## Model fine-tuning
 ### Hyper-parameter configuration in common.yaml
 
-Take the [common.yaml](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/conf/medical_ner/common.yaml) file of train_mix.sh as an example. 
+Take the [common.yaml](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/conf/medical_ner/common.yaml) file of train_ner.sh as an example. 
 
 - **dataset_name**: hugging_face_yale_ner
 - **dataset_sampling**: file_split or random_split. Here, 'file_split' denotes that each site owns one dataset. For example, site A has MIMIC-III, site B has MTSamples and site C has UTP. 'random_split' denotes that all datasets are merged together and evenly distributed to different sites. 
@@ -54,11 +54,8 @@ Take the [common.yaml](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/mai
 - **evaluation_prompt_file**: medical_html_evaluation.txt
 - **no_validation** in 'dataset_kwargs': true or false. If it is true, then the running algorithm is Fed-MedLoRA. If it is false, then we we need to add a new hyper-parameter 'validation_files' into 'dataset_kwargs' to run the Fed-MedLoRA+ algorithm. 
 
-- Fine-tuning NER 
-  - Run train.sh for LLaMA3, DeepSeek-R1-Distill and QWen3 models.
-
-  Take training LLaMA3-8B model for an example, the train.sh is:
-
+### Fine-tuning NER 
+  - Run train_ner.sh for fine-tuning LLMs, e.g., LLaMA3 and DeepSeek-R1-Distill on NER tasks. For example, the train_ner.sh for fine-tuning LLaMA3-8B with communication 2 rounds, 2 epochs across 3 sites is: 
 ```
 python3 ./simulator.py --config-name medical_ner/Meta-Llama-3-8B.yaml  ++medical_ner.round=2 ++medical_ner.epoch=2 ++medical_ner.worker_number=3
 ```
@@ -90,6 +87,7 @@ Take train_ner.sh as an example, introduce these parameters in [common.yaml](htt
 In this study, we calculate the **strict and lenient F1 scores** of different settings on **[NER](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/evaluate.sh)** and 
 **[RE](https://github.com/Yale-BIDS-Chen-Lab/FL_LLM_Med/blob/main/re_evaluate.sh)** tasks. 
 Inference and evaluation are calculated at the same time.
+
 
 
 
