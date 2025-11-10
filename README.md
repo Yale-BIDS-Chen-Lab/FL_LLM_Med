@@ -1,6 +1,6 @@
 # FL_LLM_Med
 
-This repository provides the related codes and models for federated instruction tuning for privacy-preserving clinical large language models (LLMs). 
+This repository provides the related codes for federated and parameter-efficient framework for large language model (LLM) training in medicine: applications to clinical information  extraction. 
 
 ## Install environment
 
@@ -73,6 +73,7 @@ We report precision, recall and F1 score for NER and RE. We use two evaluation s
 - To evaluate RE performance, run [re_evaluate.sh](re_evaluate.sh) by specifying some parameters. 
 
 All these evaluations will be done by using [vllm_generator.py](src/command/vllm_generator.py) for model inference. 
+
 
 
 
