@@ -9,7 +9,7 @@ sys.path.append(lib_path)
 from cyy_naive_lib.log import log_info
 from cyy_torch_toolbox import TensorDict
 
-from ..sft import SFTTrainerMinxin, load_perf_model_state_dict
+from ..sft import SFTTrainerMinxin, load_peft_model_state_dict
 from .common import LLMTextWorker
 
 __all__ = ["SFTTrainerWorker"]
@@ -37,7 +37,7 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
         self._aggregation(sent_data=sent_data)
 
     def _get_parameters(self) -> TensorDict:
-        return self.sft_get_perf_model_state_dict()
+        return self.sft_get_peft_model_state_dict()
 
     def pause(self, in_round: bool = False) -> None:
         super().pause(in_round=in_round)
@@ -46,7 +46,7 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
             log_info("used cuda memory: %s", torch.cuda.memory_allocated())
 
     def _load_adaptor(self, adaptor_parameter: TensorDict) -> None:
-        load_perf_model_state_dict(
+        load_peft_model_state_dict(
             model=self._sft_trainer.model_wrapped
             if self._sft_trainer is not None
             else self.trainer.running_model_evaluator.model,

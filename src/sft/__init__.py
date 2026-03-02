@@ -17,10 +17,10 @@ from peft.utils.save_and_load import set_peft_model_state_dict
 from transformers.trainer_pt_utils import AcceleratorConfig
 from trl import SFTConfig, SFTTrainer
 
-__all__ = ["SFTTrainerMinxin", "get_SFTConfig", "load_perf_model_state_dict"]
+__all__ = ["SFTTrainerMinxin", "get_SFTConfig", "load_peft_model_state_dict"]
 
 
-def load_perf_model_state_dict(
+def load_peft_model_state_dict(
     model, state_dict: TensorDict, device: torch.device
 ) -> None:
     state_dict = tensor_to(state_dict, device=device)
@@ -125,11 +125,11 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
             preprocess_function, batched=True, new_fingerprint=str(uuid.uuid4())
         )
 
-    def sft_get_perf_model_state_dict(self) -> TensorDict:
+    def sft_get_peft_model_state_dict(self) -> TensorDict:
         assert self._sft_trainer is not None
         if torch.cuda.is_available():
             torch.cuda.synchronize()
-        data = HuggingFaceModelEvaluatorForFinetune.get_perf_model_state_dict(
+        data = HuggingFaceModelEvaluatorForFinetune.get_peft_model_state_dict(
             self._sft_trainer.model_wrapped
         )
         return tensor_to(data, device=torch.device("cpu"))

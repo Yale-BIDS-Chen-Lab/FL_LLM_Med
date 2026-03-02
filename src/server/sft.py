@@ -7,7 +7,7 @@ from cyy_torch_toolbox import Inferencer, MachineLearningPhase, TensorDict
 from peft import PeftModel
 
 from ..algorithm import AggregationByLossAlgorithm
-from ..sft import SFTTrainerMinxin, load_perf_model_state_dict
+from ..sft import SFTTrainerMinxin, load_peft_model_state_dict
 from .common import LLMTextServer
 
 __all__ = ["SFTServer"]
@@ -33,7 +33,7 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
         evaluator = tester.model_evaluator
         assert isinstance(evaluator, HuggingFaceModelEvaluatorForFinetune)
         if init_global_model_path is None:
-            return HuggingFaceModelEvaluatorForFinetune.get_perf_model_state_dict(
+            return HuggingFaceModelEvaluatorForFinetune.get_peft_model_state_dict(
                 evaluator.model
             )
 
@@ -42,11 +42,11 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
         )
         self.load_parameter(
             tester=tester,
-            parameter=HuggingFaceModelEvaluatorForFinetune.get_perf_model_state_dict(
+            parameter=HuggingFaceModelEvaluatorForFinetune.get_peft_model_state_dict(
                 finetuned_model
             ),
         )
-        return self.sft_get_perf_model_state_dict()
+        return self.sft_get_peft_model_state_dict()
 
     def get_validation_loss(self, worker_data):
         validator = self.get_validator()
@@ -58,7 +58,7 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
     def load_parameter(self, tester: Inferencer, parameter: TensorDict) -> None:
         sft_trainer = self.get_sft_trainer(tester)
         log_debug("load parameter to device %s", tester.device)
-        load_perf_model_state_dict(sft_trainer.model, parameter, device=tester.device)
+        load_peft_model_state_dict(sft_trainer.model, parameter, device=tester.device)
 
     def _get_metric(self, tester: Inferencer) -> Any:
         with torch.inference_mode():

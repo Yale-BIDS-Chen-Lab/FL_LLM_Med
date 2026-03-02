@@ -42,7 +42,7 @@ class FinetuneAdaptorServer(LLMTextServer):
     def load_parameter(self, tester: Inferencer, parameter: TensorDict) -> None:
         model_evaluator = tester.model_evaluator
         assert isinstance(model_evaluator, HuggingFaceModelEvaluatorForFinetune)
-        model_evaluator.load_perf_model_state_dict(parameter, device=tester.device)
+        model_evaluator.load_peft_model_state_dict(parameter, device=tester.device)
 
     def _server_exit(self) -> None:
         assert self.current_aggregated_model.has_data
