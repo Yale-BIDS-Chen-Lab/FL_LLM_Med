@@ -7,7 +7,7 @@ from collections import Counter
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 
-from preprocess.iob import IOBRecord, JSONRecord
+from cyy_preprocessing_pipeline.dataset import IOBRecord, JSONRecord
 
 from preprocess import parse_dir, parse_file
 
