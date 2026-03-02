@@ -9,7 +9,8 @@ from cyy_huggingface_toolbox import (
     HuggingFaceModelEvaluatorForFinetune,
 )
 from cyy_naive_lib.log import log_debug, log_error, log_info
-from cyy_torch_toolbox import Config, Executor, TensorDict, Trainer, tensor_to
+from cyy_preprocessing_pipeline import tensor_to
+from cyy_torch_toolbox import Config, Executor, TensorDict, Trainer
 from datasets import Dataset
 from distributed_learning_simulation import ExecutorProtocol
 from peft.utils.save_and_load import set_peft_model_state_dict

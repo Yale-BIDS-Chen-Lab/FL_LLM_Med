@@ -1,8 +1,7 @@
-import os
+from pathlib import Path
 from typing import Any
 
-from cyy_naive_lib.fs.path import list_files, list_files_by_suffixes
-from cyy_preprocessing_pipeline.dataset import IOBParser, IOBRecord, JSONParser
+from cyy_preprocessing_pipeline.dataset import IOBParser, IOBRecord, JSONParser, JSONRecord
 
 
 def parse_file(file: str) -> Any:
@@ -15,7 +14,8 @@ def parse_file(file: str) -> Any:
 
 
 def parse_dir(data_dir: str, suffix: str | None = None) -> dict:
-    assert os.path.isdir(data_dir)
+    data_path = Path(data_dir)
+    assert data_path.is_dir()
     res = {}
     suffixes = []
     if suffix is not None:
@@ -24,14 +24,15 @@ def parse_dir(data_dir: str, suffix: str | None = None) -> dict:
             suffixes.append("iob")
         if suffix == "iob":
             suffixes.append("bio")
-    files = (
-        list_files(data_dir)
-        if not suffixes
-        else list_files_by_suffixes(data_dir, suffixes=suffixes)
-    )
+    if suffixes:
+        files = [
+            str(p) for s in suffixes for p in data_path.rglob(f"*.{s}") if p.is_file()
+        ]
+    else:
+        files = [str(p) for p in data_path.rglob("*") if p.is_file()]
     for file in files:
         res[file] = parse_file(file)
     return res
 
 
-__all__ = ["IOBRecord", "parse_dir"]
+__all__ = ["IOBRecord", "JSONRecord", "parse_dir"]

@@ -1,5 +1,6 @@
 from cyy_naive_lib.log import log_debug, log_warning
-from cyy_torch_toolbox import TensorDict, tensor_clone
+from cyy_preprocessing_pipeline import tensor_clone
+from cyy_torch_toolbox import TensorDict
 
 from ..method_forward import (
     SFTTrainerWorker,

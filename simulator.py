@@ -18,7 +18,7 @@ import src.method  # noqa: F401
 
 if __name__ == "__main__":
     config_path = os.path.join(project_path, "conf")
-    with redirect_stdout_to_logger(logger_names=["transformers"]):
+    with redirect_stdout_to_logger("transformers"):
         config = load_config(config_path=config_path, import_libs=False)
         log_info("Use train files %s", config.dc_config.dataset_kwargs["train_files"])
         log_info("Use test files %s", config.dc_config.dataset_kwargs["test_files"])
