@@ -36,7 +36,7 @@ def get_min_tag(all_records: list[IOBRecord | JSONRecord]) -> str | None:
 def allocate_impl(
     all_records: list[IOBRecord | JSONRecord],
     checked_tag: str,
-    allocation: dict,
+    allocation: dict[int, list[IOBRecord | JSONRecord]],
     split_number: int,
 ) -> list[IOBRecord | JSONRecord]:
     heap: list = []
@@ -66,7 +66,9 @@ def allocate_impl(
 
 
 def allocate(
-    all_records: list[IOBRecord | JSONRecord], allocation: dict, split_number: int
+    all_records: list[IOBRecord | JSONRecord],
+    allocation: dict[int, list[IOBRecord | JSONRecord]],
+    split_number: int,
 ) -> None:
     while True:
         tag = get_min_tag(all_records=all_records)

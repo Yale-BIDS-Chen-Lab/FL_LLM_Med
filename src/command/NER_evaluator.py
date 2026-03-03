@@ -56,10 +56,10 @@ if __name__ == "__main__":
         "--skipped_tags", help="tags to skip evaluation", type=str, default=None
     )
     parser.add_argument(
-        "--zero_shot", help="use pretrained model", type=bool, default=False
+        "--zero_shot", help="use pretrained model", action="store_true"
     )
     parser.add_argument(
-        "--parse_gt_html", help="parsing gt html into tags", type=bool, default=False
+        "--parse_gt_html", help="parsing gt html into tags", action="store_true"
     )
     parser.add_argument(
         "--worker_index", help="evaluate worker", type=int, default=None

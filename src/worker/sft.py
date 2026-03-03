@@ -9,13 +9,13 @@ sys.path.append(lib_path)
 from cyy_naive_lib.log import log_info
 from cyy_torch_toolbox import TensorDict
 
-from ..sft import SFTTrainerMinxin, load_peft_model_state_dict
+from ..sft import SFTTrainerMixin, load_peft_model_state_dict
 from .common import LLMTextWorker
 
 __all__ = ["SFTTrainerWorker"]
 
 
-class SFTTrainerWorker(LLMTextWorker, SFTTrainerMinxin):
+class SFTTrainerWorker(LLMTextWorker, SFTTrainerMixin):
     _sample_size: None | int = None
 
     def _before_training(self) -> None:

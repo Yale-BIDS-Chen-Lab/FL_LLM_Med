@@ -4,16 +4,17 @@ import torch
 from cyy_huggingface_toolbox import HuggingFaceModelEvaluatorForFinetune
 from cyy_naive_lib.log import log_debug, log_info, log_warning
 from cyy_torch_toolbox import Inferencer, MachineLearningPhase, TensorDict
+from distributed_learning_simulation.message import ParameterMessage
 from peft import PeftModel
 
 from ..algorithm import AggregationByLossAlgorithm
-from ..sft import SFTTrainerMinxin, load_peft_model_state_dict
+from ..sft import SFTTrainerMixin, load_peft_model_state_dict
 from .common import LLMTextServer
 
 __all__ = ["SFTServer"]
 
 
-class SFTServer(LLMTextServer, SFTTrainerMinxin):
+class SFTServer(LLMTextServer, SFTTrainerMixin):
     cached_validator: None | Inferencer = None
 
     def get_validator(self, for_evaluation: bool = False) -> Inferencer:
@@ -48,7 +49,7 @@ class SFTServer(LLMTextServer, SFTTrainerMinxin):
         )
         return self.sft_get_peft_model_state_dict()
 
-    def get_validation_loss(self, worker_data):
+    def get_validation_loss(self, worker_data: ParameterMessage) -> float:
         validator = self.get_validator()
         self.load_parameter(validator, worker_data.parameter)
         loss = self._get_metric(validator)["eval_loss"]

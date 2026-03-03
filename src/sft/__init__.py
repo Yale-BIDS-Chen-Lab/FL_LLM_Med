@@ -1,4 +1,5 @@
 import gc
+import math
 import os
 import uuid
 from typing import Protocol
@@ -8,7 +9,7 @@ from cyy_huggingface_toolbox import (
     HuggingFaceModelEvaluator,
     HuggingFaceModelEvaluatorForFinetune,
 )
-from cyy_naive_lib.log import log_debug, log_error, log_info
+from cyy_naive_lib.log import log_debug, log_info
 from cyy_preprocessing_pipeline import tensor_to
 from cyy_torch_toolbox import Config, Executor, TensorDict, Trainer
 from datasets import Dataset
@@ -17,7 +18,7 @@ from peft.utils.save_and_load import set_peft_model_state_dict
 from transformers.trainer_pt_utils import AcceleratorConfig
 from trl import SFTConfig, SFTTrainer
 
-__all__ = ["SFTTrainerMinxin", "get_SFTConfig", "load_peft_model_state_dict"]
+__all__ = ["SFTTrainerMixin", "get_SFTConfig", "load_peft_model_state_dict"]
 
 
 def load_peft_model_state_dict(
@@ -36,18 +37,24 @@ def load_peft_model_state_dict(
     assert not unexpected_keys
 
 
-def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTConfig:
+def get_SFTConfig(
+    config: Config, executor: Executor, output_dir: str, dataset_size: int = 0
+) -> SFTConfig:
     # torch.backends.cudnn.benchmark = True
     learning_rate = 2.0e-4
     if isinstance(executor, Trainer):
         assert isinstance(executor.hyper_parameter.learning_rate, float)
         learning_rate = executor.hyper_parameter.learning_rate
+    batch_size = executor.hyper_parameter.batch_size
+    num_epochs = executor.hyper_parameter.epoch
+    total_steps = math.ceil(dataset_size / batch_size) * num_epochs if dataset_size > 0 else 0
+    warmup_steps = int(0.05 * total_steps)
     accelerate_config = AcceleratorConfig()
     accelerate_config.non_blocking = True
     return SFTConfig(
         accelerator_config=accelerate_config.to_dict(),
-        per_device_train_batch_size=executor.hyper_parameter.batch_size,
-        num_train_epochs=executor.hyper_parameter.epoch,
+        per_device_train_batch_size=batch_size,
+        num_train_epochs=num_epochs,
         learning_rate=learning_rate,
         logging_steps=10,
         bf16=True,
@@ -60,7 +67,7 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
         save_strategy="no",
         eval_strategy="no",
         report_to="none",
-        warmup_ratio=0.05,
+        warmup_steps=warmup_steps,
         logging_nan_inf_filter=False,
         eval_accumulation_steps=1,
         bf16_full_eval=True,
@@ -69,7 +76,7 @@ def get_SFTConfig(config: Config, executor: Executor, output_dir: str) -> SFTCon
     )
 
 
-class SFTTrainerMinxin(ExecutorProtocol, Protocol):
+class SFTTrainerMixin(ExecutorProtocol, Protocol):
     _sft_trainer: None | SFTTrainer = None
 
     @property
@@ -88,8 +95,12 @@ class SFTTrainerMinxin(ExecutorProtocol, Protocol):
         executor.set_device(device)
 
         output_dir = os.path.join(self.save_dir, "SFTTrainer")
+        dataset_size = len(executor.dataloader.dataset)
         training_args = get_SFTConfig(
-            config=self.config, executor=executor, output_dir=output_dir
+            config=self.config,
+            executor=executor,
+            output_dir=output_dir,
+            dataset_size=dataset_size,
         )
         if self.hold_log_lock:
             log_info("SFTConfig is %s", training_args)

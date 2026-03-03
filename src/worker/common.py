@@ -18,7 +18,7 @@ class LLMTextWorker(AggregationWorker, DatapipelineMixin):
         self.set_prompt(self.dataset_collection, for_evaluation=False)
 
     @property
-    def dataset_collection(self) -> TextDatasetCollection:
+    def dataset_collection(self) -> TextDatasetCollection | ClassificationDatasetCollection:
         assert isinstance(
             self.trainer.dataset_collection,
             TextDatasetCollection | ClassificationDatasetCollection,

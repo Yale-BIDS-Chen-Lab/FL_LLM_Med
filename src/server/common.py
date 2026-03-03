@@ -47,7 +47,7 @@ class FinetuneAdaptorServer(LLMTextServer):
     def _server_exit(self) -> None:
         assert self.current_aggregated_model.has_data
         tester = self.get_tester(for_evaluation=False)
-        # merge Rola layers
+        # merge LoRA layers
         tester.replace_model(lambda old_model: old_model.merge_and_unload())
         model_evaluator = tester.model_evaluator
         assert isinstance(model_evaluator, HuggingFaceModelEvaluatorForFinetune)
