@@ -101,7 +101,6 @@ if __name__ == "__main__":
             ),
             args.pretrained_model_dir,
         )
-        pretrained_model_dir = os.path.abspath(args.pretrained_model_dir)
         session.config.model_config.model_name = (
             f"hugging_face_causal_lm_{args.pretrained_model_dir}"
         )
@@ -153,12 +152,6 @@ if __name__ == "__main__":
                 vllm_engine = get_llm_engine(
                     session=session, finetuned_model_dir=finetuned_model_dir
                 )
-
-            finetuned_model_dir = get_finetune_dir(
-                zero_shot=args.zero_shot,
-                session=session,
-                worker_index=args.worker_index,
-            )
 
             vllm_output = list(get_vllm_output(tester=tester, engine=vllm_engine))
             for idx, (sample, generated_text) in enumerate(vllm_output):
