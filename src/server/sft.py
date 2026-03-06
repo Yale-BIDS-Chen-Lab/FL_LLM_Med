@@ -58,15 +58,21 @@ class SFTServer(LLMTextServer, SFTTrainerMixin):
 
     def load_parameter(self, tester: Inferencer, parameter: TensorDict) -> None:
         sft_trainer = self.get_sft_trainer(tester)
+        sft_trainer.model.to(tester.device)
         log_debug("load parameter to device %s", tester.device)
         load_peft_model_state_dict(sft_trainer.model, parameter, device=tester.device)
 
     def _get_metric(self, tester: Inferencer) -> Any:
+        sft_trainer = self.get_sft_trainer(tester)
         with torch.inference_mode():
-            metrics = self.sft_trainer.evaluate(
+            sft_trainer.model.to(tester.device)
+            metrics = sft_trainer.evaluate(
                 eval_dataset=self.get_sft_trainer_dataset(executor=tester)
             )
             log_warning("metric is %s", metrics)
+            sft_trainer.model.to("cpu")
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
             return metrics
 
     def _server_exit(self) -> None:
