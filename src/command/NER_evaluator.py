@@ -78,8 +78,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    prediction: list[list[str]] = []
-    ground_tags: list[list[str]] = []
     assert not (args.zero_shot and args.worker_index is not None)
     assert os.path.isdir(args.session_dir), args.session_dir
     canonical_tags: set[str] = set()
@@ -125,6 +123,8 @@ if __name__ == "__main__":
     sample_times = 1 if args.sample_times is None else args.sample_times
     vllm_engine = None
     for sample_idx in range(sample_times):
+        prediction = []
+        ground_tags = []
         if args.sample_size is not None:
             test_len = len(
                 tester.dataset_collection.get_dataset_util(

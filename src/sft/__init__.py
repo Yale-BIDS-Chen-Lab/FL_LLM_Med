@@ -105,13 +105,12 @@ class SFTTrainerMixin(ExecutorProtocol, Protocol):
         if self.hold_log_lock:
             log_info("SFTConfig is %s", training_args)
 
-        model = executor.running_model_evaluator.underlying_model
+        model = executor.running_model_evaluator.model
         train_dataset = self.get_sft_trainer_dataset(executor)
         sft_trainer = SFTTrainer(
             model,
             train_dataset=train_dataset,
             args=training_args,
-            peft_config=executor.running_model_evaluator.peft_config,
         )
         assert sft_trainer.model is sft_trainer.model_wrapped
         self._sft_trainer = sft_trainer
