@@ -19,8 +19,7 @@ class LLMTextServer(AggregationServer, DatapipelineMixin):
         phase: MachineLearningPhase = MachineLearningPhase.Test,
         for_evaluation: bool = False,
     ) -> Inferencer:
-        self.config.model_config.model_kwargs.pop("load_in_4bit", None)
-        self.config.model_config.model_kwargs.pop("load_in_8bit", None)
+        # Keep quantization (load_in_4bit/8bit) to reduce server GPU memory
         if "finetune_config" not in self.config.model_config.model_kwargs:
             self.config.model_config.model_kwargs["finetune_config"] = {}
         self.config.model_config.model_kwargs["finetune_config"]["inference_mode"] = (
