@@ -26,6 +26,7 @@ def get_llm_engine(session: Session, finetuned_model_dir: str | None = None) -> 
         pretrained_model_name_or_path=model_name,
         finetuned_model_dir=finetuned_model_dir,
         max_model_len=2048,
+        gpu_memory_utilization=0.5,
     )
     return llm
 
