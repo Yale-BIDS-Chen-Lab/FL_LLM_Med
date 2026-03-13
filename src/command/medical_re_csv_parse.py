@@ -8,7 +8,10 @@ from datasets import load_dataset
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 
-from NER_evaluation.html_form import html2bio
+import re
+
+from cyy_preprocessing_pipeline.parsing import html2bio
+from cyy_preprocessing_pipeline.parsing.bio.types import CanonicalTags
 
 
 def format_prompt(prompt: str) -> str:
@@ -141,7 +144,8 @@ if __name__ == "__main__":
         # print("=====")
         tags: list[str] = []
         tokens: list[str] = []
-        for token in html2bio(output_text):
+        bio_tokens = html2bio(output_text, canonical_tags=CanonicalTags([]))
+        for token in bio_tokens:
             if isinstance(token, str):
                 tokens.append(token)
                 tags.append("O")

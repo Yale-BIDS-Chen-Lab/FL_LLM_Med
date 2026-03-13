@@ -11,10 +11,10 @@ os.environ["NO_TOKENIZER_TRANSFORMS"] = "1"
 import cyy_huggingface_toolbox  # noqa: F401
 from cyy_naive_lib import save_json
 from cyy_naive_lib.log import log_warning, set_level
-from cyy_preprocessing_pipeline.parsing import approximately_match_tokens
+from cyy_preprocessing_pipeline.parsing import approximately_match_tokens, html2bio, json2bio
+from cyy_preprocessing_pipeline.parsing.bio.types import CanonicalTags
 from cyy_torch_toolbox import MachineLearningPhase
 from distributed_learning_simulation import Session
-from NER_evaluation.html_form import html2bio
 from NER_evaluation.metric import get_metrics
 from NER_evaluation.token_classification import process_batch
 from util import get_tester
@@ -76,6 +76,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--sample_output_dir", help="dir to save sample results", type=str, default=None
     )
+    parser.add_argument(
+        "--output_format",
+        help="format of LLM output (html or json)",
+        type=str,
+        choices=["html", "json"],
+        default="html",
+    )
     args = parser.parse_args()
 
     assert not (args.zero_shot and args.worker_index is not None)
@@ -119,6 +126,7 @@ if __name__ == "__main__":
         canonical_tags = canonical_tags - skipped_tags
     assert canonical_tags
     print("canonical_tags are", canonical_tags)
+    bio_canonical_tags = CanonicalTags(canonical_tags)
     print("skipped_tags are", skipped_tags)
     sample_times = 1 if args.sample_times is None else args.sample_times
     vllm_engine = None
@@ -162,7 +170,7 @@ if __name__ == "__main__":
                 if args.parse_gt_html:
                     assert "html" in sample
                     parsed_gt_tokens = html2bio(
-                        html=sample["html"], canonical_tags=canonical_tags
+                        html=sample["html"], canonical_tags=bio_canonical_tags
                     )
                     tags = []
                     tokens = []
@@ -174,9 +182,14 @@ if __name__ == "__main__":
                             tokens += t[0]
                             tags += t[1]
 
-                predicated_tokens = html2bio(
-                    html=out_text, canonical_tags=canonical_tags
-                )
+                if args.output_format == "json":
+                    predicated_tokens = json2bio(
+                        json_text=out_text, canonical_tags=bio_canonical_tags
+                    )
+                else:
+                    predicated_tokens = html2bio(
+                        html=out_text, canonical_tags=bio_canonical_tags
+                    )
                 tmp_predicated_tags = approximately_match_tokens(
                     tokens, predicated_tokens
                 )

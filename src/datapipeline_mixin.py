@@ -1,3 +1,4 @@
+import json
 import os
 from dataclasses import dataclass
 from typing import Any
@@ -63,6 +64,35 @@ class MedicalREPromptReduction(Transform):
         return data
 
 
+@dataclass(kw_only=True)
+class AddJsonEntities(Transform):
+    def __init__(self, name: str = "add_json_entities") -> None:
+        super().__init__(name=name, fun=self.add_json_entities)
+
+    @classmethod
+    def add_json_entities(cls, data: Any) -> Any:
+        assert isinstance(data, dict)
+        tokens = data["tokens"]
+        tags = data["tags"]
+        entities: list[dict[str, str]] = []
+        current_entity: dict[str, str] | None = None
+        for token, tag in zip(tokens, tags, strict=True):
+            if tag.startswith("B-"):
+                if current_entity is not None:
+                    entities.append(current_entity)
+                current_entity = {"entity": tag[2:], "text": token}
+            elif tag.startswith("I-") and current_entity is not None:
+                current_entity["text"] += " " + token
+            else:
+                if current_entity is not None:
+                    entities.append(current_entity)
+                    current_entity = None
+        if current_entity is not None:
+            entities.append(current_entity)
+        data["json_entities"] = json.dumps(entities)
+        return data
+
+
 class DatapipelineMixin(ExecutorProtocol):
     def get_prompt_file(self, for_evaluation: bool) -> str:
         key = "evaluation_prompt_file" if for_evaluation else "prompt_file"
@@ -78,6 +108,8 @@ class DatapipelineMixin(ExecutorProtocol):
         prompt_file = self.get_prompt_file(for_evaluation=for_evaluation)
         with open(prompt_file, encoding="utf8") as f:
             prompt = f.read()
+            if "{json_entities}" in prompt:
+                dc.append_text_transform(transform=AddJsonEntities())
             dc.set_prompt(prompt)
         if not for_evaluation and self.config.dc_config.dataset_kwargs.get(
             "tailor_prompt_for_training", False
