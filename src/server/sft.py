@@ -63,6 +63,7 @@ class SFTServer(LLMTextServer, SFTTrainerMixin):
 
     def _get_metric(self, tester: Inferencer) -> Any:
         with torch.inference_mode():
+            self.sft_trainer.model.to(tester.device)
             metrics = self.sft_trainer.evaluate(
                 eval_dataset=self.get_sft_trainer_dataset(executor=tester)
             )
