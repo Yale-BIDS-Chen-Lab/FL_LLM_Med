@@ -1,0 +1,14 @@
+---
+dataset_name: hugging_face_yale_ner
+dataset_sampling: file_split
+distributed_algorithm: adaptor_avg
+dataset_kwargs:
+  input_max_len: 800
+  train_files:
+    - /home/cyy/lar_dataset/NER_data/train/MIMIC3.json
+    - /home/cyy/lar_dataset/NER_data/train/MTSamples.json
+  test_files: [/home/cyy/lar_dataset/NER_data/test/MIMIC3.json]
+  no_validation: true
+  prompt_file: medical_json.txt
+  evaluation_prompt_file: medical_json_evaluation.txt
+defaults: [../global@_here_, _self_]

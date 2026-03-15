@@ -1,6 +1,7 @@
 import argparse
 import copy
 import functools
+import json
 import logging
 import os
 import sys
@@ -12,7 +13,7 @@ import cyy_huggingface_toolbox  # noqa: F401
 from cyy_naive_lib import save_json
 from cyy_naive_lib.log import log_warning, set_level
 from cyy_preprocessing_pipeline.parsing import approximately_match_tokens, html2bio, json2bio
-from cyy_preprocessing_pipeline.parsing.bio.types import CanonicalTags
+from cyy_preprocessing_pipeline.parsing.bio.types import CanonicalTags, make_bio_span
 from cyy_torch_toolbox import MachineLearningPhase
 from distributed_learning_simulation import Session
 from NER_evaluation.metric import get_metrics
@@ -22,6 +23,39 @@ from util import get_tester
 project_path = os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.insert(0, project_path)
 import src.method  # noqa: F401
+
+
+def robust_json2bio(json_text: str, canonical_tags: CanonicalTags) -> list | None:
+    """Parse JSON entities from LLM output, using json_repair for malformed JSON.
+    Returns None if the output is completely unfixable."""
+    from json_repair import repair_json
+
+    # Try direct parsing first
+    try:
+        return json2bio(json_text=json_text, canonical_tags=canonical_tags)
+    except Exception:
+        pass
+
+    # Use json_repair to fix malformed JSON
+    try:
+        repaired = repair_json(json_text, return_objects=True)
+    except (RecursionError, Exception):
+        return None
+    if isinstance(repaired, list):
+        tokens = []
+        for ent in repaired:
+            if not isinstance(ent, dict):
+                continue
+            tag = canonical_tags.match(ent.get("entity", ""))
+            text = ent.get("text", "")
+            if not tag or not text:
+                continue
+            words = text.strip().split()
+            if words:
+                tokens.append(make_bio_span(words, tag))
+        return tokens
+
+    return None
 
 
 def get_finetune_dir(
@@ -46,12 +80,9 @@ if __name__ == "__main__":
     )
     parser.add_argument("--session_dir", help="session dir", type=str, required=True)
     parser.add_argument(
-        "--pretrained_model_dir", help="session dir", type=str, default=None
+        "--pretrained_model_dir", help="pretrained model dir", type=str, default=None
     )
     parser.add_argument("--test_file", help="test file", type=str, default=None)
-    parser.add_argument(
-        "--debug_file", help="contain debug info", type=str, default=None
-    )
     parser.add_argument(
         "--skipped_tags", help="tags to skip evaluation", type=str, default=None
     )
@@ -77,11 +108,10 @@ if __name__ == "__main__":
         "--sample_output_dir", help="dir to save sample results", type=str, default=None
     )
     parser.add_argument(
-        "--output_format",
-        help="format of LLM output (html or json)",
+        "--results_file",
+        help="file to append clean metric results (separate from vllm noise)",
         type=str,
-        choices=["html", "json"],
-        default="html",
+        default=None,
     )
     args = parser.parse_args()
 
@@ -93,6 +123,9 @@ if __name__ == "__main__":
         skipped_tags = set(args.skipped_tags.split(" "))
 
     session = Session(session_dir=args.session_dir)
+    prompt_file = session.config.dc_config.dataset_kwargs.get("prompt_file", "")
+    output_format = "json" if "json" in prompt_file else "html"
+    print(f"Auto-detected output_format={output_format} from prompt_file={prompt_file}")
     use_llm = session.config.model_config.model_name.startswith(
         "hugging_face_causal_lm_"
     )
@@ -125,6 +158,10 @@ if __name__ == "__main__":
     if skipped_tags:
         canonical_tags = canonical_tags - skipped_tags
     assert canonical_tags
+    test_file_name = os.path.basename(args.test_file) if args.test_file else "unknown"
+    print(f"\n{'='*60}")
+    print(f"Test file: {test_file_name}")
+    print(f"{'='*60}")
     print("canonical_tags are", canonical_tags)
     bio_canonical_tags = CanonicalTags(canonical_tags)
     print("skipped_tags are", skipped_tags)
@@ -133,6 +170,7 @@ if __name__ == "__main__":
     for sample_idx in range(sample_times):
         prediction = []
         ground_tags = []
+        unfixable_samples: list[dict] = []
         if args.sample_size is not None:
             test_len = len(
                 tester.dataset_collection.get_dataset_util(
@@ -182,10 +220,15 @@ if __name__ == "__main__":
                             tokens += t[0]
                             tags += t[1]
 
-                if args.output_format == "json":
-                    predicated_tokens = json2bio(
+                if output_format == "json":
+                    predicated_tokens = robust_json2bio(
                         json_text=out_text, canonical_tags=bio_canonical_tags
                     )
+                    if predicated_tokens is None:
+                        unfixable_samples.append(
+                            {"index": idx, "output": out_text}
+                        )
+                        continue
                 else:
                     predicated_tokens = html2bio(
                         html=out_text, canonical_tags=bio_canonical_tags
@@ -224,25 +267,13 @@ if __name__ == "__main__":
                         if "inputs" in sample:
                             joined_tokens = sample["inputs"]
                         debug_f.write(f"{joined_tokens}\n")
-                        debug_f.write("ground_out html ==============\n")
+                        debug_f.write(f"ground_out ({output_format}) ==============\n")
                         if "html" in sample:
                             debug_f.write(f"{sample['html']}\n")
                         else:
                             debug_f.write(f"{sample['output']}\n")
                         debug_f.write("predicated_out >>>>>>>>>>>>>>\n")
                         debug_f.write(f"{out_text}\n")
-                        # debug_f.write("ground_out ==============\n")
-                        # assert tags
-                        # joined_tags = " ".join(tags)
-                        # debug_f.write(f"{joined_tags}\n")
-                        # debug_f.write("parsed_predicated_out >>>>>>>>>>>>>>\n")
-                        # predicated_out_text: list[str] = []
-                        # for t in predicated_tokens:
-                        #     if isinstance(t, str):
-                        #         predicated_out_text.append(t)
-                        #     else:
-                        #         predicated_out_text += t[0]
-                        # out_text = " ".join(predicated_out_text)
         else:
             if not args.zero_shot:
                 assert args.worker_index is None
@@ -252,13 +283,51 @@ if __name__ == "__main__":
                     process_batch, ground_tags, prediction, skipped_tags, labels
                 )
             )
+        total_samples = len(prediction) + len(unfixable_samples)
+
         metrics = get_metrics(
             ground_tags=ground_tags,
             prediction=prediction,
             canonical_tags=canonical_tags,
         )
+
+        # Build clean result lines
+        sample_label = f"{test_file_name}" if sample_times == 1 else f"{test_file_name} sample={sample_idx}"
+        result_lines = []
+        result_lines.append(f"\n{'='*60}")
+        result_lines.append(f"[{sample_label}] output_format={output_format}")
+        result_lines.append(f"[{sample_label}] Parse stats: {len(prediction)}/{total_samples} parsed, {len(unfixable_samples)} unfixable")
+        if unfixable_samples:
+            result_lines.append(f"[{sample_label}] Unfixable indices: {[s['index'] for s in unfixable_samples]}")
+        result_lines.append(f"[{sample_label}] Metrics:")
+        for metric_type in ("strict", "lenient"):
+            if metric_type in metrics:
+                for tag, values in metrics[metric_type].items():
+                    if isinstance(values, dict) and "f1-score" in values:
+                        result_lines.append(
+                            f"  [{sample_label}] {metric_type:8s} {tag:20s} "
+                            f"P={values.get('precision', 0):.4f} "
+                            f"R={values.get('recall', 0):.4f} "
+                            f"F1={values['f1-score']:.4f}"
+                        )
+        result_lines.append(f"{'='*60}")
+        result_text = "\n".join(result_lines)
+
+        # Print to stdout
+        print(result_text)
+
+        # Append to results file if specified
+        if args.results_file:
+            with open(args.results_file, "a", encoding="utf8") as rf:
+                rf.write(result_text + "\n")
+
         if args.output_dir:
-            assert os.path.isdir(args.output_dir), args.output_dir
+            os.makedirs(args.output_dir, exist_ok=True)
+            metrics["test_file"] = test_file_name
+            metrics["output_format"] = output_format
+            metrics["unfixable_count"] = len(unfixable_samples)
+            metrics["total_count"] = total_samples
+            metrics["unfixable_samples"] = unfixable_samples
             save_json(
-                metrics, os.path.join(args.output_dir, f"metrics_{sample_idx}.json")
+                metrics, os.path.join(args.output_dir, f"metrics_{test_file_name}_{sample_idx}.json")
             )

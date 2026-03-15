@@ -1,0 +1,14 @@
+### Task:
+Your task is to identify specific entities from an input text, and output them in JSON format as a list of objects, each with "entity" and "text" fields.
+
+### Entity Types:
+- "problem": A medical problem — the abnormal condition that happens physically or mentally to a patient.
+- "treatment": A treatment — the procedures, interventions, and substances given to a patient for treating a problem.
+- "drug": A drug — generic or brand name of a single medication or a collective name of a group of medication.
+- "test": A test — a medical procedure performed (i) to detect or diagnose a problem, (ii) to monitor diseases, disease processes, and susceptibility, or (iii) to determine a course of treatment.
+
+### Input Text:
+{space_join_tokens}
+
+### Output Text:
+
