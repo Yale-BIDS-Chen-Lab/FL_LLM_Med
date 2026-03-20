@@ -25,6 +25,54 @@ sys.path.insert(0, project_path)
 import src.method  # noqa: F401
 
 
+def _extract_json_array(text: str) -> str:
+    """Extract the first top-level JSON array from text, ignoring trailing junk."""
+    text = text.strip()
+    if not text.startswith("["):
+        return text
+    depth = 0
+    in_string = False
+    escape = False
+    for i, ch in enumerate(text):
+        if escape:
+            escape = False
+            continue
+        if ch == "\\":
+            escape = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch == "[":
+            depth += 1
+        elif ch == "]":
+            depth -= 1
+            if depth == 0:
+                return text[: i + 1]
+    return text
+
+
+def _tags_to_json(tokens: list[str], tags: list[str]) -> str:
+    """Convert BIO tokens/tags to JSON entity format for display."""
+    entities: list[dict[str, str]] = []
+    current_entity: dict[str, str] | None = None
+    for token, tag in zip(tokens, tags, strict=True):
+        if tag.startswith("B-"):
+            if current_entity is not None:
+                entities.append(current_entity)
+            current_entity = {"entity": tag[2:], "text": token}
+        elif tag.startswith("I-") and current_entity is not None:
+            current_entity["text"] += " " + token
+        elif current_entity is not None:
+            entities.append(current_entity)
+            current_entity = None
+    if current_entity is not None:
+        entities.append(current_entity)
+    return json.dumps(entities)
+
+
 def robust_json2bio(json_text: str, canonical_tags: CanonicalTags) -> list | None:
     """Parse JSON entities from LLM output, using json_repair for malformed JSON.
     Returns None if the output is completely unfixable."""
@@ -36,10 +84,17 @@ def robust_json2bio(json_text: str, canonical_tags: CanonicalTags) -> list | Non
     except Exception:
         pass
 
+    # Strip trailing LLM repetition junk and retry
+    json_text = _extract_json_array(json_text)
+    try:
+        return json2bio(json_text=json_text, canonical_tags=canonical_tags)
+    except Exception:
+        pass
+
     # Use json_repair to fix malformed JSON
     try:
         repaired = repair_json(json_text, return_objects=True)
-    except (RecursionError, Exception):
+    except Exception:
         return None
     if isinstance(repaired, list):
         tokens = []
@@ -107,12 +162,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--sample_output_dir", help="dir to save sample results", type=str, default=None
     )
-    parser.add_argument(
-        "--results_file",
-        help="file to append clean metric results (separate from vllm noise)",
-        type=str,
-        default=None,
-    )
     args = parser.parse_args()
 
     assert not (args.zero_shot and args.worker_index is not None)
@@ -171,6 +220,7 @@ if __name__ == "__main__":
         prediction = []
         ground_tags = []
         unfixable_samples: list[dict] = []
+        all_examples: list[dict] = []
         if args.sample_size is not None:
             test_len = len(
                 tester.dataset_collection.get_dataset_util(
@@ -220,6 +270,7 @@ if __name__ == "__main__":
                             tokens += t[0]
                             tags += t[1]
 
+                parse_failed = False
                 if output_format == "json":
                     predicated_tokens = robust_json2bio(
                         json_text=out_text, canonical_tags=bio_canonical_tags
@@ -228,7 +279,8 @@ if __name__ == "__main__":
                         unfixable_samples.append(
                             {"index": idx, "output": out_text}
                         )
-                        continue
+                        predicated_tokens = []
+                        parse_failed = True
                 else:
                     predicated_tokens = html2bio(
                         html=out_text, canonical_tags=bio_canonical_tags
@@ -242,6 +294,19 @@ if __name__ == "__main__":
                 assert len(predicated_tags) == len(tags)
                 prediction.append(predicated_tags)
                 ground_tags.append(tags)
+
+                input_text = sample.get("inputs", " ".join(tokens))
+                if output_format == "json":
+                    gt_output = _tags_to_json(tokens, tags)
+                else:
+                    gt_output = sample.get("html", sample.get("output", ""))
+                all_examples.append({
+                    "index": idx,
+                    "input": input_text,
+                    "ground_truth_output": gt_output,
+                    "predicted_output": out_text,
+                    "parse_failed": parse_failed,
+                })
 
                 if args.sample_output_dir is not None:
                     assert args.sample_times is None
@@ -268,7 +333,9 @@ if __name__ == "__main__":
                             joined_tokens = sample["inputs"]
                         debug_f.write(f"{joined_tokens}\n")
                         debug_f.write(f"ground_out ({output_format}) ==============\n")
-                        if "html" in sample:
+                        if output_format == "json":
+                            debug_f.write(f"{_tags_to_json(tokens, tags)}\n")
+                        elif "html" in sample:
                             debug_f.write(f"{sample['html']}\n")
                         else:
                             debug_f.write(f"{sample['output']}\n")
@@ -316,11 +383,6 @@ if __name__ == "__main__":
         # Print to stdout
         print(result_text)
 
-        # Append to results file if specified
-        if args.results_file:
-            with open(args.results_file, "a", encoding="utf8") as rf:
-                rf.write(result_text + "\n")
-
         if args.output_dir:
             os.makedirs(args.output_dir, exist_ok=True)
             metrics["test_file"] = test_file_name
@@ -331,3 +393,15 @@ if __name__ == "__main__":
             save_json(
                 metrics, os.path.join(args.output_dir, f"metrics_{test_file_name}_{sample_idx}.json")
             )
+            if all_examples:
+                examples_path = os.path.join(args.output_dir, f"examples_{test_file_name}_{sample_idx}.txt")
+                with open(examples_path, "w", encoding="utf8") as ef:
+                    for ex in all_examples:
+                        ef.write(f"[#{ex['index']}] parse_failed={ex['parse_failed']}\n")
+                        ef.write("--- input ---\n")
+                        ef.write(f"{ex['input']}\n")
+                        ef.write("--- ground_truth_output ---\n")
+                        ef.write(f"{ex['ground_truth_output']}\n")
+                        ef.write("--- predicted_output ---\n")
+                        ef.write(f"{ex['predicted_output']}\n")
+                        ef.write("\n")
