@@ -113,7 +113,7 @@ class SFTTrainerMixin(ExecutorProtocol, Protocol):
 
         model = executor.running_model_evaluator.model
         train_dataset = self.get_sft_trainer_dataset(executor)
-        sft_trainer = SFTTrainer(
+        sft_trainer = self.get_sft_trainer_cls()(
             model,
             train_dataset=train_dataset,
             args=training_args,

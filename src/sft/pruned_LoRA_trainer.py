@@ -39,6 +39,5 @@ class PrunedLoRATrainer(SFTTrainer):
 
         loss += reg_loss
         if return_outputs:
-            res[0] = loss
-            return res
+            return loss, res[1]
         return loss
