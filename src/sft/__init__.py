@@ -1,3 +1,4 @@
+import functools
 import gc
 import math
 import os
@@ -17,6 +18,8 @@ from distributed_learning_simulation import ExecutorProtocol
 from peft.utils.save_and_load import set_peft_model_state_dict
 from transformers.trainer_pt_utils import AcceleratorConfig
 from trl import SFTConfig, SFTTrainer
+
+from .pruned_LoRA_trainer import PrunedLoRATrainer
 
 __all__ = ["SFTTrainerMixin", "get_SFTConfig", "load_peft_model_state_dict"]
 
@@ -119,6 +122,14 @@ class SFTTrainerMixin(ExecutorProtocol, Protocol):
         return self._sft_trainer
 
     def get_sft_trainer_cls(self) -> type[SFTTrainer]:
+        if "trainer_type" in self.config.algorithm_kwargs:
+            assert self.config.algorithm_kwargs["trainer_type"] == "PrunedLoRATrainer"
+            return functools.partial(
+                PrunedLoRATrainer,
+                lora_lambda1=self.config.algorithm_kwargs.pop("lora_lambda1"),
+                lora_lambda2=self.config.algorithm_kwargs.pop("lora_lambda2"),
+            )
+
         return SFTTrainer
 
     def get_sft_trainer_dataset(self, executor: Executor) -> Dataset:

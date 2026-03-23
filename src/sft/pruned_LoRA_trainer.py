@@ -4,8 +4,8 @@ from trl.trainer.sft_trainer import SFTTrainer
 
 class PrunedLoRATrainer(SFTTrainer):
     def __init__(self, *args, **kwargs):
-        self.lora_lambda1: float = kwargs.pop("lora_lambda1", 0.01)
-        self.lora_lambda2: float = kwargs.pop("lora_lambda2", 0.01)
+        self.lora_lambda1: float = kwargs.pop("lora_lambda1")
+        self.lora_lambda2: float = kwargs.pop("lora_lambda2")
         super().__init__(*args, **kwargs)
 
     def compute_loss(
