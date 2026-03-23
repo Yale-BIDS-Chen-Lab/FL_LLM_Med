@@ -46,9 +46,10 @@ class SFTTrainerWorker(LLMTextWorker, SFTTrainerMixin):
             log_info("used cuda memory: %s", torch.cuda.memory_allocated())
 
     def _load_adaptor(self, adaptor_parameter: TensorDict) -> None:
-        assert self._sft_trainer is not None
         load_peft_model_state_dict(
-            model=self._sft_trainer.model_wrapped,
+            model=self._sft_trainer.model_wrapped
+            if self._sft_trainer is not None
+            else self.trainer.running_model_evaluator.model,
             state_dict=adaptor_parameter,
             device=self.trainer.device,
         )

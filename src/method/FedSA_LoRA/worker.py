@@ -20,6 +20,7 @@ class FedSALoRAWorker(SFTTrainerWorker):
 
     def _after_training(self) -> None:
         super()._after_training()
+        self.get_sft_trainer(self.trainer)
         message = self._get_sent_data()
         message.end_training = True
         self._aggregation(sent_data=message)
