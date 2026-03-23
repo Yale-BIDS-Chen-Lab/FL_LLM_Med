@@ -8,7 +8,6 @@ from datasets import load_dataset
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 sys.path.append(lib_path)
 
-import re
 
 from cyy_preprocessing_pipeline.parsing import html2bio
 from cyy_preprocessing_pipeline.parsing.bio.types import CanonicalTags

@@ -83,10 +83,9 @@ class AddJsonEntities(Transform):
                 current_entity = {"entity": tag[2:], "text": token}
             elif tag.startswith("I-") and current_entity is not None:
                 current_entity["text"] += " " + token
-            else:
-                if current_entity is not None:
-                    entities.append(current_entity)
-                    current_entity = None
+            elif current_entity is not None:
+                entities.append(current_entity)
+                current_entity = None
         if current_entity is not None:
             entities.append(current_entity)
         data["json_entities"] = json.dumps(entities)

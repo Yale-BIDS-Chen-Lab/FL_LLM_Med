@@ -1,8 +1,6 @@
 from cyy_naive_lib.log import log_warning
 
-from ..method_forward import (
-    SFTServer,
-)
+from ..method_forward import SFTServer
 
 
 class FedSALoRAServer(SFTServer):

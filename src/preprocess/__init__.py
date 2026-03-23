@@ -1,7 +1,12 @@
 from pathlib import Path
 from typing import Any
 
-from cyy_preprocessing_pipeline.dataset import IOBParser, IOBRecord, JSONParser, JSONRecord
+from cyy_preprocessing_pipeline.dataset import (
+    IOBParser,
+    IOBRecord,
+    JSONParser,
+    JSONRecord,
+)
 
 
 def parse_file(file: str) -> Any:

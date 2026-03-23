@@ -12,7 +12,11 @@ os.environ["NO_TOKENIZER_TRANSFORMS"] = "1"
 import cyy_huggingface_toolbox  # noqa: F401
 from cyy_naive_lib import save_json
 from cyy_naive_lib.log import log_warning, set_level
-from cyy_preprocessing_pipeline.parsing import approximately_match_tokens, html2bio, json2bio
+from cyy_preprocessing_pipeline.parsing import (
+    approximately_match_tokens,
+    html2bio,
+    json2bio,
+)
 from cyy_preprocessing_pipeline.parsing.bio.types import CanonicalTags, make_bio_span
 from cyy_torch_toolbox import MachineLearningPhase
 from distributed_learning_simulation import Session

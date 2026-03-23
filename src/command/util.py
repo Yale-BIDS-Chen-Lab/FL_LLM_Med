@@ -1,8 +1,8 @@
 import copy
 import os
 
-from cyy_torch_toolbox import Inferencer
 from cyy_preprocessing_pipeline import load_local_files
+from cyy_torch_toolbox import Inferencer
 from distributed_learning_simulation import (
     Session,
     get_server,
