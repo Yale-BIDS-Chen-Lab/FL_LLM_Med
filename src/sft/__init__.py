@@ -10,14 +10,15 @@ from cyy_huggingface_toolbox import (
     HuggingFaceModelEvaluator,
     HuggingFaceModelEvaluatorForFinetune,
 )
-from cyy_naive_lib.log import log_debug, log_info
+from cyy_naive_lib.log import log_debug, log_info, log_warning
 from cyy_preprocessing_pipeline import tensor_to
 from cyy_torch_toolbox import Config, Executor, TensorDict, Trainer
 from datasets import Dataset
 from distributed_learning_simulation import ExecutorProtocol
 from peft.utils.save_and_load import set_peft_model_state_dict
 from transformers.trainer_pt_utils import AcceleratorConfig
-from trl import SFTConfig, SFTTrainer
+from trl.trainer.sft_config import SFTConfig
+from trl.trainer.sft_trainer import SFTTrainer
 
 from .pruned_LoRA_trainer import PrunedLoRATrainer
 
@@ -124,6 +125,7 @@ class SFTTrainerMixin(ExecutorProtocol, Protocol):
     def get_sft_trainer_cls(self) -> type[SFTTrainer]:
         if "trainer_type" in self.config.algorithm_kwargs:
             assert self.config.algorithm_kwargs["trainer_type"] == "PrunedLoRATrainer"
+            log_warning("use PrunedLoRATrainer")
             return functools.partial(
                 PrunedLoRATrainer,
                 lora_lambda1=self.config.algorithm_kwargs.pop("lora_lambda1"),
