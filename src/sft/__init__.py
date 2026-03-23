@@ -47,7 +47,9 @@ def get_SFTConfig(
         learning_rate = executor.hyper_parameter.learning_rate
     batch_size = executor.hyper_parameter.batch_size
     num_epochs = executor.hyper_parameter.epoch
-    total_steps = math.ceil(dataset_size / batch_size) * num_epochs if dataset_size > 0 else 0
+    total_steps = (
+        math.ceil(dataset_size / batch_size) * num_epochs if dataset_size > 0 else 0
+    )
     warmup_steps = int(0.05 * total_steps)
     accelerate_config = AcceleratorConfig()
     accelerate_config.non_blocking = True
@@ -115,6 +117,9 @@ class SFTTrainerMixin(ExecutorProtocol, Protocol):
         assert sft_trainer.model is sft_trainer.model_wrapped
         self._sft_trainer = sft_trainer
         return self._sft_trainer
+
+    def get_sft_trainer_cls(self) -> type[SFTTrainer]:
+        return SFTTrainer
 
     def get_sft_trainer_dataset(self, executor: Executor) -> Dataset:
         log_info("dataset size is %s", len(executor.dataloader.dataset))
