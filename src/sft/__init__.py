@@ -20,6 +20,7 @@ from transformers.trainer_pt_utils import AcceleratorConfig
 from trl.trainer.sft_config import SFTConfig
 from trl.trainer.sft_trainer import SFTTrainer
 
+from .dp_trainer import DPSFTTrainer
 from .pruned_LoRA_trainer import PrunedLoRATrainer
 
 __all__ = ["SFTTrainerMixin", "get_SFTConfig", "load_peft_model_state_dict"]
@@ -123,13 +124,20 @@ class SFTTrainerMixin(ExecutorProtocol, Protocol):
         return self._sft_trainer
 
     def get_sft_trainer_cls(self) -> type[SFTTrainer]:
-        if "trainer_type" in self.config.algorithm_kwargs:
-            assert self.config.algorithm_kwargs["trainer_type"] == "PrunedLoRATrainer"
+        trainer_type = self.config.algorithm_kwargs.get("trainer_type")
+        if trainer_type == "PrunedLoRATrainer":
             log_warning("use PrunedLoRATrainer")
             return functools.partial(
                 PrunedLoRATrainer,
                 lora_lambda1=self.config.algorithm_kwargs["lora_lambda1"],
                 lora_lambda2=self.config.algorithm_kwargs["lora_lambda2"],
+            )
+        if trainer_type == "DPSFTTrainer":
+            log_warning("use DPSFTTrainer")
+            return functools.partial(
+                DPSFTTrainer,
+                dp_epsilon=self.config.algorithm_kwargs.get("dp_epsilon", 4.0),
+                dp_delta=self.config.algorithm_kwargs.get("dp_delta", 1e-5),
             )
 
         return SFTTrainer
