@@ -128,8 +128,8 @@ class SFTTrainerMixin(ExecutorProtocol, Protocol):
             log_warning("use PrunedLoRATrainer")
             return functools.partial(
                 PrunedLoRATrainer,
-                lora_lambda1=self.config.algorithm_kwargs.pop("lora_lambda1"),
-                lora_lambda2=self.config.algorithm_kwargs.pop("lora_lambda2"),
+                lora_lambda1=self.config.algorithm_kwargs["lora_lambda1"],
+                lora_lambda2=self.config.algorithm_kwargs["lora_lambda2"],
             )
 
         return SFTTrainer

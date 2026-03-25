@@ -24,7 +24,7 @@ class PrunedLoRATrainer(SFTTrainer):
         else:
             loss = res
 
-        reg_loss = torch.zeros_like(loss)
+        assert isinstance(loss, torch.Tensor)
         l1 = self.lora_lambda1
         l2 = self.lora_lambda2
 
@@ -32,12 +32,11 @@ class PrunedLoRATrainer(SFTTrainer):
             for name, param in model.named_parameters():
                 if "lora_A" in name and l2 > 0:
                     # Y is (r, d_in), column-wise norm corresponds to input features
-                    reg_loss += l2 * torch.norm(param, p=2, dim=0).sum()
+                    loss += l2 * torch.norm(param, p=2, dim=0).sum()
                 elif "lora_B" in name and l1 > 0:
                     # B is (d_out, r), row-wise norm corresponds to output features
-                    reg_loss += l1 * torch.norm(param, p=2, dim=1).sum()
+                    loss += l1 * torch.norm(param, p=2, dim=1).sum()
 
-        loss += reg_loss
         if return_outputs:
             return loss, res[1]
         return loss
