@@ -12,8 +12,8 @@ class DPSFTTrainer(SFTTrainer):
     """SFTTrainer with batch-level differential privacy gradient noise."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        dp_epsilon: float = kwargs.pop("dp_epsilon", 4.0)
-        dp_delta: float = kwargs.pop("dp_delta", 1e-5)
+        dp_epsilon: float = kwargs.pop("dp_epsilon")
+        dp_delta: float = kwargs.pop("dp_delta")
         self.dp_sigma: float = kwargs.pop(
             "dp_sigma", compute_dp_sigma(dp_epsilon, dp_delta)
         )

@@ -136,8 +136,8 @@ class SFTTrainerMixin(ExecutorProtocol, Protocol):
             log_warning("use DPSFTTrainer")
             return functools.partial(
                 DPSFTTrainer,
-                dp_epsilon=self.config.algorithm_kwargs.get("dp_epsilon", 4.0),
-                dp_delta=self.config.algorithm_kwargs.get("dp_delta", 1e-5),
+                dp_epsilon=self.config.algorithm_kwargs["dp_epsilon"],
+                dp_delta=self.config.algorithm_kwargs["dp_delta"]
             )
 
         return SFTTrainer
