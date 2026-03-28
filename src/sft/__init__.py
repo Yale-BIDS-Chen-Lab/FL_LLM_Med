@@ -137,7 +137,7 @@ class SFTTrainerMixin(ExecutorProtocol, Protocol):
             return functools.partial(
                 DPSFTTrainer,
                 dp_epsilon=self.config.algorithm_kwargs["dp_epsilon"],
-                dp_delta=self.config.algorithm_kwargs["dp_delta"]
+                dp_delta=self.config.algorithm_kwargs["dp_delta"],
             )
 
         return SFTTrainer
