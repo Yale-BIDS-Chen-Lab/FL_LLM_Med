@@ -52,15 +52,17 @@ def get_SFTConfig(
         learning_rate = executor.hyper_parameter.learning_rate
     batch_size = executor.hyper_parameter.batch_size
     num_epochs = executor.hyper_parameter.epoch
-    total_steps = (
-        math.ceil(dataset_size / batch_size) * num_epochs if dataset_size > 0 else 0
-    )
-    warmup_steps = int(0.05 * total_steps)
     accelerate_config = AcceleratorConfig()
     accelerate_config.non_blocking = True
     gradient_accumulation_steps = config.algorithm_kwargs.get(
         "gradient_accumulation_steps", 1
     )
+    total_steps = (
+        math.ceil(dataset_size / (batch_size * gradient_accumulation_steps)) * num_epochs
+        if dataset_size > 0
+        else 0
+    )
+    warmup_steps = int(0.05 * total_steps)
     return SFTConfig(
         accelerator_config=accelerate_config.to_dict(),
         per_device_train_batch_size=batch_size,
