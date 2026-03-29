@@ -58,9 +58,13 @@ def get_SFTConfig(
     warmup_steps = int(0.05 * total_steps)
     accelerate_config = AcceleratorConfig()
     accelerate_config.non_blocking = True
+    gradient_accumulation_steps = config.algorithm_kwargs.get(
+        "gradient_accumulation_steps", 1
+    )
     return SFTConfig(
         accelerator_config=accelerate_config.to_dict(),
         per_device_train_batch_size=batch_size,
+        gradient_accumulation_steps=gradient_accumulation_steps,
         num_train_epochs=num_epochs,
         learning_rate=learning_rate,
         logging_steps=10,
