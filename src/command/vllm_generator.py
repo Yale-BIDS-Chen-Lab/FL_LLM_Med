@@ -35,7 +35,9 @@ def get_vllm_output(
     tester: Inferencer, engine: LLM
 ) -> Generator[tuple[dict, RequestOutput]]:
     # Load the default sampling parameters from the model.
-    sampling_params = SamplingParams(n=1, max_tokens=2048, temperature=0, min_tokens=10)
+    sampling_params = SamplingParams(
+        n=1, max_tokens=2048, temperature=0, min_tokens=10, logprobs=1
+    )
 
     for batch in tester.dataloader:
         batch_size = batch["batch_size"]

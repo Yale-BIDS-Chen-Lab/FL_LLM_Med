@@ -27,9 +27,7 @@ class _DPGradientCallback(TrainerCallback):
     def on_pre_optimizer_step(self, args, state, control, **kwargs):
         model = kwargs["model"]
         params_with_grad = [p for p in model.parameters() if p.grad is not None]
-        batch_size = (
-            args.per_device_train_batch_size * args.gradient_accumulation_steps
-        )
+        batch_size = args.per_device_train_batch_size * args.gradient_accumulation_steps
         gradients = [p.grad for p in params_with_grad]
 
         should_log = self._step % self._log_interval == 0

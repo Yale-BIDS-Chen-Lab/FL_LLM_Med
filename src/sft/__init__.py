@@ -58,7 +58,8 @@ def get_SFTConfig(
         "gradient_accumulation_steps", 1
     )
     total_steps = (
-        math.ceil(dataset_size / (batch_size * gradient_accumulation_steps)) * num_epochs
+        math.ceil(dataset_size / (batch_size * gradient_accumulation_steps))
+        * num_epochs
         if dataset_size > 0
         else 0
     )
