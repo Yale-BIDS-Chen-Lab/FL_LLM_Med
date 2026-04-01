@@ -1,8 +1,8 @@
 import argparse
 import copy
-import functools
 import json
 import logging
+import math
 import os
 import sys
 
@@ -20,8 +20,7 @@ from cyy_preprocessing_pipeline.parsing import (
 from cyy_preprocessing_pipeline.parsing.bio.types import CanonicalTags, make_bio_span
 from cyy_torch_toolbox import MachineLearningPhase
 from distributed_learning_simulation import Session
-from NER_evaluation.metric import get_metrics
-from NER_evaluation.token_classification import process_batch
+from NER_evaluation.metric import compute_auprc, get_metrics, plot_prc
 from util import get_tester
 
 project_path = os.path.join(os.path.dirname(__file__), "..", "..")
@@ -223,6 +222,7 @@ if __name__ == "__main__":
     for sample_idx in range(sample_times):
         prediction = []
         ground_tags = []
+        sample_confidences: list[float] = []
         unfixable_samples: list[dict] = []
         all_examples: list[dict] = []
         if args.sample_size is not None:
@@ -255,7 +255,15 @@ if __name__ == "__main__":
 
             vllm_output = list(get_vllm_output(tester=tester, engine=vllm_engine))
             for idx, (sample, generated_text) in enumerate(vllm_output):
-                out_text = generated_text.outputs[0].text
+                output = generated_text.outputs[0]
+                out_text = output.text
+                num_tokens = len(output.token_ids)
+                if output.cumulative_logprob is not None and num_tokens > 0:
+                    sample_confidences.append(
+                        math.exp(output.cumulative_logprob / num_tokens)
+                    )
+                else:
+                    sample_confidences.append(1.0)
                 tags = sample["tags"]
                 assert tags
                 tokens = sample["tokens"]
@@ -345,15 +353,6 @@ if __name__ == "__main__":
                             debug_f.write(f"{sample['output']}\n")
                         debug_f.write("predicated_out >>>>>>>>>>>>>>\n")
                         debug_f.write(f"{out_text}\n")
-        else:
-            if not args.zero_shot:
-                assert args.worker_index is None
-                tester.model_util.load_parameters(session.get_last_model_parameters())
-            tester.process_sample_output(
-                functools.partial(
-                    process_batch, ground_tags, prediction, skipped_tags, labels
-                )
-            )
         total_samples = len(prediction) + len(unfixable_samples)
 
         metrics = get_metrics(
@@ -361,6 +360,15 @@ if __name__ == "__main__":
             prediction=prediction,
             canonical_tags=canonical_tags,
         )
+
+        auprc_results = {}
+        if use_llm:
+            auprc_results = compute_auprc(
+                ground_tags=ground_tags,
+                prediction=prediction,
+                canonical_tags=canonical_tags,
+                sample_confidences=sample_confidences,
+            )
 
         # Build clean result lines
         sample_label = f"{test_file_name}" if sample_times == 1 else f"{test_file_name} sample={sample_idx}"
@@ -381,6 +389,10 @@ if __name__ == "__main__":
                             f"R={values.get('recall', 0):.4f} "
                             f"F1={values['f1-score']:.4f}"
                         )
+        if auprc_results:
+            result_lines.append(f"[{sample_label}] AUPRC:")
+            for key, val in auprc_results.items():
+                result_lines.append(f"  [{sample_label}] AUPRC {key:20s} = {val:.4f}")
         result_lines.append(f"{'='*60}")
         result_text = "\n".join(result_lines)
 
@@ -394,6 +406,18 @@ if __name__ == "__main__":
             metrics["unfixable_count"] = len(unfixable_samples)
             metrics["total_count"] = total_samples
             metrics["unfixable_samples"] = unfixable_samples
+            metrics["auprc"] = auprc_results
+            if auprc_results:
+                plot_prc(
+                    ground_tags=ground_tags,
+                    prediction=prediction,
+                    canonical_tags=canonical_tags,
+                    sample_confidences=sample_confidences,
+                    output_path=os.path.join(
+                        args.output_dir,
+                        f"prc_{test_file_name}_{sample_idx}.png",
+                    ),
+                )
             save_json(
                 metrics, os.path.join(args.output_dir, f"metrics_{test_file_name}_{sample_idx}.json")
             )

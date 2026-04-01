@@ -48,7 +48,7 @@ def compute_auprc(
     # Per tag (uses original tags, e.g. B-treatment, I-treatment)
     for tag in sorted(canonical_tags):
         y_true, y_score = _build_y(
-            ground_tags, prediction, sample_confidences, lambda t, tag=tag: tag in t
+            ground_tags, prediction, sample_confidences, lambda t, tag=tag: t.endswith(f"-{tag}")
         )
         if any(y_true):
             results[tag] = float(average_precision_score(y_true, y_score))
@@ -78,7 +78,7 @@ def plot_prc(
     # Per tag
     for tag in sorted(canonical_tags):
         y_true, y_score = _build_y(
-            ground_tags, prediction, sample_confidences, lambda t, tag=tag: tag in t
+            ground_tags, prediction, sample_confidences, lambda t, tag=tag: t.endswith(f"-{tag}")
         )
         if any(y_true):
             precision, recall, _ = precision_recall_curve(y_true, y_score)
