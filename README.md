@@ -1,4 +1,4 @@
-# distributed_LLM_learning_simulator
+# A Federated and Parameter-Efficient Framework for Large Language Model Training in Medicine
 
 This is a simulator of Federated Learning for LLM fine-tuning on a single host. It implements our works.
 
