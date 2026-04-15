@@ -55,7 +55,7 @@ Modify the contents of common.yaml to change the configuration parameters.
 
 Take train_mix.sh as an example, introduce these parameters in [common.yaml](https://github.com/cyyever/distributed_LLM_learning_simulator/blob/main/conf/medical_mix/common.yaml).
 
-- **dataset_name**:
+- **dataset_name**: MIMIC-III, MTSamples, UTP, i2b2
 
 - **dataset_sampling**: file_split or random_split. "file_split" means that one dataset is only distributed to one client. "random_split" means the sentences in one dataset distributed to diffenent clients are random.
 
